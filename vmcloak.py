@@ -287,6 +287,7 @@ if __name__ == '__main__':
     parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--ramsize', type=int, default=1024, help='Available virtual memory (in MB) for this virtual machine.')
+    parser.add_argument('--resolution', type=str, default='1024x768', help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
 
@@ -349,3 +350,16 @@ if __name__ == '__main__':
 
     c, a = s.accept()
     print '[x] It took %d seconds to install Windows!' % (time.time() - t)
+
+    try:
+        width, height = [int(x) for x in args.resolution.split('x')]
+    except:
+        print '[-] Invalid resolution specified'
+        exit(1)
+
+    print '[x] Setting the resolution to %dx%d' % (width, height)
+    c.send(args.resolution)
+    if ord(c.recv(1)):
+        print '[+] Resolution was set successfully'
+    else:
+        print '[-] Error setting the resolution'
