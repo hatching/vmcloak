@@ -7,9 +7,11 @@ import argparse
 import logging
 import os.path
 import random
+import socket
 import string
 import subprocess
 import sys
+import time
 
 
 logging.basicConfig(level=logging.INFO)
@@ -62,7 +64,7 @@ class VM(object):
         raise
 
     def delete_vm(self):
-        """Delete an existing Virtual Machine."""
+        """Delete an existing Virtual Machine and its associated files."""
         raise
 
     def ramsize(self, ramsize):
@@ -87,6 +89,14 @@ class VM(object):
 
     def modify_mac(self, mac=None):
         """Modify the MAC address of a Virtual Machine."""
+        raise
+
+    def hostonly(self, index=0):
+        """Configure a Hostonly adapter for the Virtual Machine."""
+        raise
+
+    def start_vm(self):
+        """Start the associated Virtual Machine."""
         raise
 
     def list_settings(self):
@@ -254,14 +264,24 @@ class VirtualBox(VM):
         self._call('modifyvm', self.name, macaddress1=vbox_mac)
         return macaddr
 
+    def hostonly(self, index=0):
+        self._call('modifyvm', self.name,
+                   nic1='hostonly',
+                   nictype1='Am79C973',
+                   nicpromisc1='allow-all',
+                   hostonlyadapter1='VirtualBox Host-Only Ethernet Adapter')
+
+    def start_vm(self):
+        return self._call('startvm', self.name)
+
     def list_settings(self):
         return self._call('getextradata', self.name, 'enumerate')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('name', type=str, help='Name of the Virtual Machine.')
-    parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
+    parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
+    parser.add_argument('--cuckoo', type=str, required=True, help='Directory where Cuckoo is located.')
     parser.add_argument('--basedir', type=str, required=True, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--vm', type=str, default='virtualbox', help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
@@ -277,7 +297,7 @@ if __name__ == '__main__':
     from lib.cuckoo.common.constants import CUCKOO_ROOT
 
     if args.vm == 'virtualbox':
-        m = VirtualBox(args.name, args.basedir)
+        m = VirtualBox(args.vmname, args.basedir)
     else:
         print '[-] Only VirtualBox is supported as of now'
         exit(1)
@@ -287,8 +307,13 @@ if __name__ == '__main__':
         exit(0)
 
     if args.delete:
+        print '[x] Unregistering and deleting the VM and its associated files'
         m.delete_vm()
         exit(0)
+
+    if not args.iso:
+        print '[-] Please specify a Windows Installer ISO image'
+        exit(1)
 
     print '[x] Creating VM'
     print m.create_vm()
@@ -299,12 +324,28 @@ if __name__ == '__main__':
     print '[x] Creating Harddisk'
     m.create_hd(args.hdsize)
 
-    if args.iso:
-        print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
-        m.attach_iso(args.iso)
+    print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
+    m.attach_iso(args.iso)
 
     print '[x] Randomizing Hardware'
     m.init_vm()
 
     print '[x] Randomizing the MAC address:',
     print m.modify_mac()
+
+    print '[x] Initially configuring Hostonly network'
+    m.hostonly()
+
+    print '[!] Starting the Virtual Machine to install Windows'
+    print m.start_vm()
+
+    print '[x] Waiting for the Virtual Machine to connect back'
+    print '[!] This may take up to 30 minutes'
+    t = time.time()
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('192.168.56.1', 61453))
+    s.listen(1)
+
+    c, a = s.accept()
+    print '[x] It took %d seconds to install Windows!' % (time.time() - t)
