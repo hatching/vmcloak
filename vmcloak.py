@@ -259,7 +259,6 @@ class VirtualBox(VM):
         ctlname = 'IDE Controller'
         self._call('storageattach', self.name, storagectl=ctlname,
                    type='dvddrive', port=1, device=0, medium=iso)
-        self._call('modifyvm', self.name, boot1='dvd')
 
     def set_field(self, key, value):
         return self._call('setextradata', self.name, key, value)
@@ -356,6 +355,23 @@ if __name__ == '__main__':
     # Write the WINNT.SIF file.
     open(os.path.join('nlite', 'winnt.sif'), 'wb').write(buf)
 
+    try:
+        # The directory doesn't exist yet, probably.
+        os.mkdir(os.path.join(args.basedir, args.vmname))
+    except:
+        pass
+
+    iso_path = os.path.join(args.basedir, args.vmname, 'image.iso')
+
+    # Create the ISO file.
+    print '[x] Creating ISO file.'
+    try:
+        subprocess.check_call(['./nlite.sh', args.iso, iso_path])
+    except subprocess.CalledProcessError as e:
+        print '[-] Error creating ISO file.'
+        print e
+        exit(1)
+
     print '[x] Creating VM'
     print m.create_vm()
 
@@ -366,7 +382,7 @@ if __name__ == '__main__':
     m.create_hd(args.hdsize)
 
     print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
-    m.attach_iso(args.iso)
+    m.attach_iso(iso_path)
 
     print '[x] Randomizing Hardware'
     m.init_vm()
