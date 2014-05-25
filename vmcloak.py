@@ -32,6 +32,14 @@ CONFIG = dict(
 )
 
 
+def random_string(minimum, maximum=None):
+    if maximum is None:
+        maximum = minimum
+
+    count = random.randint(minimum, maximum)
+    return ''.join(random.choice(string.ascii_letters) for x in xrange(count))
+
+
 def random_mac():
     """Generates a random MAC address."""
     values = [random.randint(0, 15) for _ in xrange(12)]
@@ -278,6 +286,21 @@ class VirtualBox(VM):
         return self._call('getextradata', self.name, 'enumerate')
 
 
+def configure_winnt_sif(path, args):
+    values = {
+        'PRODUCTKEY': args.serial_key,
+        'COMPUTERNAME': random_string(8, 16),
+        'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
+        'ORGANIZATION': '',
+        'WORKGROUP': random_string(4, 8),
+    }
+
+    buf = open(path, 'rb').read()
+    for key, value in values.items():
+        buf = buf.replace('%%%s%%' % key, value)
+    return buf
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
@@ -290,6 +313,7 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=str, default='1024x768', help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
+    parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
 
     args = parser.parse_args()
 
@@ -315,6 +339,15 @@ if __name__ == '__main__':
     if not args.iso:
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
+
+    print '[x] Configuring WINNT.SIF'
+    buf = configure_winnt_sif('winnt.sif', args)
+    if not buf:
+        print '[-] Error configuring WINNT.SIF'
+        exit(1)
+
+    # Write the WINNT.SIF file.
+    open(os.path.join('nlite', 'winnt.sif'), 'wb').write(buf)
 
     print '[x] Creating VM'
     print m.create_vm()
