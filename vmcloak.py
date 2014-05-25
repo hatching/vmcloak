@@ -107,6 +107,14 @@ class VM(object):
         """Start the associated Virtual Machine."""
         raise
 
+    def snapshot(self, label):
+        """Take a snapshot of the associated Virtual Machine."""
+        raise
+
+    def stopvm(self):
+        """Stop the associated Virtual Machine."""
+        raise
+
     def list_settings(self):
         """List all settings of a Virtual Machine."""
         raise
@@ -288,6 +296,13 @@ class VirtualBox(VM):
     def start_vm(self):
         return self._call('startvm', self.name)
 
+    def snapshot(self, label, description=''):
+        return self._call('snapshot', self.name, 'take', label,
+                          description=description)
+
+    def stopvm(self):
+        return self._call('controlvm', self.name, 'poweroff')
+
     def list_settings(self):
         return self._call('getextradata', self.name, 'enumerate')
 
@@ -419,3 +434,9 @@ if __name__ == '__main__':
         print '[+] Resolution was set successfully'
     else:
         print '[-] Error setting the resolution'
+
+    print '[x] Taking a snapshot of the current state'
+    print m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
+
+    print '[x] Powering off the virtual machine'
+    print m.stopvm()
