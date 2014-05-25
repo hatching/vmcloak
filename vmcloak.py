@@ -229,12 +229,15 @@ class VirtualBox(VM):
 
         return ret
 
+    def _hd_path(self):
+        return os.path.join(self.basedir, self.name, '%s.vdi' % self.name)
+
     def create_vm(self):
         return self._call('createvm', name=self.name,
                           basefolder=self.basedir, register=True)
 
     def delete_vm(self):
-        return self._call('unregistervm', self.name, delete=True)
+        self._call('unregistervm', self.name, delete=True)
 
     def ramsize(self, ramsize):
         return self._call('modifyvm', self.name, memory=ramsize)
@@ -247,11 +250,10 @@ class VirtualBox(VM):
 
     def create_hd(self, fsize):
         ctlname = 'IDE Controller'
-        path = os.path.join(self.basedir, self.name, '%s.vdi' % self.name)
-        self._call('createhd', filename=path, size=fsize)
+        self._call('createhd', filename=self._hd_path(), size=fsize)
         self._call('storagectl', self.name, name=ctlname, add='ide')
         self._call('storageattach', self.name, storagectl=ctlname,
-                   type='hdd', device=0, port=0, medium=path)
+                   type='hdd', device=0, port=0, medium=self._hd_path())
 
     def attach_iso(self, iso):
         ctlname = 'IDE Controller'
