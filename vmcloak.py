@@ -273,11 +273,16 @@ class VirtualBox(VM):
         return macaddr
 
     def hostonly(self, index=0):
+        if os.name == 'posix':
+            adapter = 'vboxnet0'
+        else:
+            adapter = 'VirtualBox Host-Only Ethernet Adapter'
+
         self._call('modifyvm', self.name,
                    nic1='hostonly',
                    nictype1='Am79C973',
                    nicpromisc1='allow-all',
-                   hostonlyadapter1='VirtualBox Host-Only Ethernet Adapter')
+                   hostonlyadapter1=adapter)
 
     def start_vm(self):
         return self._call('startvm', self.name)
