@@ -48,6 +48,11 @@ echo "Overwriting various files.."
 cp nlite/* "$TEMPDIR/i386/" || cleanup 1
 cp boot.img "$TEMPDIR" || cleanup 1
 
+echo "Installing bootstrap files.."
+OSDIR="$TEMPDIR/\$OEM\$/\$1"
+mkdir -p "$OSDIR"
+cp bootstrap/* "$OSDIR"
+
 # Make an ISO file with the updated file contents.
 echo "Creating ISO image.."
 mkisofs -quiet -b boot.img -no-emul-boot -boot-load-seg 1984 \

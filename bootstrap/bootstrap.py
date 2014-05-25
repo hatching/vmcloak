@@ -54,4 +54,4 @@ if __name__ == '__main__':
 
     # We're assuming that what the host sends is correct.
     width, height = [int(x) for x in s.recv(128).split('x')]
-    s.write('\x01' if set_resolution(width, height) else '\x00')
+    s.send('\x01' if set_resolution(width, height) else '\x00')
