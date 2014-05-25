@@ -28,7 +28,9 @@ cleanup() {
         sudo umount "$MOUNT"
         sudo rm -r "$MOUNT"
     fi
-    exit $1
+    if [ $1 -eq 1 ]; then
+        exit 1
+    fi
 }
 
 echo "Mounting the ISO image.."
