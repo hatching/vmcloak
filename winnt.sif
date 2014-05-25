@@ -42,7 +42,7 @@ OrgName="%ORGANIZATION%"
 
 [RegionalSettings]
 LanguageGroup=1,2
-Language= "0409"
+Language="0409"
 
 [Networking]
 InstallDefaultComponents="Yes"
