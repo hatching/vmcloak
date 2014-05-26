@@ -435,6 +435,9 @@ if __name__ == '__main__':
     else:
         print '[-] Error setting the resolution'
 
+    # Give the system a little bit of time to fully initialize.
+    time.sleep(10)
+
     print '[x] Taking a snapshot of the current state'
     print m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
 
