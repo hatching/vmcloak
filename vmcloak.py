@@ -298,7 +298,7 @@ class VirtualBox(VM):
 
     def snapshot(self, label, description=''):
         return self._call('snapshot', self.name, 'take', label,
-                          description=description)
+                          description=description, live=True)
 
     def stopvm(self):
         return self._call('controlvm', self.name, 'poweroff')
