@@ -370,11 +370,9 @@ if __name__ == '__main__':
     # Write the WINNT.SIF file.
     open(os.path.join('nlite', 'winnt.sif'), 'wb').write(buf)
 
-    try:
-        # The directory doesn't exist yet, probably.
+    # The directory doesn't exist yet, probably.
+    if not os.path.exists(os.path.join(args.basedir, args.vmname)):
         os.mkdir(os.path.join(args.basedir, args.vmname))
-    except:
-        pass
 
     iso_path = os.path.join(args.basedir, args.vmname, 'image.iso')
 
