@@ -4,6 +4,7 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 import argparse
+from ConfigParser import ConfigParser
 import logging
 import os.path
 import random
@@ -322,11 +323,35 @@ def configure_winnt_sif(path, args):
     return buf
 
 
+class Configuration(object):
+    def __init__(self):
+        self.conf = {}
+
+    def _process_value(self, value):
+        if isinstance(value, str) and value and value[0] == '~':
+            return os.getenv('HOME') + value[1:]
+        return value
+
+    def from_args(self, args):
+        for key, value in args._get_kwargs():
+            if key not in self.conf or value:
+                self.conf[key] = self._process_value(value)
+
+    def from_file(self, path):
+        p = ConfigParser()
+        p.read(path)
+        for key in p.options('vmcloak'):
+            self.conf[key] = self._process_value(p.get('vmcloak', key))
+
+    def __getattr__(self, key):
+        return self.conf[key]
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
-    parser.add_argument('--cuckoo', type=str, required=True, help='Directory where Cuckoo is located.')
-    parser.add_argument('--basedir', type=str, required=True, help='Base directory for the virtual machine and its associated files.')
+    parser.add_argument('--cuckoo', type=str, required=False, help='Directory where Cuckoo is located.')
+    parser.add_argument('--basedir', type=str, required=False, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--vm', type=str, default='virtualbox', help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
@@ -335,34 +360,41 @@ if __name__ == '__main__':
     parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
+    parser.add_argument('-s', '--settings', type=str, required=False, help='Configuration file with various settings.')
 
     args = parser.parse_args()
+    s = Configuration()
 
-    sys.path.append(args.cuckoo)
+    if args.settings:
+        s.from_file(args.settings)
+
+    s.from_args(args)
+
+    sys.path.append(s.cuckoo)
     from lib.cuckoo.common.config import Config
     from lib.cuckoo.common.constants import CUCKOO_ROOT
 
-    if args.vm == 'virtualbox':
-        m = VirtualBox(args.vmname, args.basedir)
+    if s.vm == 'virtualbox':
+        m = VirtualBox(s.vmname, s.basedir)
     else:
         print '[-] Only VirtualBox is supported as of now'
         exit(1)
 
-    if args.list:
+    if s.list:
         print m.list_settings()
         exit(0)
 
-    if args.delete:
+    if s.delete:
         print '[x] Unregistering and deleting the VM and its associated files'
         m.delete_vm()
         exit(0)
 
-    if not args.iso:
+    if not s.iso:
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
 
     print '[x] Configuring WINNT.SIF'
-    buf = configure_winnt_sif('winnt.sif', args)
+    buf = configure_winnt_sif('winnt.sif', s)
     if not buf:
         print '[-] Error configuring WINNT.SIF'
         exit(1)
@@ -371,15 +403,15 @@ if __name__ == '__main__':
     open(os.path.join('nlite', 'winnt.sif'), 'wb').write(buf)
 
     # The directory doesn't exist yet, probably.
-    if not os.path.exists(os.path.join(args.basedir, args.vmname)):
-        os.mkdir(os.path.join(args.basedir, args.vmname))
+    if not os.path.exists(os.path.join(s.basedir, s.vmname)):
+        os.mkdir(os.path.join(s.basedir, s.vmname))
 
-    iso_path = os.path.join(args.basedir, args.vmname, 'image.iso')
+    iso_path = os.path.join(s.basedir, s.vmname, 'image.iso')
 
     # Create the ISO file.
     print '[x] Creating ISO file.'
     try:
-        subprocess.check_call(['./nlite.sh', args.iso, iso_path])
+        subprocess.check_call(['./nlite.sh', s.iso, iso_path])
     except subprocess.CalledProcessError as e:
         print '[-] Error creating ISO file.'
         print e
@@ -388,11 +420,11 @@ if __name__ == '__main__':
     print '[x] Creating VM'
     print m.create_vm()
 
-    m.ramsize(args.ramsize)
+    m.ramsize(s.ramsize)
     m.os_type(os='xp', sp=3)
 
     print '[x] Creating Harddisk'
-    m.create_hd(args.hdsize)
+    m.create_hd(s.hdsize)
 
     print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
     m.attach_iso(iso_path)
