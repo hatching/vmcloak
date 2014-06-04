@@ -39,8 +39,8 @@ sudo mount -o loop,ro "$IMAGE" "$MOUNT" || cleanup 1
 
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
-echo "Copying all files around.."
-cp -r "$MOUNT"/* "$TEMPDIR" || cleanup 1
+echo "Copying files around.."
+./utils/cplower.py "$MOUNT" "$TEMPDIR" || cleanup 1
 chmod -R +w "$TEMPDIR" || cleanup 1
 
 # Overwrite certain files *according to the nLite tool.
