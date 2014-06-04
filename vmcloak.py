@@ -341,7 +341,8 @@ class Configuration(object):
         p = ConfigParser()
         p.read(path)
         for key in p.options('vmcloak'):
-            self.conf[key] = self._process_value(p.get('vmcloak', key))
+            self.conf[key.replace('-', '_')] = \
+                self._process_value(p.get('vmcloak', key))
 
     def __getattr__(self, key):
         return self.conf[key]
