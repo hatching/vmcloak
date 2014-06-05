@@ -2,11 +2,11 @@
 MOUNT=/mnt/nlite
 
 if [ "$#" -eq 0 ]; then
-    echo "Usage: ./nlite.sh <iso> [tempdir]"
+    echo "Usage: ./nlite.sh <iso> [outiso] [tempdir]"
     exit 1
 elif [ "$#" -eq 1 ]; then
     IMAGE="$1"
-    OUTIMAGE=$(echo $IMAGE|sed s/\.iso/\-new.iso/)
+    OUTIMAGE="$(echo -n "$IMAGE"|sed s/\.iso/\-new.iso/)"
     TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 2 ]; then
     IMAGE="$1"
