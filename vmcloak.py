@@ -234,9 +234,9 @@ class VirtualBox(VM):
             ret = subprocess.check_output(cmd)
         except Exception as e:
             print '[-] Error running command:', e
-            return
+            exit(1)
 
-        return ret
+        return ret.strip()
 
     def _hd_path(self):
         return os.path.join(self.basedir, self.name, '%s.vdi' % self.name)
