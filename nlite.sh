@@ -1,5 +1,5 @@
 #!/bin/sh
-MOUNT=/mnt/nlite
+MOUNT=/mnt/vmcloak
 
 if [ "$#" -eq 0 ]; then
     echo "Usage: ./nlite.sh <iso> [outiso] [tempdir]"
@@ -43,7 +43,7 @@ echo "Copying files around.."
 ./utils/cplower.py "$MOUNT" "$TEMPDIR" || cleanup 1
 chmod -R +w "$TEMPDIR" || cleanup 1
 
-# Overwrite certain files *according to the nLite tool.
+# Overwrite certain files according to the nLite tool.
 echo "Overwriting various files.."
 cp nlite/* "$TEMPDIR/i386/" || cleanup 1
 cp boot.img "$TEMPDIR" || cleanup 1

@@ -207,10 +207,10 @@ class VirtualBox(VM):
     def __init__(self, *args, **kwargs):
         VM.__init__(self, *args, **kwargs)
 
-        self.CONF_PATH = os.path.join(CUCKOO_ROOT, 'conf', 'virtualbox.conf')
+        self.conf_path = os.path.join(CUCKOO_ROOT, 'conf', 'virtualbox.conf')
 
         try:
-            self.vboxmanage = Config(self.CONF_PATH).virtualbox.path
+            self.vboxmanage = Config(self.conf_path).virtualbox.path
         except:
             log.error('Unable to locate VBoxManage path, please '
                       'configure conf/virtualbox.conf properly.')
