@@ -371,6 +371,14 @@ if __name__ == '__main__':
 
     s.from_args(args)
 
+    if not s.cuckoo:
+        print '[-] Please provide your Cuckoo root directory.'
+        exit(1)
+
+    if not s.basedir:
+        print '[-] Please provide the base directory for the VM.'
+        exit(1)
+
     sys.path.append(s.cuckoo)
     from lib.cuckoo.common.config import Config
     from lib.cuckoo.common.constants import CUCKOO_ROOT

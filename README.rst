@@ -1,14 +1,14 @@
 VMCloak
 =======
 
-Automated Virtual Machine Generation and Cloaking for Cuckoo.
+Automated Virtual Machine Generation and Cloaking for Cuckoo Sandbox.
 
 Introduction
 ------------
 
 VMCloak is a tool to fully create and prepare Virtual Machines that can be
 used by Cuckoo Sandbox. In order to create a new Virtual Machine one should
-run prepare a few configuration values that will be used later on by the tool.
+prepare a few configuration values that will be used later on by the tool.
 
 Dependencies
 ------------
