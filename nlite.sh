@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 MOUNT=/mnt/vmcloak
 
 if [ "$#" -eq 0 ]; then
@@ -33,20 +34,23 @@ cleanup() {
     fi
 }
 
+# When a command fails we do a bit of cleanup.
+trap "cleanup 1" ERR
+
 echo "Mounting the ISO image.."
-sudo mkdir "$MOUNT" || cleanup 1
-sudo mount -o loop,ro "$IMAGE" "$MOUNT" || cleanup 1
+sudo mkdir "$MOUNT"
+sudo mount -o loop,ro "$IMAGE" "$MOUNT"
 
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
 echo "Copying files around.."
-./utils/cplower.py "$MOUNT" "$TEMPDIR" || cleanup 1
-chmod -R +w "$TEMPDIR" || cleanup 1
+./utils/cplower.py "$MOUNT" "$TEMPDIR"
+chmod -R +w "$TEMPDIR"
 
 # Overwrite certain files according to the nLite tool.
 echo "Overwriting various files.."
-cp nlite/* "$TEMPDIR/i386/" || cleanup 1
-cp boot.img "$TEMPDIR" || cleanup 1
+cp nlite/* "$TEMPDIR/i386/"
+cp boot.img "$TEMPDIR"
 
 echo "Installing bootstrap files.."
 OSDIR="$TEMPDIR/\$OEM\$/\$1"
@@ -57,7 +61,7 @@ cp bootstrap/* "$OSDIR"
 echo "Creating ISO image.."
 mkisofs -quiet -b boot.img -no-emul-boot -boot-load-seg 1984 \
     -boot-load-size 4 -iso-level 2 -J -l -D -N -joliet-long \
-    -relaxed-filenames -o "$OUTIMAGE" "$TEMPDIR" || cleanup 1
+    -relaxed-filenames -o "$OUTIMAGE" "$TEMPDIR"
 
 cleanup 0
 echo $OUTIMAGE
