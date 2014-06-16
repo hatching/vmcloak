@@ -27,3 +27,11 @@ In order to run the tool you'll have to provide all the required configuration
 variables that can be found when running ``./vmcloak.py -h``. Optionally one
 can generate a configuration file with various default values (such as path
 of Cuckoo Sandbox and `basedir`) and load these settings using the `-s` flag.
+
+Credits
+-------
+
+Without the help of `nLite <http://www.nliteos.com/>`_ this tool would
+probably not have been as complete as it is now. Inspiration on how to design
+the output ISO files has for a large part been derived from changes observed
+by `nLite`.
