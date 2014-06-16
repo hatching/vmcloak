@@ -328,7 +328,7 @@ class Configuration(object):
         self.conf = {}
 
     def _process_value(self, value):
-        if isinstance(value, str) and value and value[0] == '~':
+        if isinstance(value, str) and value.startswith('~'):
             return os.getenv('HOME') + value[1:]
         return value
 

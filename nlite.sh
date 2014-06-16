@@ -38,7 +38,7 @@ cleanup() {
 trap "cleanup 1" ERR
 
 echo "Mounting the ISO image.."
-sudo mkdir "$MOUNT"
+sudo mkdir -p "$MOUNT"
 sudo mount -o loop,ro "$IMAGE" "$MOUNT"
 
 # Copy all files to our temporary directory, as
