@@ -2,21 +2,27 @@
 set -e
 MOUNT=/mnt/vmcloak
 
-if [ "$#" -eq 0 ]; then
-    echo "Usage: ./buildiso.sh <iso> [outiso] [tempdir]"
+if [ "$#" -lt 2 ]; then
+    echo "Usage: ./buildiso.sh <iso> <winnt.sif> [outiso] [tempdir]"
     exit 1
-elif [ "$#" -eq 1 ]; then
-    IMAGE="$1"
-    OUTIMAGE="$(echo -n "$IMAGE"|sed s/\.iso/\-new.iso/)"
-    TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 2 ]; then
     IMAGE="$1"
-    OUTIMAGE="$2"
+    WINNTSIF="$2"
+    OUTIMAGE="$(echo -n "$IMAGE"|sed s/\.iso/\-new.iso/)"
     TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 3 ]; then
     IMAGE="$1"
-    OUTIMAGE="$2"
-    TEMPDIR="$3"
+    WINNTSIF="$2"
+    OUTIMAGE="$3"
+    TEMPDIR="$(mktemp -d)"
+elif [ "$#" -eq 4 ]; then
+    IMAGE="$1"
+    WINNTSIF="$2"
+    OUTIMAGE="$3"
+    TEMPDIR="$4"
+else
+    print "Invalid amount of arguments.."
+    exit 1
 fi
 
 cleanup() {
@@ -51,8 +57,12 @@ chmod -R +w "$TEMPDIR"
 echo "Overwriting various files.."
 cp boot.img "$TEMPDIR"
 
-# Merge the original winnt.sif file with our settings.
-./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge winnt-configured.sif
+# Merge the original winnt.sif file with our settings. Note that we have a
+# set of configuration values that we overwrite whether they're already
+# present in the original winnt.sif or not, and also a set of optional values
+# which will only be used if they're not present in the configuration already.
+./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge "$WINNTSIF" --overwrite
+./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge winnt-opt.sif
 
 echo "Installing bootstrap files.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"

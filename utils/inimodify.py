@@ -61,7 +61,7 @@ def ini_delete(data, section, value):
             del data[section][idx]
 
 
-def ini_merge(data, ini2):
+def ini_merge(data, ini2, overwrite=True):
     mode, data2 = read_ini(ini2)
     for section in data2:
         for value in data2[section]:
@@ -77,7 +77,8 @@ def ini_merge(data, ini2):
 
             for idx, row in enumerate(data[section]):
                 if len(row) > off and row[:off] == value[:off]:
-                    data[section][idx] = value
+                    if overwrite:
+                        data[section][idx] = value
                     break
             else:
                 data[section].append(value)
@@ -96,7 +97,7 @@ if __name__ == '__main__':
         print 'Actions:'
         print '    add <section> <value>'
         print '    delete <section> <value>'
-        print '    merge <ini2>'
+        print '    merge <ini2> [--overwrite]'
         exit(1)
 
     path, action = sys.argv[1:3]
@@ -106,11 +107,18 @@ if __name__ == '__main__':
         print '%s is not a valid action' % action
         exit(1)
 
-    if len(sys.argv) - 3 != actions[action][1]:
+    argc = actions[action][1]
+    if len(sys.argv) - 3 < argc:
         print 'Invalid argument count', len(sys.argv) - 3,
-        print 'instead of', actions[action][1]
+        print 'instead of', argc
         exit(1)
 
-    actions[action][0](data, *sys.argv[3:])
+    d = dict(overwrite=False)
+
+    for arg in sys.argv[3+argc:]:
+        assert arg[:2] == '--'
+        d[arg[2:]] = True
+
+    actions[action][0](data, *sys.argv[3:3+argc], **d)
 
     write_ini(path, mode, data)

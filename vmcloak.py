@@ -12,6 +12,7 @@ import socket
 import string
 import subprocess
 import sys
+import tempfile
 import time
 
 
@@ -409,7 +410,8 @@ if __name__ == '__main__':
         exit(1)
 
     # Write the WINNT.SIF file.
-    open(os.path.join('winnt-configured.sif'), 'wb').write(buf)
+    _, winntsif = tempfile.mkstemp(suffix='.sif')
+    open(winntsif, 'wb').write(buf)
 
     # The directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
@@ -420,7 +422,8 @@ if __name__ == '__main__':
     # Create the ISO file.
     print '[x] Creating ISO file.'
     try:
-        subprocess.check_call(['./utils/buildiso.sh', s.iso, iso_path])
+        subprocess.check_call(['./utils/buildiso.sh',
+                               s.iso, winntsif, iso_path])
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e
