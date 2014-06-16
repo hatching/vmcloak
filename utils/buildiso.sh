@@ -3,7 +3,7 @@ set -e
 MOUNT=/mnt/vmcloak
 
 if [ "$#" -eq 0 ]; then
-    echo "Usage: ./nlite.sh <iso> [outiso] [tempdir]"
+    echo "Usage: ./buildiso.sh <iso> [outiso] [tempdir]"
     exit 1
 elif [ "$#" -eq 1 ]; then
     IMAGE="$1"

@@ -420,9 +420,9 @@ if __name__ == '__main__':
     # Create the ISO file.
     print '[x] Creating ISO file.'
     try:
-        subprocess.check_call(['./nlite.sh', s.iso, iso_path])
+        subprocess.check_call(['./utils/buildiso.sh', s.iso, iso_path])
     except OSError as e:
-        print '[-] Is ./nlite.sh executable?'
+        print '[-] Is ./utils/buildiso.sh executable?'
         print e
         exit(1)
     except subprocess.CalledProcessError as e:
