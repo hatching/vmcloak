@@ -47,6 +47,15 @@ def ini_add(data, section, value):
         data[section].append(value)
 
 
+def ini_delete(data, section, value):
+    if section not in data:
+        return
+
+    for idx, row in enumerate(data[section]):
+        if row == value:
+            del data[section][idx]
+
+
 def ini_merge(data, ini2):
     mode, data2 = read_ini(ini2)
     for section in data2:
@@ -56,9 +65,10 @@ def ini_merge(data, ini2):
                 continue
 
             off = value.find('=')
-            # TODO For now we only support key = value lines.
+            # If this line is not a key = value entry, then
+            # we take the entire line.
             if off < 0:
-                continue
+                off = len(value)
 
             for idx, row in enumerate(data[section]):
                 if len(row) > off and row[:off] == value[:off]:
@@ -70,6 +80,7 @@ def ini_merge(data, ini2):
 
 actions = {
     'add': (ini_add, 2),
+    'delete': (ini_delete, 2),
     'merge': (ini_merge, 1),
 }
 
@@ -79,6 +90,7 @@ if __name__ == '__main__':
         print 'Usage: python %s <ini> <action> [args..]' % sys.argv[0]
         print 'Actions:'
         print '    add <section> <value>'
+        print '    delete <section> <value>'
         print '    merge <ini2>'
         exit(1)
 
