@@ -28,7 +28,6 @@ CreateFirstRunRp=0
 EncryptedAdminPassword="No"
 AutoLogon="Yes"
 AdminPassword=*
-TimeZone=085
 OEMSkipRegional=1
 OemSkipWelcome=1
 
@@ -39,10 +38,6 @@ ProductKey="@PRODUCTKEY@"
 ComputerName="@COMPUTERNAME@"
 FullName="@FULLNAME@"
 OrgName="@ORGANIZATION@"
-
-[RegionalSettings]
-LanguageGroup=1,2
-Language="0409"
 
 [Networking]
 InstallDefaultComponents="Yes"
