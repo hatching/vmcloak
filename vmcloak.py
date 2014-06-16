@@ -319,7 +319,7 @@ def configure_winnt_sif(path, args):
 
     buf = open(path, 'rb').read()
     for key, value in values.items():
-        buf = buf.replace('%%%s%%' % key, value)
+        buf = buf.replace('@%s@' % key, value)
     return buf
 
 

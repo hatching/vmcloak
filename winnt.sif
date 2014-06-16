@@ -35,10 +35,10 @@ OemSkipWelcome=1
 [Components]
 
 [UserData]
-ProductKey="%PRODUCTKEY%"
-ComputerName="%COMPUTERNAME%"
-FullName="%FULLNAME%"
-OrgName="%ORGANIZATION%"
+ProductKey="@PRODUCTKEY@"
+ComputerName="@COMPUTERNAME@"
+FullName="@FULLNAME@"
+OrgName="@ORGANIZATION@"
 
 [RegionalSettings]
 LanguageGroup=1,2
@@ -54,7 +54,7 @@ Profiles=WindowsFirewall.TurnOffFirewall
 Mode=0
 
 [Identification]
-JoinWorkgroup="%WORKGROUP%"
+JoinWorkgroup="@WORKGROUP@"
 
 [GuiRunOnce]
 "%SystemRoot%\System32\nLite.cmd"
