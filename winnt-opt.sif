@@ -1,0 +1,6 @@
+[GuiUnattended]
+TimeZone=085
+
+[RegionalSettings]
+LanguageGroup=1,2
+Language="0409"
