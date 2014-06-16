@@ -53,7 +53,7 @@ cp nlite/* "$TEMPDIR/i386/"
 cp boot.img "$TEMPDIR"
 
 echo "Installing bootstrap files.."
-OSDIR="$TEMPDIR/\$OEM\$/\$1"
+OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"
 cp bootstrap/* "$OSDIR"
 
