@@ -5,7 +5,13 @@ import sys
 
 def read_ini(path):
     ret, cur = {}, None
-    for line in open(path, 'rb'):
+    buf = open(path, 'rb').read()
+
+    # UTF-16 BOM
+    mode = 'utf16' if buf[:2] == '\xff\xfe' else 'latin1'
+    buf = buf.decode(mode)
+
+    for line in buf.split('\n'):
         line = line.strip()
         if not line or line[0] == ';':
             continue
@@ -20,27 +26,29 @@ def read_ini(path):
         else:
             a, b = line.split('=', 1)
             ret[cur].append('%s = %s' % (a.strip(), b.strip()))
-    return ret
+    return mode, ret
 
 
-def write_ini(path, data):
-    f = open(path, 'wb')
+def write_ini(path, mode, data):
+    lines = ['']
     for key in sorted(data.keys()):
-        print>>f, '[%s]' % key
+        lines.append('[%s]' % key)
         for value in sorted(data[key]):
-            print>>f, value
-        print>>f
+            lines.append(value)
+        lines.append('')
+    open(path, 'wb').write('\r\n'.join(lines).encode(mode))
 
 
 def ini_add(data, section, value):
     if section not in data:
         data[section] = []
 
-    data[section].append(value)
+    if value not in data[section]:
+        data[section].append(value)
 
 
 def ini_merge(data, ini2):
-    data2 = read_ini(ini2)
+    mode, data2 = read_ini(ini2)
     for section in data2:
         for value in data2[section]:
             if section not in data:
@@ -75,7 +83,7 @@ if __name__ == '__main__':
         exit(1)
 
     path, action = sys.argv[1:3]
-    data = read_ini(path)
+    mode, data = read_ini(path)
 
     if action not in actions:
         print '%s is not a valid action' % action
@@ -88,4 +96,4 @@ if __name__ == '__main__':
 
     actions[action][0](data, *sys.argv[3:])
 
-    write_ini(path, data)
+    write_ini(path, mode, data)
