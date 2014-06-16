@@ -12,7 +12,7 @@ def read_ini(path):
     else:
         buf = ''
 
-    # UTF-16 BOM
+    # UTF-16 Byte Order Mark ("BOM")
     mode = 'utf16' if buf[:2] == '\xff\xfe' else 'latin1'
     buf = buf.decode(mode)
 
