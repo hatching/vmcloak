@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 """Script that modifies an INI file."""
+import os.path
 import sys
 
 
 def read_ini(path):
     ret, cur = {}, None
-    buf = open(path, 'rb').read()
+
+    if os.path.exists(path):
+        buf = open(path, 'rb').read()
+    else:
+        buf = ''
 
     # UTF-16 BOM
     mode = 'utf16' if buf[:2] == '\xff\xfe' else 'latin1'
