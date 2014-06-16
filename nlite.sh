@@ -52,6 +52,9 @@ echo "Overwriting various files.."
 cp nlite/* "$TEMPDIR/i386/"
 cp boot.img "$TEMPDIR"
 
+# Merge the original winnt.sif file with our settings.
+./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge winnt-configured.sif
+
 echo "Installing bootstrap files.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"

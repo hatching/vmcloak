@@ -409,7 +409,7 @@ if __name__ == '__main__':
         exit(1)
 
     # Write the WINNT.SIF file.
-    open(os.path.join('nlite', 'winnt.sif'), 'wb').write(buf)
+    open(os.path.join('winnt-configured.sif'), 'wb').write(buf)
 
     # The directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):

@@ -47,7 +47,11 @@ def ini_merge(data, ini2):
                 data[section] = [value]
                 continue
 
-            off = value.index('=')
+            off = value.find('=')
+            # TODO For now we only support key = value lines.
+            if off < 0:
+                continue
+
             for idx, row in enumerate(data[section]):
                 if len(row) > off and row[:off] == value[:off]:
                     data[section][idx] = value
