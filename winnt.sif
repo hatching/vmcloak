@@ -57,4 +57,4 @@ Mode=0
 JoinWorkgroup="@WORKGROUP@"
 
 [GuiRunOnce]
-"%SystemRoot%\System32\nLite.cmd"
+C:\bootstrap.bat

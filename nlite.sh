@@ -49,7 +49,6 @@ chmod -R +w "$TEMPDIR"
 
 # Overwrite certain files according to the nLite tool.
 echo "Overwriting various files.."
-cp nlite/* "$TEMPDIR/i386/"
 cp boot.img "$TEMPDIR"
 
 # Merge the original winnt.sif file with our settings.

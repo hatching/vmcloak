@@ -18,7 +18,6 @@ the process of generating a new VM.
 
 * Python 2.6+
 * mkisofs
-* lcab(1)
 * VirtualBox
 
 Usage
