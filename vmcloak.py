@@ -420,11 +420,12 @@ if __name__ == '__main__':
 
     settings = dict(
         HOST_PORT=port,
+        RESOLUTION=args.resolution,
     )
 
     # Write the configuration values for the bootstrap code.
     with open(os.path.join('bootstrap', 'settings.py'), 'wb') as f:
-        f.write('\n'.join('%s = %s' % (k, v) for k, v in settings.items()))
+        f.write('\n'.join('%s = %r' % (k, v) for k, v in settings.items()))
 
     # The directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
@@ -484,7 +485,6 @@ if __name__ == '__main__':
         exit(1)
 
     print '[x] Setting the resolution to %dx%d' % (width, height)
-    guest.send(args.resolution)
     if ord(guest.recv(1)):
         print '[+] Resolution was set successfully'
     else:
