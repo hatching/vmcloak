@@ -53,7 +53,6 @@ echo "Copying files around.."
 ./utils/cplower.py "$MOUNT" "$TEMPDIR"
 chmod -R +w "$TEMPDIR"
 
-# Overwrite certain files according to the nLite tool.
 echo "Overwriting various files.."
 cp boot.img "$TEMPDIR"
 
