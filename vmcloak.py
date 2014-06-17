@@ -357,6 +357,11 @@ class Configuration(object):
             self.conf[key.replace('-', '_')] = \
                 self._process_value(p.get('vmcloak', key))
 
+    def from_defaults(self, defaults):
+        for key, value in defaults.items():
+            if self.conf[key] is None:
+                self.conf[key] = value
+
     def __getattr__(self, key):
         return self.conf[key]
 
@@ -366,19 +371,28 @@ if __name__ == '__main__':
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, required=False, help='Directory where Cuckoo is located.')
     parser.add_argument('--basedir', type=str, required=False, help='Base directory for the virtual machine and its associated files.')
-    parser.add_argument('--vm', type=str, default='virtualbox', help='Virtual Machine Software (VirtualBox.)')
+    parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
-    parser.add_argument('--ramsize', type=int, default=1024, help='Available virtual memory (in MB) for this virtual machine.')
-    parser.add_argument('--resolution', type=str, default='1024x768', help='Virtual Machine resolution.')
-    parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
+    parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
+    parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
+    parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
-    parser.add_argument('--host-ip', type=str, default='192.168.56.1', help='static IP address to bind to on the Host.')
-    parser.add_argument('--guest-ip', type=str, default='192.168.56.101', help='static IP address to use on the Guest.')
+    parser.add_argument('--host-ip', type=str, help='static IP address to bind to on the Host.')
+    parser.add_argument('--guest-ip', type=str, help='static IP address to use on the Guest.')
     parser.add_argument('--hwvirt', action='store_true', default=None, dest='hwvirt', help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('-s', '--settings', type=str, required=False, help='Configuration file with various settings.')
+
+    defaults = dict(
+        vm='virtualbox',
+        ramsize=1024,
+        resolution='1024x768',
+        hdsize=256*1024,
+        host_ip='192.168.56.1',
+        guest_ip='192.168.56.101',
+    )
 
     args = parser.parse_args()
     s = Configuration()
@@ -387,6 +401,7 @@ if __name__ == '__main__':
         s.from_file(args.settings)
 
     s.from_args(args)
+    s.from_defaults(defaults)
 
     if not s.cuckoo:
         print '[-] Please provide your Cuckoo root directory.'
