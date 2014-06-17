@@ -1,7 +1,8 @@
 from ctypes import c_char, c_ushort, c_uint, c_char_p
 from ctypes import windll, Structure, POINTER, sizeof
-import os
 import socket
+
+from settings import HOST_PORT
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
 # http://msdn.microsoft.com/en-us/library/windows/desktop/dd183565(v=vs.85).aspx
@@ -47,7 +48,7 @@ def set_resolution(width, height):
     return False
 
 if __name__ == '__main__':
-    s = socket.create_connection(('192.168.56.1', 61453))
+    s = socket.create_connection(('192.168.56.1', HOST_PORT))
 
     # We're assuming that what the host sends is correct.
     width, height = [int(x) for x in s.recv(128).split('x')]

@@ -403,6 +403,11 @@ if __name__ == '__main__':
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
 
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(('192.168.56.1', 0))
+    sock.listen(1)
+    _, port = sock.getsockname()
+
     print '[x] Configuring WINNT.SIF'
     buf = configure_winnt_sif('winnt.sif', s)
     if not buf:
@@ -412,6 +417,14 @@ if __name__ == '__main__':
     # Write the WINNT.SIF file.
     _, winntsif = tempfile.mkstemp(suffix='.sif')
     open(winntsif, 'wb').write(buf)
+
+    settings = dict(
+        HOST_PORT=port,
+    )
+
+    # Write the configuration values for the bootstrap code.
+    with open(os.path.join('bootstrap', 'settings.py'), 'wb') as f:
+        f.write('\n'.join('%s = %s' % (k, v) for k, v in settings.items()))
 
     # The directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
@@ -461,11 +474,7 @@ if __name__ == '__main__':
     print '[!] This may take up to 30 minutes'
     t = time.time()
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('192.168.56.1', 61453))
-    s.listen(1)
-
-    c, a = s.accept()
+    guest, _ = sock.accept()
     print '[x] It took %d seconds to install Windows!' % (time.time() - t)
 
     try:
@@ -475,8 +484,8 @@ if __name__ == '__main__':
         exit(1)
 
     print '[x] Setting the resolution to %dx%d' % (width, height)
-    c.send(args.resolution)
-    if ord(c.recv(1)):
+    guest.send(args.resolution)
+    if ord(guest.recv(1)):
         print '[+] Resolution was set successfully'
     else:
         print '[-] Error setting the resolution'
