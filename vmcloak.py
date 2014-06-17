@@ -105,6 +105,10 @@ class VM(object):
         """Configure a Hostonly adapter for the Virtual Machine."""
         raise
 
+    def hwvirt(self, enable=True):
+        """Enable or disable the usage of Hardware Virtualization."""
+        raise
+
     def start_vm(self):
         """Start the associated Virtual Machine."""
         raise
@@ -295,6 +299,10 @@ class VirtualBox(VM):
                    nicpromisc1='allow-all',
                    hostonlyadapter1=adapter)
 
+    def hwvirt(self, enable=True):
+        """Enable or disable the usage of Hardware Virtualization."""
+        self._call('modifyvm', self.name, hwvirtex='on' if enable else 'off')
+
     def start_vm(self):
         return self._call('startvm', self.name)
 
@@ -361,6 +369,8 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=str, default='1024x768', help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
+    parser.add_argument('--hwvirt', action='store_true', default=None, dest='hwvirt', help='Explicitly enable Hardware Virtualization.')
+    parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('-s', '--settings', type=str, required=False, help='Configuration file with various settings.')
 
@@ -467,6 +477,13 @@ if __name__ == '__main__':
 
     print '[x] Initially configuring Hostonly network'
     m.hostonly()
+
+    if s.hwvirt is not None:
+        if s.hwvirt:
+            print '[x] Enabling Hardware Virtualization'
+        else:
+            print '[x] Disabling Hardware Virtualization'
+        m.hwvirt(s.hwvirt)
 
     print '[!] Starting the Virtual Machine to install Windows'
     print m.start_vm()
