@@ -378,8 +378,9 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
-    parser.add_argument('--host-ip', type=str, help='static IP address to bind to on the Host.')
-    parser.add_argument('--guest-ip', type=str, help='static IP address to use on the Guest.')
+    parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
+    parser.add_argument('--guest-ip', type=str, help='Static IP address to use on the Guest.')
+    parser.add_argument('--guest-ip-gateway', type=str, help='Static IP address gateway to use on the Guest.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -392,6 +393,7 @@ if __name__ == '__main__':
         hdsize=256*1024,
         host_ip='192.168.56.1',
         guest_ip='192.168.56.101',
+        guest_ip_gateway='192.168.0.1',
     )
 
     args = parser.parse_args()
@@ -453,6 +455,7 @@ if __name__ == '__main__':
     print '[x] Using static IP address %s on the Guest' % s.guest_ip
     settings_bat = dict(
         HOSTONLYIP=s.guest_ip,
+        HOSTONLYGATEWAY=s.guest_ip_gateway,
     )
 
     settings_py = dict(
