@@ -428,14 +428,24 @@ if __name__ == '__main__':
     _, winntsif = tempfile.mkstemp(suffix='.sif')
     open(winntsif, 'wb').write(buf)
 
-    settings = dict(
+    settings_bat = dict(
+        HOSTONLYIP='192.168.56.101',
+    )
+
+    settings_py = dict(
         HOST_PORT=port,
         RESOLUTION=args.resolution,
     )
 
-    # Write the configuration values for the bootstrap code.
+    # Write the configuration values for bootstrap.bat.
+    with open(os.path.join('bootstrap', 'settings.bat'), 'wb') as f:
+        for key, value in settings_bat.items():
+            print>>f, 'set %s=%s' % (key, value)
+
+    # Write the configuration values for bootstrap.py.
     with open(os.path.join('bootstrap', 'settings.py'), 'wb') as f:
-        f.write('\n'.join('%s = %r' % (k, v) for k, v in settings.items()))
+        for key, value in settings_py.items():
+            print>>f, '%s = %r' % (key, value)
 
     # The directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
