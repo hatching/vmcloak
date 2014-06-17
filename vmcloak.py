@@ -369,8 +369,8 @@ class Configuration(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
-    parser.add_argument('--cuckoo', type=str, required=False, help='Directory where Cuckoo is located.')
-    parser.add_argument('--basedir', type=str, required=False, help='Base directory for the virtual machine and its associated files.')
+    parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
+    parser.add_argument('--basedir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
@@ -380,10 +380,10 @@ if __name__ == '__main__':
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
     parser.add_argument('--host-ip', type=str, help='static IP address to bind to on the Host.')
     parser.add_argument('--guest-ip', type=str, help='static IP address to use on the Guest.')
-    parser.add_argument('--hwvirt', action='store_true', default=None, dest='hwvirt', help='Explicitly enable Hardware Virtualization.')
+    parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
-    parser.add_argument('-s', '--settings', type=str, required=False, help='Configuration file with various settings.')
+    parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
         vm='virtualbox',
