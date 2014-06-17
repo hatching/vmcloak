@@ -373,6 +373,8 @@ if __name__ == '__main__':
     parser.add_argument('--resolution', type=str, default='1024x768', help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, default=256*1024, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
+    parser.add_argument('--host-ip', type=str, default='192.168.56.1', help='static IP address to bind to on the Host.')
+    parser.add_argument('--guest-ip', type=str, default='192.168.56.101', help='static IP address to use on the Guest.')
     parser.add_argument('--hwvirt', action='store_true', default=None, dest='hwvirt', help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -417,8 +419,9 @@ if __name__ == '__main__':
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
 
+    print '[x] Using %s as Host IP' % s.host_ip
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind(('192.168.56.1', 0))
+    sock.bind((s.host_ip, 0))
     sock.listen(1)
     _, port = sock.getsockname()
 
@@ -432,11 +435,13 @@ if __name__ == '__main__':
     _, winntsif = tempfile.mkstemp(suffix='.sif')
     open(winntsif, 'wb').write(buf)
 
+    print '[x] Using static IP address %s on the Guest' % s.guest_ip
     settings_bat = dict(
-        HOSTONLYIP='192.168.56.101',
+        HOSTONLYIP=s.guest_ip,
     )
 
     settings_py = dict(
+        HOST_IP=s.host_ip,
         HOST_PORT=port,
         RESOLUTION=args.resolution,
     )
