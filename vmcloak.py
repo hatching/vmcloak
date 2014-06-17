@@ -458,7 +458,7 @@ if __name__ == '__main__':
     settings_py = dict(
         HOST_IP=s.host_ip,
         HOST_PORT=port,
-        RESOLUTION=args.resolution,
+        RESOLUTION=s.resolution,
     )
 
     # Write the configuration values for bootstrap.bat.
@@ -529,13 +529,7 @@ if __name__ == '__main__':
     guest, _ = sock.accept()
     print '[x] It took %d seconds to install Windows!' % (time.time() - t)
 
-    try:
-        width, height = [int(x) for x in args.resolution.split('x')]
-    except:
-        print '[-] Invalid resolution specified'
-        exit(1)
-
-    print '[x] Setting the resolution to %dx%d' % (width, height)
+    print '[x] Setting the resolution to %s' % s.resolution
     if ord(guest.recv(1)):
         print '[+] Resolution was set successfully'
     else:
