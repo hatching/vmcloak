@@ -339,6 +339,10 @@ class Configuration(object):
     def _process_value(self, value):
         if isinstance(value, str) and value.startswith('~'):
             return os.getenv('HOME') + value[1:]
+        if value in ('true', 'True', 'on', 'yes', 'enable'):
+            return True
+        if value in ('false', 'False', 'off', 'no', 'disable'):
+            return False
         return value
 
     def from_args(self, args):
