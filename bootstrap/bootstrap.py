@@ -1,8 +1,11 @@
 from ctypes import c_char, c_ushort, c_uint, c_char_p
 from ctypes import windll, Structure, POINTER, sizeof
 import socket
+from _winreg import CreateKeyEx, SetValueEx
+from _winreg import HKEY_CURRENT_USER, KEY_SET_VALUE, REG_DWORD
 
 from settings import HOST_IP, HOST_PORT, RESOLUTION
+
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
 # http://msdn.microsoft.com/en-us/library/windows/desktop/dd183565(v=vs.85).aspx
@@ -31,6 +34,11 @@ ENUM_CURRENT_SETTINGS = -1
 CDS_UPDATEREGISTRY = 1
 DISP_CHANGE_SUCCESSFUL = 0
 
+REGISTRY = [
+    # http://www.techrepublic.com/article/tech-tip-disable-the-windows-xp-tour-prompt/
+    (HKEY_CURRENT_USER, 'Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Tour', 'RunCount', REG_DWORD, 0),
+]
+
 
 def set_resolution(width, height):
     dm = _DevMode()
@@ -42,13 +50,23 @@ def set_resolution(width, height):
     dm.dmPelsHeight = height
 
     ret = ChangeDisplaySettings(dm, CDS_UPDATEREGISTRY)
-    if ret == DISP_CHANGE_SUCCESSFUL:
-        return True
+    return ret == DISP_CHANGE_SUCCESSFUL
 
-    return False
+
+def set_regkey(key, subkey, name, typ, value):
+    parts = subkey.split('\\')
+    for off in xrange(1, len(parts)):
+        CreateKeyEx(key, '\\'.join(parts[:off]), 0, KEY_SET_VALUE).Close()
+
+    with CreateKeyEx(key, subkey, 0, KEY_SET_VALUE) as handle:
+        SetValueEx(handle, name, 0, typ, value)
+
 
 if __name__ == '__main__':
     s = socket.create_connection((HOST_IP, HOST_PORT))
 
     width, height = [int(x) for x in RESOLUTION.split('x')]
     s.send('\x01' if set_resolution(width, height) else '\x00')
+
+    for key, subkey, name, typ, value in REGISTRY:
+        set_regkey(key, subkey, name, typ, value)
