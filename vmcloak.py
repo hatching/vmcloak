@@ -443,7 +443,7 @@ if __name__ == '__main__':
     _, port = sock.getsockname()
 
     print '[x] Configuring WINNT.SIF'
-    buf = configure_winnt_sif('winnt.sif', s)
+    buf = configure_winnt_sif(os.path.join('data', 'winnt.sif'), s)
     if not buf:
         print '[-] Error configuring WINNT.SIF'
         exit(1)

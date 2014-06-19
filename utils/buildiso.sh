@@ -54,14 +54,14 @@ echo "Copying files around.."
 chmod -R +w "$TEMPDIR"
 
 echo "Overwriting various files.."
-cp boot.img "$TEMPDIR"
+cp data/boot.img "$TEMPDIR"
 
 # Merge the original winnt.sif file with our settings. Note that we have a
 # set of configuration values that we overwrite whether they're already
 # present in the original winnt.sif or not, and also a set of optional values
 # which will only be used if they're not present in the configuration already.
 ./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge "$WINNTSIF" --overwrite
-./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge winnt-opt.sif
+./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge data/winnt-opt.sif
 
 echo "Installing bootstrap files.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
