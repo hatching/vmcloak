@@ -28,8 +28,6 @@ AdminPassword=*
 OEMSkipRegional=1
 OemSkipWelcome=1
 
-[Components]
-
 [UserData]
 ProductKey="@PRODUCTKEY@"
 ComputerName="@COMPUTERNAME@"
