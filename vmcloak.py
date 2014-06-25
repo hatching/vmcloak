@@ -385,6 +385,7 @@ if __name__ == '__main__':
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
+    parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
@@ -549,19 +550,20 @@ if __name__ == '__main__':
     print '[x] Powering off the virtual machine'
     print m.stopvm()
 
-    print '[x] Registering the VM with Cuckoo.'
-    try:
-        machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
-        subprocess.check_call([machine_py, '--add',
-                               '--ip', s.guest_ip,
-                               '--platform', 'windows',
-                               '--tags', s.tags,
-                               '--snapshot', 'vmcloak',
-                               s.vmname],
-                              cwd=CUCKOO_ROOT)
-    except subprocess.CalledProcessError as e:
-        print '[-] Error registering the VM.'
-        print e
-        exit(1)
+    if s.register_cuckoo:
+        print '[x] Registering the VM with Cuckoo.'
+        try:
+            machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
+            subprocess.check_call([machine_py, '--add',
+                                   '--ip', s.guest_ip,
+                                   '--platform', 'windows',
+                                   '--tags', s.tags,
+                                   '--snapshot', 'vmcloak',
+                                   s.vmname],
+                                  cwd=CUCKOO_ROOT)
+        except subprocess.CalledProcessError as e:
+            print '[-] Error registering the VM.'
+            print e
+            exit(1)
 
     print '[!] Virtual Machine created successfully.'
