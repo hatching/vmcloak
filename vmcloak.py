@@ -428,6 +428,12 @@ if __name__ == '__main__':
     if s.cuckoo:
         sys.path.append(s.cuckoo)
         from lib.cuckoo.common.constants import CUCKOO_ROOT
+    elif s.register_cuckoo:
+        print '[-] To register the Virtual Machine with Cuckoo'
+        print '[-] please provide the Cuckoo directory.'
+        print '[x] To disable registering please provide --no-register-cuckoo'
+        print '[x] or register-cuckoo = false in the configuration.'
+        exit(1)
 
     if not s.basedir:
         print '[-] Please provide the base directory for the VM.'
@@ -565,11 +571,6 @@ if __name__ == '__main__':
     print m.stopvm()
 
     if s.register_cuckoo:
-        if not s.cuckoo:
-            print '[-] To register the Virtual Machine with Cuckoo'
-            print '[-] please provide the Cuckoo directory.'
-            exit(1)
-
         print '[x] Registering the VM with Cuckoo.'
         try:
             machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
