@@ -436,7 +436,8 @@ if __name__ == '__main__':
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
 
-    print '[x] Using %s as Host IP' % s.host_ip
+    print '[x] Static Host IP', s.host_ip
+    print '[x] Static Guest IP', s.guest_ip
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((s.host_ip, 0))
     sock.listen(1)
@@ -452,7 +453,6 @@ if __name__ == '__main__':
     _, winntsif = tempfile.mkstemp(suffix='.sif')
     open(winntsif, 'wb').write(buf)
 
-    print '[x] Using static IP address %s on the Guest' % s.guest_ip
     settings_bat = dict(
         HOSTONLYIP=s.guest_ip,
         HOSTONLYGATEWAY=s.guest_ip_gateway,
