@@ -210,21 +210,8 @@ class VirtualBox(VM):
     }
 
     def __init__(self, *args, **kwargs):
+        self.vboxmanage = kwargs.pop('vboxmanage')
         VM.__init__(self, *args, **kwargs)
-
-        self.conf_path = os.path.join(CUCKOO_ROOT, 'conf', 'virtualbox.conf')
-
-        try:
-            self.vboxmanage = Config(self.conf_path).virtualbox.path
-        except:
-            log.error('Unable to locate VBoxManage path, please '
-                      'configure conf/virtualbox.conf properly.')
-            exit(1)
-
-        if not os.path.isfile(self.vboxmanage):
-            log.error('The configured VBoxManage path does not exist, '
-                      'please configure conf/virtualbox.conf properly.')
-            exit(1)
 
     def _call(self, *args, **kwargs):
         cmd = [self.vboxmanage] + list(args)
@@ -366,6 +353,33 @@ class Configuration(object):
         return self.conf[key]
 
 
+def vboxmanage_path(s):
+    if os.path.isfile(s.vboxmanage):
+        return s.vboxmanage
+
+    if not s.cuckoo:
+        print '[-] Please provide your Cuckoo root directory.'
+        print '[-] Or provide the path to the VBoxManage executable.'
+        exit(1)
+
+    conf_path = os.path.join(CUCKOO_ROOT, 'conf', 'virtualbox.conf')
+
+    try:
+        from lib.cuckoo.common.config import Config
+        vboxmanage = Config(conf_path).virtualbox.path
+    except:
+        log.error('Unable to locate VBoxManage path, please '
+                  'configure conf/virtualbox.conf properly.')
+        exit(1)
+
+    if not os.path.isfile(vboxmanage):
+        log.error('The configured VBoxManage path in Cuckoo does not '
+                  'exist, please configure $CUCKOO/conf/virtualbox.conf '
+                  'properly.')
+        exit(1)
+
+    return vboxmanage
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
@@ -386,6 +400,7 @@ if __name__ == '__main__':
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
     parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
+    parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
@@ -397,6 +412,7 @@ if __name__ == '__main__':
         guest_ip='192.168.56.101',
         guest_ip_gateway='192.168.0.1',
         tags='',
+        vboxmanage='/usr/bin/VBoxManage',
     )
 
     args = parser.parse_args()
@@ -408,20 +424,18 @@ if __name__ == '__main__':
     s.from_args(args)
     s.from_defaults(defaults)
 
-    if not s.cuckoo:
-        print '[-] Please provide your Cuckoo root directory.'
-        exit(1)
+    # If the Cuckoo directory has been specified, then load CUCKOO_ROOT.
+    if s.cuckoo:
+        sys.path.append(s.cuckoo)
+        from lib.cuckoo.common.constants import CUCKOO_ROOT
 
     if not s.basedir:
         print '[-] Please provide the base directory for the VM.'
         exit(1)
 
-    sys.path.append(s.cuckoo)
-    from lib.cuckoo.common.config import Config
-    from lib.cuckoo.common.constants import CUCKOO_ROOT
-
     if s.vm == 'virtualbox':
-        m = VirtualBox(s.vmname, s.basedir)
+        m = VirtualBox(s.vmname, s.basedir,
+                       vboxmanage=vboxmanage_path(s))
     else:
         print '[-] Only VirtualBox is supported as of now'
         exit(1)
@@ -551,6 +565,11 @@ if __name__ == '__main__':
     print m.stopvm()
 
     if s.register_cuckoo:
+        if not s.cuckoo:
+            print '[-] To register the Virtual Machine with Cuckoo'
+            print '[-] please provide the Cuckoo directory.'
+            exit(1)
+
         print '[x] Registering the VM with Cuckoo.'
         try:
             machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
