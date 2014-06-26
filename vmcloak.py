@@ -91,7 +91,11 @@ class VM(object):
         raise
 
     def attach_iso(self, iso):
-        """Attach a ISO file as DVDRom."""
+        """Attach a ISO file as DVDRom drive."""
+        raise
+
+    def detach_iso(self):
+        """Detach the ISO file in the DVDRom drive."""
         raise
 
     def set_field(self, key, value):
@@ -261,6 +265,11 @@ class VirtualBox(VM):
         ctlname = 'IDE Controller'
         self._call('storageattach', self.name, storagectl=ctlname,
                    type='dvddrive', port=1, device=0, medium=iso)
+
+    def detach_iso(self):
+        ctlname = 'IDE Controller'
+        self._call('storageattach', self.name, storagectl=ctlname,
+                   type='dvddrive', port=1, device=0, medium='emptydrive')
 
     def set_field(self, key, value):
         return self._call('setextradata', self.name, key, value)
@@ -648,6 +657,9 @@ if __name__ == '__main__':
         print '[+] Resolution was set successfully'
     else:
         print '[-] Error setting the resolution'
+
+    print '[x] Detaching the Windows Installation disk.'
+    m.detach_iso()
 
     # Give the system a little bit of time to fully initialize.
     time.sleep(10)
