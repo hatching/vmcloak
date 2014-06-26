@@ -21,7 +21,7 @@ elif [ "$#" -eq 4 ]; then
     OUTIMAGE="$3"
     TEMPDIR="$4"
 else
-    print "Invalid amount of arguments.."
+    echo "Invalid amount of arguments.."
     exit 1
 fi
 
@@ -63,10 +63,10 @@ cp data/boot.img "$TEMPDIR"
 ./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge "$WINNTSIF" --overwrite
 ./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge data/winnt-opt.sif
 
-echo "Installing bootstrap files.."
+echo "Installing bootstrap files and copying dependencies.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"
-cp bootstrap/* "$OSDIR"
+cp -r bootstrap/* "$OSDIR"
 
 # Make an ISO file with the updated file contents.
 echo "Creating ISO image.."

@@ -12,11 +12,16 @@ rem TODO Allow the static IP address to be configurable.
 netsh interface ip set address name="Local Area Connection" ^
   static %HOSTONLYIP% 255.255.255.0 %HOSTONLYGATEWAY% 1
 
+echo Installing 3rd party software.
+call C:\dependencies.bat
+
 echo Initiate VM hardening.
 C:\Python27\Python.exe C:\bootstrap.py
 
 echo Cleaning up.
 del C:\click.exe C:\Python-2.7.6.msi
 del C:\bootstrap.py C:\settings.bat C:\settings.py
+del C:\dependencies.bat
+echo Y|rmdir /S C:\dependencies
 
 start C:\Python27\Pythonw.exe C:\agent.py

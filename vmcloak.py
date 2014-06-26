@@ -9,6 +9,7 @@ import logging
 import os.path
 import random
 import socket
+import shutil
 import string
 import subprocess
 import sys
@@ -380,6 +381,48 @@ def vboxmanage_path(s):
 
     return vboxmanage
 
+
+def enum_dependencies(utils_repo, dependencies, resolved=None):
+    resolved = [] if resolved is None else resolved
+
+    conf = ConfigParser()
+    conf.read(utils_repo)
+
+    for dependency in dependencies.split(','):
+        d = dependency.strip()
+        if d not in conf.sections():
+            print '[-] Dependency %s not found!' % d
+            exit(1)
+
+        kw = dict(conf.items(d))
+        fname = kw.pop('filename')
+        arguments = kw.pop('arguments', '')
+        depends = kw.pop('dependencies', None)
+        marker = kw.pop('marker', None)
+        params = []
+
+        idx = 0
+        while 'param%d' % idx in kw:
+            params.append(kw.pop('param%d' % idx))
+            idx += 1
+
+        # Not used by us.
+        kw.pop('description', None)
+
+        if kw:
+            print '[-] Found an unused flag in the configuration,'
+            print '[-] please fix before continuing..'
+            print '[-] Remaining flags:', kw
+            exit(1)
+
+        if depends:
+            enum_dependencies(utils_repo, depends, resolved)
+
+        if d not in resolved:
+            resolved.append((fname, marker, arguments, params))
+
+    return resolved
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
@@ -401,6 +444,8 @@ if __name__ == '__main__':
     parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
     parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
+    parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
+    parser.add_argument('--vmcloak-utils', type=str, help='VMCloak Utilities repository.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
@@ -413,6 +458,7 @@ if __name__ == '__main__':
         guest_ip_gateway='192.168.0.1',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
+        vmcloak_utils='https://github.com/jbremer/vmcloak-utils',
     )
 
     args = parser.parse_args()
@@ -497,7 +543,43 @@ if __name__ == '__main__':
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
-    # The directory doesn't exist yet, probably.
+    # Clone the utils repository if that has not already happened.
+    # TODO Use submodules.
+    if s.dependencies and not os.path.isdir('vmcloak-utils'):
+        print '[x] Fetching vmcloak-utils repository, this may take a while.'
+        subprocess.check_call(['/usr/bin/git', 'clone',
+                               s.vmcloak_utils, 'vmcloak-utils'])
+
+    # TODO Make sure the utils repository is up-to-date.
+
+    if not os.path.exists(os.path.join('bootstrap', 'dependencies')):
+        os.mkdir(os.path.join('bootstrap', 'dependencies'))
+
+    with open(os.path.join('bootstrap', 'dependencies.bat'), 'wb') as f:
+        utils_repo = os.path.join('vmcloak-utils', 'repo.ini')
+        for d in enum_dependencies(utils_repo, s.dependencies):
+            fname, marker, args, params = d
+
+            print>>f, 'echo Installing..', fname
+            if marker:
+                print>>f, 'if exist "%s" (' % marker
+                print>>f, 'echo Dependency already installed!'
+                print>>f, ') else ('
+
+            print>>f, 'C:\\dependencies\\%s' % fname, args
+            for param in params:
+                if param.startswith('click'):
+                    print>>f, 'C:\\%s' % param
+                else:
+                    print>>f, param
+
+            if marker:
+                print>>f, ')'
+
+            shutil.copy(os.path.join('vmcloak-utils', fname),
+                        os.path.join('bootstrap', 'dependencies', fname))
+
+    # The image directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
         os.mkdir(os.path.join(s.basedir, s.vmname))
 
