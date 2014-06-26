@@ -385,6 +385,9 @@ def vboxmanage_path(s):
 def enum_dependencies(utils_repo, dependencies, resolved=None):
     resolved = [] if resolved is None else resolved
 
+    if not dependencies:
+        return resolved
+
     conf = ConfigParser()
     conf.read(utils_repo)
 
