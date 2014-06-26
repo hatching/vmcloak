@@ -68,9 +68,18 @@ OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"
 cp -r bootstrap/* "$OSDIR"
 
+if [ -f /usr/bin/mkisofs ]; then
+    ISOTOOL=/usr/bin/mkisofs
+elif [ -f /usr/bin/genisoimage ]; then
+    ISOTOOL=/usr/bin/genisoimage
+else
+    echo "Either mkisofs or genisoimage is required!"
+    exit 1
+fi
+
 # Make an ISO file with the updated file contents.
 echo "Creating ISO image.."
-mkisofs -quiet -b boot.img -no-emul-boot -boot-load-seg 1984 \
+$ISOTOOL -quiet -b boot.img -no-emul-boot -boot-load-seg 1984 \
     -boot-load-size 4 -iso-level 2 -J -l -D -N -joliet-long \
     -relaxed-filenames -o "$OUTIMAGE" "$TEMPDIR"
 
