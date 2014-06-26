@@ -110,7 +110,7 @@ class VM(object):
         """Enable or disable the usage of Hardware Virtualization."""
         raise
 
-    def start_vm(self):
+    def start_vm(self, visible=False):
         """Start the associated Virtual Machine."""
         raise
 
@@ -291,8 +291,9 @@ class VirtualBox(VM):
         """Enable or disable the usage of Hardware Virtualization."""
         self._call('modifyvm', self.name, hwvirtex='on' if enable else 'off')
 
-    def start_vm(self):
-        return self._call('startvm', self.name)
+    def start_vm(self, visible=False):
+        return self._call('startvm', self.name,
+                          type='gui' if visible else 'headless')
 
     def snapshot(self, label, description=''):
         return self._call('snapshot', self.name, 'take', label,
@@ -449,6 +450,7 @@ if __name__ == '__main__':
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vmcloak-utils', type=str, help='VMCloak Utilities repository.')
+    parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
@@ -462,6 +464,7 @@ if __name__ == '__main__':
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
         vmcloak_utils='https://github.com/jbremer/vmcloak-utils',
+        vm_visible=False,
     )
 
     args = parser.parse_args()
@@ -631,7 +634,7 @@ if __name__ == '__main__':
         m.hwvirt(s.hwvirt)
 
     print '[!] Starting the Virtual Machine to install Windows'
-    print m.start_vm()
+    print m.start_vm(visible=s.vm_visible)
 
     print '[x] Waiting for the Virtual Machine to connect back'
     print '[!] This may take up to 30 minutes'
