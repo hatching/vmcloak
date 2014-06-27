@@ -2,7 +2,8 @@ from ctypes import c_char, c_ushort, c_uint, c_char_p
 from ctypes import windll, Structure, POINTER, sizeof
 import socket
 from _winreg import CreateKeyEx, SetValueEx
-from _winreg import HKEY_CURRENT_USER, KEY_SET_VALUE, REG_DWORD
+from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
+from _winreg import KEY_SET_VALUE, REG_DWORD
 
 from settings import HOST_IP, HOST_PORT, RESOLUTION
 
@@ -35,8 +36,13 @@ CDS_UPDATEREGISTRY = 1
 DISP_CHANGE_SUCCESSFUL = 0
 
 REGISTRY = [
+    # Disable "Windows XP Tour" prompt.
     # http://www.techrepublic.com/article/tech-tip-disable-the-windows-xp-tour-prompt/
     (HKEY_CURRENT_USER, 'Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Tour', 'RunCount', REG_DWORD, 0),
+
+    # Disable the Windows Indexation service.
+    # http://www.wikihow.com/Turn-Off-Windows-XP%E2%80%99s-Indexing-Service
+    (HKEY_LOCAL_MACHINE, 'System\\CurrentControlSet\\Services\\CiSvc', 'Start', REG_DWORD, 4),
 ]
 
 
