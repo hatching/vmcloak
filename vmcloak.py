@@ -322,6 +322,7 @@ def configure_winnt_sif(path, args):
         'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
         'ORGANIZATION': '',
         'WORKGROUP': random_string(4, 8),
+        'KBLAYOUT': args.keyboard_layout,
     }
 
     buf = open(path, 'rb').read()
@@ -436,6 +437,13 @@ def enum_dependencies(utils_repo, dependencies, resolved=None):
 
     return resolved
 
+
+def check_keyboard_layout(kblayout):
+    for layout in open(os.path.join('data', 'keyboard_layout_values.txt')):
+        if layout.strip() == kblayout:
+            return True
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
@@ -460,6 +468,7 @@ if __name__ == '__main__':
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vmcloak-utils', type=str, help='VMCloak Utilities repository.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
+    parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
 
     defaults = dict(
@@ -474,6 +483,7 @@ if __name__ == '__main__':
         vboxmanage='/usr/bin/VBoxManage',
         vmcloak_utils='https://github.com/jbremer/vmcloak-utils',
         vm_visible=False,
+        keyboard_layout='US',
     )
 
     args = parser.parse_args()
@@ -518,6 +528,12 @@ if __name__ == '__main__':
 
     if not s.iso:
         print '[-] Please specify a Windows Installer ISO image'
+        exit(1)
+
+    print '[x] Checking whether the keyboard layout is valid.'
+    if not check_keyboard_layout(s.keyboard_layout):
+        print '[-] Invalid keyboard layout:', s.keyboard_layout
+        print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
     print '[x] Static Host IP', s.host_ip

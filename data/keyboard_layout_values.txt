@@ -1,0 +1,62 @@
+Albanian
+Belarusian
+Belgian Dutch
+Belgian French
+Brazilian (ABNT)
+Bulgarian
+Bulgarian Latin
+Canadian English (Multilingual)
+Canadian French
+Canadian French (Multilingual)
+Croatian
+Czech
+Czech (QWERTY)
+Danish
+Dutch
+Estonian
+Finnish
+French
+German
+German (IBM)
+Greek
+Greek Latin
+Greek (220)
+Greek (220) Latin
+Greek (319)
+Greek (319) Latin
+Hungarian
+Hungarian 101-key
+Icelandic
+Irish
+Italian
+Italian (142)
+Latin American
+Latvian
+Latvian (QWERTY)
+Lithuanian
+Norwegian
+Polish (Programmers)
+Polish (214)
+Portuguese
+Romanian
+Russian
+Russian (Typewriter)
+Serbian Cyrillic
+Serbian Latin
+Slovak
+Slovak (QWERTY)
+Slovenian
+Spanish
+Spanish variation
+Swedish
+Swiss French
+Swiss German
+Turkish F
+Turkish Q
+Ukrainian
+United Kingdom
+US
+US-Dvorak
+US-Dvorak for left hand
+US-Dvorak for right hand
+US-International
