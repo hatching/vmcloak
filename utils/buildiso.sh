@@ -32,8 +32,8 @@ cleanup() {
     fi
     if [ -d "$MOUNT" ]; then
         echo "Unmounting mount.."
-        sudo /bin/umount "$MOUNT"
-        sudo /bin/rm -r "$MOUNT"
+        $SUDO /bin/umount "$MOUNT"
+        $SUDO /bin/rm -r "$MOUNT"
     fi
     if [ $1 -eq 1 ]; then
         exit 1
@@ -43,9 +43,14 @@ cleanup() {
 # When a command fails we do a bit of cleanup.
 trap "cleanup 1" ERR
 
+SUDO=/usr/bin/sudo
+if [ "$(whoami)" = "root" ]; then
+    SUDO=
+fi
+
 echo "Mounting the ISO image.."
-sudo /bin/mkdir -p "$MOUNT"
-sudo /bin/mount -o loop,ro "$IMAGE" "$MOUNT"
+$SUDO /bin/mkdir -p "$MOUNT"
+$SUDO /bin/mount -o loop,ro "$IMAGE" "$MOUNT"
 
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
