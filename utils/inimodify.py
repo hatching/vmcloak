@@ -30,7 +30,7 @@ def read_ini(path):
             ret[cur].append(line)
         else:
             a, b = line.split('=', 1)
-            ret[cur].append('%s = %s' % (a.strip(), b.strip()))
+            ret[cur].append('%s=%s' % (a.strip(), b.strip()))
     return mode, ret
 
 
