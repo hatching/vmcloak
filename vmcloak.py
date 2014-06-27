@@ -536,6 +536,9 @@ if __name__ == '__main__':
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
+    print '[x] Ensuring vboxnet0 is running.'
+    subprocess.check_call(['./utils/vboxnet.sh', vboxmanage_path(s)])
+
     print '[x] Static Host IP', s.host_ip
     print '[x] Static Guest IP', s.guest_ip
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
