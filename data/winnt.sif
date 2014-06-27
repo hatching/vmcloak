@@ -49,3 +49,8 @@ JoinWorkgroup="@WORKGROUP@"
 
 [GuiRunOnce]
 C:\bootstrap.bat
+
+[IEPopupBlocker]
+BlockPopups="No"
+FilterLevel="Low"
+ShowInformationBar="No"
