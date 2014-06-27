@@ -79,7 +79,7 @@ elif [ -f /usr/bin/genisoimage ]; then
     ISOTOOL=/usr/bin/genisoimage
 else
     echo "Either mkisofs or genisoimage is required!"
-    exit 1
+    cleanup 1
 fi
 
 # Make an ISO file with the updated file contents.
