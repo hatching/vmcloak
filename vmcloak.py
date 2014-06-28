@@ -408,7 +408,12 @@ def add_dependency(f, deps_repo, dependency):
     arguments = kw.pop('arguments', '')
     depends = kw.pop('dependencies', None)
     marker = kw.pop('marker', None)
+    flags = []
     cmds = []
+
+    for flag in kw.pop('flags', '').split(','):
+        if flag.strip():
+            flags.append(flag.strip())
 
     idx = 0
     while 'cmd%d' % idx in kw:
@@ -419,14 +424,14 @@ def add_dependency(f, deps_repo, dependency):
     kw.pop('description', None)
 
     if kw:
-        print '[-] Found an unused flag in the configuration,'
+        print '[-] Found an unused value in the configuration,'
         print '[-] please fix before continuing..'
-        print '[-] Remaining flags:', kw
+        print '[-] Remaining values:', kw
         exit(1)
 
     if depends:
         for dep in depends.split(','):
-            add_dependency(deps_repo, dep)
+            add_dependency(f, deps_repo, dep)
 
     if d not in DEPS:
         DEPS.append(d)
@@ -437,7 +442,11 @@ def add_dependency(f, deps_repo, dependency):
             print>>f, 'echo Dependency already installed!'
             print>>f, ') else ('
 
-        print>>f, 'C:\\dependencies\\%s' % fname, arguments
+        if 'bg' in flags or 'background' in flags:
+            print>>f, 'start C:\\dependencies\\%s' % fname, arguments
+        else:
+            print>>f, 'C:\\dependencies\\%s' % fname, arguments
+
         for cmd in cmds:
             if cmd.startswith('click'):
                 print>>f, 'C:\\%s' % cmd
@@ -602,6 +611,8 @@ if __name__ == '__main__':
         os.mkdir(os.path.join('bootstrap', 'dependencies'))
 
     with open(os.path.join('bootstrap', 'dependencies.bat'), 'wb') as f:
+        add_dependency(f, deps_repo, 'python27')
+
         for d in s.dependencies.split(','):
             if d.strip():
                 add_dependency(f, deps_repo, d.strip())
