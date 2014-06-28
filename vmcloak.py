@@ -393,14 +393,14 @@ def vboxmanage_path(s):
     return vboxmanage
 
 
-def enum_dependencies(utils_repo, dependencies, resolved=None):
+def enum_dependencies(deps_repo, dependencies, resolved=None):
     resolved = [] if resolved is None else resolved
 
     if not dependencies:
         return resolved
 
     conf = ConfigParser()
-    conf.read(utils_repo)
+    conf.read(deps_repo)
 
     for dependency in dependencies.split(','):
         d = dependency.strip()
@@ -413,11 +413,11 @@ def enum_dependencies(utils_repo, dependencies, resolved=None):
         arguments = kw.pop('arguments', '')
         depends = kw.pop('dependencies', None)
         marker = kw.pop('marker', None)
-        params = []
+        cmds = []
 
         idx = 0
-        while 'param%d' % idx in kw:
-            params.append(kw.pop('param%d' % idx))
+        while 'cmd%d' % idx in kw:
+            cmds.append(kw.pop('cmd%d' % idx))
             idx += 1
 
         # Not used by us.
@@ -430,10 +430,10 @@ def enum_dependencies(utils_repo, dependencies, resolved=None):
             exit(1)
 
         if depends:
-            enum_dependencies(utils_repo, depends, resolved)
+            enum_dependencies(deps_repo, depends, resolved)
 
         if d not in resolved:
-            resolved.append((fname, marker, arguments, params))
+            resolved.append((fname, marker, arguments, cmds))
 
     return resolved
 
@@ -466,7 +466,7 @@ if __name__ == '__main__':
     parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
-    parser.add_argument('--vmcloak-utils', type=str, help='VMCloak Utilities repository.')
+    parser.add_argument('--vmcloak-deps', type=str, help='VMCloak Dependencies repository.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
@@ -481,7 +481,7 @@ if __name__ == '__main__':
         guest_ip_gateway='192.168.0.1',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
-        vmcloak_utils='https://github.com/jbremer/vmcloak-utils',
+        vmcloak_deps='https://github.com/jbremer/vmcloak-deps',
         vm_visible=False,
         keyboard_layout='US',
     )
@@ -577,22 +577,22 @@ if __name__ == '__main__':
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
-    # Clone the utils repository if that has not already happened.
+    # Clone the dependencies repository if that has not already happened.
     # TODO Use submodules.
-    if s.dependencies and not os.path.isdir('vmcloak-utils'):
-        print '[x] Fetching vmcloak-utils repository, this may take a while.'
+    if s.dependencies and not os.path.isdir('vmcloak-deps'):
+        print '[x] Fetching vmcloak-deps repository, this may take a while.'
         subprocess.check_call(['/usr/bin/git', 'clone',
-                               s.vmcloak_utils, 'vmcloak-utils'])
+                               s.vmcloak_deps, 'vmcloak-deps'])
 
-    # TODO Make sure the utils repository is up-to-date.
+    # TODO Make sure the deps repository is up-to-date.
 
     if not os.path.exists(os.path.join('bootstrap', 'dependencies')):
         os.mkdir(os.path.join('bootstrap', 'dependencies'))
 
     with open(os.path.join('bootstrap', 'dependencies.bat'), 'wb') as f:
-        utils_repo = os.path.join('vmcloak-utils', 'repo.ini')
-        for d in enum_dependencies(utils_repo, s.dependencies):
-            fname, marker, args, params = d
+        deps_repo = os.path.join('vmcloak-deps', 'repo.ini')
+        for d in enum_dependencies(deps_repo, s.dependencies):
+            fname, marker, args, cmds = d
 
             print>>f, 'echo Installing..', fname
             if marker:
@@ -601,16 +601,16 @@ if __name__ == '__main__':
                 print>>f, ') else ('
 
             print>>f, 'C:\\dependencies\\%s' % fname, args
-            for param in params:
-                if param.startswith('click'):
-                    print>>f, 'C:\\%s' % param
+            for cmd in cmds:
+                if cmd.startswith('click'):
+                    print>>f, 'C:\\%s' % cmd
                 else:
-                    print>>f, param
+                    print>>f, cmd
 
             if marker:
                 print>>f, ')'
 
-            shutil.copy(os.path.join('vmcloak-utils', fname),
+            shutil.copy(os.path.join('vmcloak-deps', fname),
                         os.path.join('bootstrap', 'dependencies', fname))
 
     # The image directory doesn't exist yet, probably.
