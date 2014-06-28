@@ -107,8 +107,12 @@ class VM(object):
         """Modify the MAC address of a Virtual Machine."""
         raise
 
-    def hostonly(self, index=0):
-        """Configure a Hostonly adapter for the Virtual Machine."""
+    def hostonly(self, index=1):
+        """Configure a hostonly adapter for the Virtual Machine."""
+        raise
+
+    def bridged(self, interface, index=1):
+        """Configure a bridged adapter for the Virtual Machine."""
         raise
 
     def hwvirt(self, enable=True):
@@ -275,27 +279,41 @@ class VirtualBox(VM):
     def set_field(self, key, value):
         return self._call('setextradata', self.name, key, value)
 
-    def modify_mac(self, macaddr=None):
+    def modify_mac(self, macaddr=None, index=1):
         if macaddr is None:
             macaddr = random_mac()
 
         # VBoxManage prefers MAC addresses without colons.
         vbox_mac = macaddr.replace(':', '')
 
-        self._call('modifyvm', self.name, macaddress1=vbox_mac)
+        mac = {'macaddress%d' % index: vbox_mac}
+        self._call('modifyvm', self.name, **mac)
         return macaddr
 
-    def hostonly(self, index=0):
+    def hostonly(self, macaddr=None, index=1):
         if os.name == 'posix':
-            adapter = 'vboxnet%d' % index
+            adapter = 'vboxnet0'
         else:
             adapter = 'VirtualBox Host-Only Ethernet Adapter'
 
-        self._call('modifyvm', self.name,
-                   nic1='hostonly',
-                   nictype1='Am79C973',
-                   nicpromisc1='allow-all',
-                   hostonlyadapter1=adapter)
+        nic = {
+            'nic%d' % index: 'hostonly',
+            'nictype%d' % index: 'Am79C973',
+            'nicpromisc%d' % index: 'allow-all',
+            'hostonlyadapter%d' % index: adapter,
+        }
+        self._call('modifyvm', self.name, **nic)
+        return self.modify_mac(macaddr, index)
+
+    def bridged(self, interface, macaddr=None, index=1):
+        nic = {
+            'nic%d' % index: 'bridged',
+            'nictype%d' % index: 'Am79C973',
+            'nicpromisc%d' % index: 'allow-all',
+            'bridgeadapter%d' % index: interface,
+        }
+        self._call('modifyvm', self.name, **nic)
+        return self.modify_mac(macaddr, index)
 
     def hwvirt(self, enable=True):
         """Enable or disable the usage of Hardware Virtualization."""
@@ -479,8 +497,13 @@ if __name__ == '__main__':
     parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso', type=str, help='ISO Windows installer.')
     parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
-    parser.add_argument('--guest-ip', type=str, help='Static IP address to use on the Guest.')
-    parser.add_argument('--guest-ip-gateway', type=str, help='Static IP address gateway to use on the Guest.')
+    parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
+    parser.add_argument('--bridged', type=str, help='Network interface for the bridged network.')
+    parser.add_argument('--bridged-ip', type=str, help='Static IP address to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -498,8 +521,8 @@ if __name__ == '__main__':
         resolution='1024x768',
         hdsize=256*1024,
         host_ip='192.168.56.1',
-        guest_ip='192.168.56.101',
-        guest_ip_gateway='192.168.0.1',
+        hostonly_ip='192.168.56.101',
+        hostonly_gateway='192.168.0.1',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
@@ -589,8 +612,11 @@ if __name__ == '__main__':
     open(winntsif, 'wb').write(buf)
 
     settings_bat = dict(
-        HOSTONLYIP=s.guest_ip,
-        HOSTONLYGATEWAY=s.guest_ip_gateway,
+        HOSTONLYIP=s.hostonly_ip,
+        HOSTONLYGATEWAY=s.hostonly_gateway,
+        BRIDGED='yes' if s.bridged else 'no',
+        BRIDGEDIP=s.bridged_ip,
+        BRIDGEDGATEWAY=s.bridged_gateway,
     )
 
     settings_py = dict(
@@ -656,11 +682,11 @@ if __name__ == '__main__':
     print '[x] Randomizing Hardware'
     m.init_vm()
 
-    print '[x] Randomizing the MAC address:',
-    print m.modify_mac()
-
     print '[x] Initially configuring Hostonly network'
-    m.hostonly()
+    m.hostonly(macaddr=s.hostonly_macaddr, index=1)
+
+    if s.bridged:
+        m.bridged(s.bridged, macaddr=s.bridged_macaddr, index=2)
 
     if s.hwvirt is not None:
         if s.hwvirt:
@@ -687,8 +713,6 @@ if __name__ == '__main__':
 
     print '[x] Detaching the Windows Installation disk.'
     m.detach_iso()
-
-    # TODO Setup the network as requested.
 
     # Give the system a little bit of time to fully initialize.
     time.sleep(10)
