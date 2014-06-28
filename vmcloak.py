@@ -287,7 +287,7 @@ class VirtualBox(VM):
 
     def hostonly(self, index=0):
         if os.name == 'posix':
-            adapter = 'vboxnet0'
+            adapter = 'vboxnet%d' % index
         else:
             adapter = 'VirtualBox Host-Only Ethernet Adapter'
 
@@ -564,8 +564,14 @@ if __name__ == '__main__':
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
-    print '[x] Ensuring vboxnet0 is running.'
-    subprocess.check_call(['./utils/vboxnet.sh', vboxmanage_path(s)])
+    try:
+        # TODO This should be part of m.hostonly().
+        print '[x] Ensuring vboxnet0 is running.'
+        subprocess.check_call(['./utils/vboxnet.sh', vboxmanage_path(s)])
+    except OSError as e:
+        print '[-] Is ./utils/vboxnet.sh executable?'
+        print e
+        exit(1)
 
     print '[x] Static Host IP', s.host_ip
     print '[x] Static Guest IP', s.guest_ip
@@ -684,6 +690,8 @@ if __name__ == '__main__':
     print '[x] Detaching the Windows Installation disk.'
     m.detach_iso()
 
+    # TODO Setup the network as requested.
+
     # Give the system a little bit of time to fully initialize.
     time.sleep(10)
 
@@ -704,6 +712,10 @@ if __name__ == '__main__':
                                    '--snapshot', 'vmcloak',
                                    s.vmname],
                                   cwd=CUCKOO_ROOT)
+        except OSError as e:
+            print '[-] Is $CUCKOO/utils/machine.py executable?'
+            print e
+            exit(1)
         except subprocess.CalledProcessError as e:
             print '[-] Error registering the VM.'
             print e
