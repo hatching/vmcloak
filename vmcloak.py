@@ -20,6 +20,7 @@ import time
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
+DEPS = []
 
 CONFIG = dict(
     bios=[
@@ -393,49 +394,61 @@ def vboxmanage_path(s):
     return vboxmanage
 
 
-def enum_dependencies(deps_repo, dependencies, resolved=None):
-    resolved = [] if resolved is None else resolved
-
-    if not dependencies:
-        return resolved
-
+def add_dependency(f, deps_repo, dependency):
     conf = ConfigParser()
     conf.read(deps_repo)
 
-    for dependency in dependencies.split(','):
-        d = dependency.strip()
-        if d not in conf.sections():
-            print '[-] Dependency %s not found!' % d
-            exit(1)
+    d = dependency.strip()
+    if d not in conf.sections():
+        print '[-] Dependency %s not found!' % d
+        exit(1)
 
-        kw = dict(conf.items(d))
-        fname = kw.pop('filename')
-        arguments = kw.pop('arguments', '')
-        depends = kw.pop('dependencies', None)
-        marker = kw.pop('marker', None)
-        cmds = []
+    kw = dict(conf.items(d))
+    fname = kw.pop('filename')
+    arguments = kw.pop('arguments', '')
+    depends = kw.pop('dependencies', None)
+    marker = kw.pop('marker', None)
+    cmds = []
 
-        idx = 0
-        while 'cmd%d' % idx in kw:
-            cmds.append(kw.pop('cmd%d' % idx))
-            idx += 1
+    idx = 0
+    while 'cmd%d' % idx in kw:
+        cmds.append(kw.pop('cmd%d' % idx))
+        idx += 1
 
-        # Not used by us.
-        kw.pop('description', None)
+    # Not used by us.
+    kw.pop('description', None)
 
-        if kw:
-            print '[-] Found an unused flag in the configuration,'
-            print '[-] please fix before continuing..'
-            print '[-] Remaining flags:', kw
-            exit(1)
+    if kw:
+        print '[-] Found an unused flag in the configuration,'
+        print '[-] please fix before continuing..'
+        print '[-] Remaining flags:', kw
+        exit(1)
 
-        if depends:
-            enum_dependencies(deps_repo, depends, resolved)
+    if depends:
+        for dep in depends.split(','):
+            add_dependency(deps_repo, dep)
 
-        if d not in resolved:
-            resolved.append((fname, marker, arguments, cmds))
+    if d not in DEPS:
+        DEPS.append(d)
 
-    return resolved
+        print>>f, 'echo Installing..', fname
+        if marker:
+            print>>f, 'if exist "%s" (' % marker
+            print>>f, 'echo Dependency already installed!'
+            print>>f, ') else ('
+
+        print>>f, 'C:\\dependencies\\%s' % fname, arguments
+        for cmd in cmds:
+            if cmd.startswith('click'):
+                print>>f, 'C:\\%s' % cmd
+            else:
+                print>>f, cmd
+
+        if marker:
+            print>>f, ')'
+
+        shutil.copy(os.path.join('deps', 'files', fname),
+                    os.path.join('bootstrap', 'dependencies', fname))
 
 
 def check_keyboard_layout(kblayout):
@@ -530,6 +543,12 @@ if __name__ == '__main__':
         print '[-] Please specify a Windows Installer ISO image'
         exit(1)
 
+    # Make sure the dependencies repository is available.
+    deps_repo = os.path.join('deps', 'repo.ini')
+    if not os.path.exists(deps_repo):
+        print '[x] Please run "git submodule update --init" first!'
+        exit(1)
+
     print '[x] Checking whether the keyboard layout is valid.'
     if not check_keyboard_layout(s.keyboard_layout):
         print '[-] Invalid keyboard layout:', s.keyboard_layout
@@ -577,41 +596,15 @@ if __name__ == '__main__':
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
-    # Clone the dependencies repository if that has not already happened.
-    # TODO Use submodules.
-    if s.dependencies and not os.path.isdir('vmcloak-deps'):
-        print '[x] Fetching vmcloak-deps repository, this may take a while.'
-        subprocess.check_call(['/usr/bin/git', 'clone',
-                               s.vmcloak_deps, 'vmcloak-deps'])
-
     # TODO Make sure the deps repository is up-to-date.
 
     if not os.path.exists(os.path.join('bootstrap', 'dependencies')):
         os.mkdir(os.path.join('bootstrap', 'dependencies'))
 
     with open(os.path.join('bootstrap', 'dependencies.bat'), 'wb') as f:
-        deps_repo = os.path.join('vmcloak-deps', 'repo.ini')
-        for d in enum_dependencies(deps_repo, s.dependencies):
-            fname, marker, args, cmds = d
-
-            print>>f, 'echo Installing..', fname
-            if marker:
-                print>>f, 'if exist "%s" (' % marker
-                print>>f, 'echo Dependency already installed!'
-                print>>f, ') else ('
-
-            print>>f, 'C:\\dependencies\\%s' % fname, args
-            for cmd in cmds:
-                if cmd.startswith('click'):
-                    print>>f, 'C:\\%s' % cmd
-                else:
-                    print>>f, cmd
-
-            if marker:
-                print>>f, ')'
-
-            shutil.copy(os.path.join('vmcloak-deps', fname),
-                        os.path.join('bootstrap', 'dependencies', fname))
+        for d in s.dependencies.split(','):
+            if d.strip():
+                add_dependency(f, deps_repo, d.strip())
 
     # The image directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):
