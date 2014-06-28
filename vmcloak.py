@@ -442,7 +442,7 @@ def add_dependency(f, deps_repo, dependency):
             print>>f, 'echo Dependency already installed!'
             print>>f, ') else ('
 
-        if 'bg' in flags or 'background' in flags:
+        if 'background' in flags:
             print>>f, 'start C:\\dependencies\\%s' % fname, arguments
         else:
             print>>f, 'C:\\dependencies\\%s' % fname, arguments
@@ -488,7 +488,6 @@ if __name__ == '__main__':
     parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
-    parser.add_argument('--vmcloak-deps', type=str, help='VMCloak Dependencies repository.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
@@ -503,7 +502,6 @@ if __name__ == '__main__':
         guest_ip_gateway='192.168.0.1',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
-        vmcloak_deps='https://github.com/jbremer/vmcloak-deps',
         vm_visible=False,
         keyboard_layout='US',
     )
