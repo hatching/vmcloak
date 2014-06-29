@@ -595,7 +595,8 @@ if __name__ == '__main__':
         exit(1)
 
     print '[x] Static Host IP', s.host_ip
-    print '[x] Static Guest IP', s.guest_ip
+    print '[x] Static Guest hostonly IP', s.hostonly_ip
+    print '[x] Static Guest bridged IP', s.bridged_ip
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((s.host_ip, 0))
     sock.listen(1)
@@ -728,7 +729,7 @@ if __name__ == '__main__':
         try:
             machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
             subprocess.check_call([machine_py, '--add',
-                                   '--ip', s.guest_ip,
+                                   '--ip', s.hostonly_ip,
                                    '--platform', 'windows',
                                    '--tags', s.tags,
                                    '--snapshot', 'vmcloak',
