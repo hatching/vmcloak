@@ -513,7 +513,7 @@ if __name__ == '__main__':
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
-    parser.add_argument('-s', '--settings', type=str, help='Configuration file with various settings.')
+    parser.add_argument('-s', '--settings', type=str, action='append', help='Configuration file with various settings.')
 
     defaults = dict(
         vm='virtualbox',
@@ -532,8 +532,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     s = Configuration()
 
-    if args.settings:
-        s.from_file(args.settings)
+    for settings in args.settings:
+        s.from_file(settings)
 
     s.from_args(args)
     s.from_defaults(defaults)
