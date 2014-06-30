@@ -13,7 +13,7 @@ import time
 
 from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from lib.conf import check_keyboard_layout
-from lib.deps import add_dependency
+from lib.deps import Dependency
 from lib.vm import VirtualBox
 
 
@@ -175,12 +175,16 @@ def main():
     if not os.path.exists(os.path.join('bootstrap', 'dependencies')):
         os.mkdir(os.path.join('bootstrap', 'dependencies'))
 
-    with open(os.path.join('bootstrap', 'dependencies.bat'), 'wb') as f:
-        add_dependency(f, deps_repo, 'python27')
+    deps = Dependency(deps_repo,
+                      os.path.join('bootstrap', 'dependencies.bat'))
 
-        for d in s.dependencies.split(','):
-            if d.strip():
-                add_dependency(f, deps_repo, d.strip())
+    deps.add('python27')
+
+    for d in s.dependencies.split(','):
+        if d.strip():
+            deps.add(d.strip())
+
+    deps.write()
 
     # The image directory doesn't exist yet, probably.
     if not os.path.exists(os.path.join(s.basedir, s.vmname)):

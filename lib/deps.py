@@ -1,72 +1,88 @@
 from ConfigParser import ConfigParser
 import os.path
+import logging
 import shutil
 
 
-DEPS = []
+log = logging.getLogger()
 
 
-def add_dependency(f, deps_repo, dependency):
-    conf = ConfigParser()
-    conf.read(deps_repo)
+class Dependency(object):
+    def __init__(self, deps_repo, bat_path):
+        conf = ConfigParser()
+        conf.read(deps_repo)
 
-    d = dependency.strip()
-    if d not in conf.sections():
-        print '[-] Dependency %s not found!' % d
-        exit(1)
+        self.repo = {}
+        for section in conf.sections():
+            self.repo[section] = dict(conf.items(section))
 
-    kw = dict(conf.items(d))
-    fname = kw.pop('filename')
-    arguments = kw.pop('arguments', '')
-    depends = kw.pop('dependencies', None)
-    marker = kw.pop('marker', None)
-    flags = []
-    cmds = []
+        self.installed = []
+        self.f = open(bat_path, 'wb')
 
-    for flag in kw.pop('flags', '').split(','):
-        if flag.strip():
-            flags.append(flag.strip())
+    def add(self, dependency):
+        if dependency not in self.repo:
+            log.error('Dependency %s not found!', dependency)
+            exit(1)
 
-    idx = 0
-    while 'cmd%d' % idx in kw:
-        cmds.append(kw.pop('cmd%d' % idx))
-        idx += 1
+        if dependency in self.installed:
+            log.debug('Dependency %s has already been handled.', dependency)
+            return
 
-    # Not used by us.
-    kw.pop('description', None)
+        kw = self.repo[dependency]
 
-    if kw:
-        print '[-] Found an unused value in the configuration,'
-        print '[-] please fix before continuing..'
-        print '[-] Remaining values:', kw
-        exit(1)
+        fname = kw.pop('filename')
+        arguments = kw.pop('arguments', '')
+        depends = kw.pop('dependencies', None)
+        marker = kw.pop('marker', None)
+        flags = []
+        cmds = []
 
-    if depends:
-        for dep in depends.split(','):
-            add_dependency(f, deps_repo, dep)
+        for flag in kw.pop('flags', '').split(','):
+            if flag.strip():
+                flags.append(flag.strip())
 
-    if d not in DEPS:
-        DEPS.append(d)
+        idx = 0
+        while 'cmd%d' % idx in kw:
+            cmds.append(kw.pop('cmd%d' % idx))
+            idx += 1
 
-        print>>f, 'echo Installing..', fname
+        # Not used by us.
+        kw.pop('description', None)
+
+        if kw:
+            log.error('Found one or more remaining value(s) in the '
+                      'configuration, please it fix before continuing..')
+            log.info('Remaining value(s): %s', kw)
+            exit(1)
+
+        if depends:
+            for dep in depends.split(','):
+                self.add(dep.strip())
+
+        self.installed.append(dependency)
+
+        print>>self.f, 'echo Installing..', fname
         if marker:
-            print>>f, 'if exist "%s" (' % marker
-            print>>f, 'echo Dependency already installed!'
-            print>>f, ') else ('
+            print>>self.f, 'if exist "%s" (' % marker
+            print>>self.f, '  echo Dependency already installed!'
+            print>>self.f, ') else ('
 
         if 'background' in flags:
-            print>>f, 'start C:\\dependencies\\%s' % fname, arguments
+            print>>self.f, '  start C:\\dependencies\\%s' % fname, arguments
         else:
-            print>>f, 'C:\\dependencies\\%s' % fname, arguments
+            print>>self.f, '  C:\\dependencies\\%s' % fname, arguments
 
         for cmd in cmds:
             if cmd.startswith('click'):
-                print>>f, 'C:\\%s' % cmd
+                print>>self.f, '  C:\\%s' % cmd
             else:
-                print>>f, cmd
+                print>>self.f, '  %s' % cmd
 
         if marker:
-            print>>f, ')'
+            print>>self.f, ')'
 
         shutil.copy(os.path.join('deps', 'files', fname),
                     os.path.join('bootstrap', 'dependencies', fname))
+
+    def write(self):
+        self.f.close()
