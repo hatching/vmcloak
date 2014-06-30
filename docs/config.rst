@@ -19,7 +19,7 @@ As it is not uncommon for one to create multiple VMs at once, rather than just
 a single one, VMCloak supports one or more configuration file(s) to be
 specified using the ``-s`` (short for ``--settings``) switch.
 
-Configuration values in the INI files should be present in the ``vmcloak``
+Configuration entries in the INI files should be present in the ``vmcloak``
 section. E.g., ``./vmcloak.py --basedir ~/vms`` would be equal to having the
 following INI file, *conf.ini*, with ``./vmcloak.py -s conf.ini``.
 
@@ -54,11 +54,31 @@ To sum it up:
 Required configuration entries
 ------------------------------
 
-A few configuration values are required.
+A few configuration entries are required.
 
+* :ref:`conf-mounted-iso`
 * :ref:`conf-basedir`
 * :ref:`conf-serial-key`
 * :ref:`conf-vmname`
+
+.. _conf-mounted-iso:
+
+Mounted ISO Image
+^^^^^^^^^^^^^^^^^
+
+``--iso-mount`` reflects one of the most important configuration entries.
+``--iso-mount`` accepts a path to a **mounted** Windows Installer ISO image.
+In order to mount a Windows Installer ISO image a directory should be created
+with **root**, and then the image should be mounted on that directory, with
+root as well. The following bash snippet depicts how to setup the ISO mount.
+
+.. code-block:: bash
+
+    sudo mkdir /mnt/winxp
+    sudo mount -o loop,ro winxp.iso /mnt/winxp
+
+Then, when mounted, one would give ``--iso-mount /mnt/winxp`` to
+``./vmcloak.py``.
 
 .. _conf-basedir:
 
@@ -93,7 +113,7 @@ value is the extra argument on the command line, e.g.,
 Semi-required configuration entries
 -----------------------------------
 
-A few configuration values are not required, but should in most cases be
+A few configuration entries are not required, but should in most cases be
 provided.
 
 * :ref:`conf-hostonly-ip`

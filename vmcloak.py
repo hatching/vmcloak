@@ -495,7 +495,7 @@ if __name__ == '__main__':
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
-    parser.add_argument('--iso-mount', type=str, help='Mounted Windows installer ISO image.')
+    parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
     parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
