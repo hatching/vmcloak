@@ -49,7 +49,7 @@ echo "Installing bootstrap files and copying dependencies.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"
 cp data/bootstrap/* "$OSDIR"
-cp "$BOOTSTRAP"/* "$OSDIR"
+cp -r "$BOOTSTRAP"/* "$OSDIR"
 
 if [ -f /usr/bin/mkisofs ]; then
     ISOTOOL=/usr/bin/mkisofs

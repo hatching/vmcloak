@@ -1,7 +1,6 @@
 call C:\settings.bat
 
 echo Setting static IP address.
-rem TODO Allow the static IP address to be configurable.
 netsh interface ip set address name="Local Area Connection" ^
   static %HOSTONLYIP% %HOSTONLYMASK% %HOSTONLYGATEWAY% 1
 
