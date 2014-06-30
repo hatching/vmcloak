@@ -2,18 +2,13 @@
 set -e
 
 if [ "$#" -lt 2 ]; then
-    echo "Usage: ./buildiso.sh <mount> <winnt.sif> <outiso> [tempdir]"
+    echo "Usage: ./buildiso.sh <mount> <winnt.sif> <outiso> <bootstrap>"
     exit 1
-elif [ "$#" -eq 3 ]; then
-    MOUNT="$1"
-    WINNTSIF="$2"
-    OUTIMAGE="$3"
-    TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 4 ]; then
     MOUNT="$1"
     WINNTSIF="$2"
     OUTIMAGE="$3"
-    TEMPDIR="$4"
+    BOOTSTRAP="$4"
 else
     echo "Invalid amount of arguments.."
     exit 1
@@ -31,6 +26,8 @@ cleanup() {
 
 # When a command fails we do a bit of cleanup.
 trap "cleanup 1" ERR
+
+TEMPDIR="$(mktemp -d)"
 
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
@@ -51,7 +48,8 @@ cp data/boot.img "$TEMPDIR"
 echo "Installing bootstrap files and copying dependencies.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
 mkdir -p "$OSDIR"
-cp -r bootstrap/* "$OSDIR"
+cp data/bootstrap/* "$OSDIR"
+cp "$BOOTSTRAP"/* "$OSDIR"
 
 if [ -f /usr/bin/mkisofs ]; then
     ISOTOOL=/usr/bin/mkisofs

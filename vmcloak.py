@@ -166,23 +166,23 @@ def main():
         RESOLUTION=s.resolution,
     )
 
+    bootstrap = tempfile.mkdtemp()
+
     # Write the configuration values for bootstrap.bat.
-    with open(os.path.join('bootstrap', 'settings.bat'), 'wb') as f:
+    with open(os.path.join(bootstrap, 'settings.bat'), 'wb') as f:
         for key, value in settings_bat.items():
             print>>f, 'set %s=%s' % (key, value)
 
     # Write the configuration values for bootstrap.py.
-    with open(os.path.join('bootstrap', 'settings.py'), 'wb') as f:
+    with open(os.path.join(bootstrap, 'settings.py'), 'wb') as f:
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
     # TODO Make sure the deps repository is up-to-date.
 
-    if not os.path.exists(os.path.join('bootstrap', 'dependencies')):
-        os.mkdir(os.path.join('bootstrap', 'dependencies'))
+    os.mkdir(os.path.join(bootstrap, 'dependencies'))
 
-    deps = Dependency(deps_repo,
-                      os.path.join('bootstrap', 'dependencies.bat'))
+    deps = Dependency(deps_repo, os.path.join(bootstrap, 'dependencies.bat'))
 
     deps.add('python27')
 
@@ -202,7 +202,7 @@ def main():
     print '[x] Creating ISO file.'
     try:
         subprocess.check_call(['./utils/buildiso.sh',
-                               s.iso_mount, winntsif, iso_path])
+                               s.iso_mount, winntsif, iso_path, bootstrap])
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e
