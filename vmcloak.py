@@ -35,10 +35,12 @@ def main():
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
     parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-mask', type=str, help='Static IP address mask to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
     parser.add_argument('--bridged', type=str, help='Network interface for the bridged network.')
     parser.add_argument('--bridged-ip', type=str, help='Static IP address to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-mask', type=str, help='Static IP address mask to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
@@ -59,7 +61,9 @@ def main():
         hdsize=256*1024,
         host_ip='192.168.56.1',
         hostonly_ip='192.168.56.101',
+        hostonly_mask='255.255.255.0',
         hostonly_gateway='192.168.0.1',
+        bridged_mask='255.255.255.0',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
@@ -148,9 +152,11 @@ def main():
 
     settings_bat = dict(
         HOSTONLYIP=s.hostonly_ip,
+        HOSTONLYMASK=s.hostonly_mask,
         HOSTONLYGATEWAY=s.hostonly_gateway,
         BRIDGED='yes' if s.bridged else 'no',
         BRIDGEDIP=s.bridged_ip,
+        BRIDGEDMASK=s.bridged_mask,
         BRIDGEDGATEWAY=s.bridged_gateway,
     )
 
