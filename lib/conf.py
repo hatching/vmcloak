@@ -2,7 +2,7 @@ from ConfigParser import ConfigParser
 import logging
 import os
 
-from lib.random import random_string
+from lib.rand import random_string
 
 
 log = logging.getLogger(__name__)

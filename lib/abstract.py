@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 import random
 
 from data.config import HW_CONFIG

@@ -3,7 +3,7 @@ import subprocess
 
 from data.config import VBOX_CONFIG
 from lib.abstract import VM
-from lib.random import random_mac
+from lib.rand import random_mac
 
 
 class VirtualBox(VM):
