@@ -17,7 +17,7 @@ VMCloak relies on a couple of tools and libraries that are required during
 the process of generating a new VM.
 
 * Python 2.6+
-* mkisofs
+* mkisofs/genisoimage
 * VirtualBox
 
 Usage

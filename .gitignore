@@ -2,3 +2,4 @@
 bootstrap/settings.bat
 bootstrap/settings.py
 bootstrap/dependencies.bat
+docs/_build

@@ -6,11 +6,20 @@
 Welcome to VMCloak's documentation!
 ===================================
 
+**VMCloak** is a utility for automatically creating Virtual Machines with
+Windows as guest Operating System. It has been tailored to generate Virtual
+Machines directly usable from within `Cuckoo Sandbox
+<http://cuckoosandbox.org/>`_, but it can also be used for other purposes
+as *Cuckoo*'s components can be omitted through the configuration.
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   requirements
+   config
+   deps
 
 
 Indices and tables
@@ -19,4 +28,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
