@@ -1,22 +1,16 @@
 #!/bin/bash
 set -e
-MOUNT=/mnt/vmcloak
 
 if [ "$#" -lt 2 ]; then
-    echo "Usage: ./buildiso.sh <iso> <winnt.sif> [outiso] [tempdir]"
+    echo "Usage: ./buildiso.sh <mount> <winnt.sif> <outiso> [tempdir]"
     exit 1
-elif [ "$#" -eq 2 ]; then
-    IMAGE="$1"
-    WINNTSIF="$2"
-    OUTIMAGE="$(echo -n "$IMAGE"|sed s/\.iso/\-new.iso/)"
-    TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 3 ]; then
-    IMAGE="$1"
+    MOUNT="$1"
     WINNTSIF="$2"
     OUTIMAGE="$3"
     TEMPDIR="$(mktemp -d)"
 elif [ "$#" -eq 4 ]; then
-    IMAGE="$1"
+    MOUNT="$1"
     WINNTSIF="$2"
     OUTIMAGE="$3"
     TEMPDIR="$4"
@@ -30,11 +24,6 @@ cleanup() {
         echo "Removing tempdir.."
         rm -rf "$TEMPDIR"
     fi
-    if [ -d "$MOUNT" ]; then
-        echo "Unmounting mount.."
-        $SUDO /bin/umount "$MOUNT"
-        $SUDO /bin/rm -r "$MOUNT"
-    fi
     if [ $1 -eq 1 ]; then
         exit 1
     fi
@@ -42,15 +31,6 @@ cleanup() {
 
 # When a command fails we do a bit of cleanup.
 trap "cleanup 1" ERR
-
-SUDO=/usr/bin/sudo
-if [ "$(whoami)" = "root" ]; then
-    SUDO=
-fi
-
-echo "Mounting the ISO image.."
-$SUDO /bin/mkdir -p "$MOUNT"
-$SUDO /bin/mount -o loop,ro "$IMAGE" "$MOUNT"
 
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
@@ -89,4 +69,3 @@ $ISOTOOL -quiet -b boot.img -no-emul-boot -boot-load-seg 1984 \
     -relaxed-filenames -o "$OUTIMAGE" "$TEMPDIR"
 
 cleanup 0
-echo $OUTIMAGE

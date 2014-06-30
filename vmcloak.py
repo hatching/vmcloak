@@ -495,7 +495,7 @@ if __name__ == '__main__':
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
-    parser.add_argument('--iso', type=str, help='ISO Windows installer.')
+    parser.add_argument('--iso-mount', type=str, help='Mounted Windows installer ISO image.')
     parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
     parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
@@ -569,8 +569,9 @@ if __name__ == '__main__':
         m.delete_vm()
         exit(0)
 
-    if not s.iso:
-        print '[-] Please specify a Windows Installer ISO image'
+    if not s.iso_mount or not os.path.isdir(s.iso_mount):
+        print '[-] Please specify the path to a mounted '
+        print '[-] Windows Installer ISO image.'
         exit(1)
 
     # Make sure the dependencies repository is available.
@@ -658,7 +659,7 @@ if __name__ == '__main__':
     print '[x] Creating ISO file.'
     try:
         subprocess.check_call(['./utils/buildiso.sh',
-                               s.iso, winntsif, iso_path])
+                               s.iso_mount, winntsif, iso_path])
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e
