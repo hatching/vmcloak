@@ -8,16 +8,18 @@ log = logging.getLogger()
 
 
 class Dependency(object):
-    def __init__(self, deps_repo, bat_path):
+    def __init__(self, deps_repo, bootstrap_path):
         conf = ConfigParser()
         conf.read(deps_repo)
+
+        self.bootstrap = bootstrap_path
 
         self.repo = {}
         for section in conf.sections():
             self.repo[section] = dict(conf.items(section))
 
         self.installed = []
-        self.f = open(bat_path, 'wb')
+        self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')
 
     def add(self, dependency):
         if dependency not in self.repo:
@@ -68,9 +70,9 @@ class Dependency(object):
             print>>self.f, ') else ('
 
         if 'background' in flags:
-            print>>self.f, '  start C:\\dependencies\\%s' % fname, arguments
+            print>>self.f, '  start C:\\deps\\%s' % fname, arguments
         else:
-            print>>self.f, '  C:\\dependencies\\%s' % fname, arguments
+            print>>self.f, '  C:\\deps\\%s' % fname, arguments
 
         for cmd in cmds:
             if cmd.startswith('click'):
@@ -82,7 +84,7 @@ class Dependency(object):
             print>>self.f, ')'
 
         shutil.copy(os.path.join('deps', 'files', fname),
-                    os.path.join('bootstrap', 'dependencies', fname))
+                    os.path.join(self.bootstrap, 'deps', fname))
 
     def write(self):
         self.f.close()

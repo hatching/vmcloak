@@ -11,14 +11,14 @@ if "%BRIDGED%" == "yes" (
 )
 
 echo Installing 3rd party software.
-call C:\dependencies.bat
+call C:\deps.bat
 
 echo Initiate VM hardening.
 C:\Python27\Python.exe C:\bootstrap.py
 
 echo Cleaning up.
-del C:\click.exe C:\dependencies.bat C:\bootstrap.py
+del C:\click.exe C:\deps.bat C:\bootstrap.py
 del C:\settings.bat C:\settings.py
-echo Y|rmdir /S C:\dependencies
+echo Y|rmdir /S C:\deps
 
 start C:\Python27\Pythonw.exe C:\agent.py

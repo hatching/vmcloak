@@ -180,9 +180,9 @@ def main():
 
     # TODO Make sure the deps repository is up-to-date.
 
-    os.mkdir(os.path.join(bootstrap, 'dependencies'))
+    os.mkdir(os.path.join(bootstrap, 'deps'))
 
-    deps = Dependency(deps_repo, os.path.join(bootstrap, 'dependencies.bat'))
+    deps = Dependency(deps_repo, bootstrap)
 
     deps.add('python27')
 
