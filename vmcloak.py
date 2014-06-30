@@ -4,487 +4,24 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 import argparse
-from ConfigParser import ConfigParser
 import logging
 import os.path
-import random
 import socket
-import shutil
-import string
 import subprocess
-import sys
 import tempfile
 import time
+
+from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
+from lib.conf import check_keyboard_layout
+from lib.deps import add_dependency
+from lib.vm import VirtualBox
 
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
-DEPS = []
 
-CONFIG = dict(
-    bios=[
-    ],
-    system=[
-    ],
-    board=[
-    ],
-    chassis=[
-    ],
-    harddisk=[
-    ],
-)
-
-
-def random_string(minimum, maximum=None):
-    if maximum is None:
-        maximum = minimum
-
-    count = random.randint(minimum, maximum)
-    return ''.join(random.choice(string.ascii_letters) for x in xrange(count))
-
-
-def random_mac():
-    """Generates a random MAC address."""
-    values = [random.randint(0, 15) for _ in xrange(12)]
-
-    # At least for VirtualBox there's a limitation for the second character,
-    # as outlined in the following thread. Thus we handle this.
-    # https://forums.virtualbox.org/viewtopic.php?p=85316
-    values[1] = int(random.choice('02468ace'), 16)
-
-    return '%x%x:%x%x:%x%x:%x%x:%x%x:%x%x' % tuple(values)
-
-
-def random_serial(length=None):
-    if length is None:
-        length = random.randint(8, 20)
-
-    return ''.join(random.choice(string.uppercase + string.digits)
-                   for _ in xrange(length))
-
-
-class VM(object):
-    FIELDS = {}
-
-    def __init__(self, name, basedir):
-        self.name = name
-        self.basedir = basedir
-
-    def create_vm(self):
-        """Create a new Virtual Machine."""
-        raise
-
-    def delete_vm(self):
-        """Delete an existing Virtual Machine and its associated files."""
-        raise
-
-    def ramsize(self, ramsize):
-        """Modify the amount of RAM available for this Virtual Machine."""
-        raise
-
-    def os_type(self, os, sp):
-        """Set the OS type to the OS and the Service Pack."""
-        raise
-
-    def create_hd(self, fsize):
-        """Create a harddisk."""
-        raise
-
-    def attach_iso(self, iso):
-        """Attach a ISO file as DVDRom drive."""
-        raise
-
-    def detach_iso(self):
-        """Detach the ISO file in the DVDRom drive."""
-        raise
-
-    def set_field(self, key, value):
-        """Set a specific field of a Virtual Machine."""
-        raise
-
-    def modify_mac(self, mac=None):
-        """Modify the MAC address of a Virtual Machine."""
-        raise
-
-    def hostonly(self, index=1):
-        """Configure a hostonly adapter for the Virtual Machine."""
-        raise
-
-    def bridged(self, interface, index=1):
-        """Configure a bridged adapter for the Virtual Machine."""
-        raise
-
-    def hwvirt(self, enable=True):
-        """Enable or disable the usage of Hardware Virtualization."""
-        raise
-
-    def start_vm(self, visible=False):
-        """Start the associated Virtual Machine."""
-        raise
-
-    def snapshot(self, label):
-        """Take a snapshot of the associated Virtual Machine."""
-        raise
-
-    def stopvm(self):
-        """Stop the associated Virtual Machine."""
-        raise
-
-    def list_settings(self):
-        """List all settings of a Virtual Machine."""
-        raise
-
-    def init_vm(self):
-        """Initialize fields as specified by `FIELDS`."""
-        def _init_vm(path, fields):
-            for key, value in fields.items():
-                key = path + '/' + key
-                if isinstance(value, dict):
-                    _init_vm(key, value)
-                else:
-                    if isinstance(value, tuple):
-                        k, v = value
-                        if not CONFIG[k]:
-                            value = 'To be filled by O.E.M.'
-                        else:
-                            if k not in config:
-                                config[k] = random.choice(CONFIG[k])
-
-                            value = config[k][v]
-
-                            # Some values are dynamically generated.
-                            if callable(value):
-                                value = value()
-
-                    print '[+] Setting %r to %r' % (key, value)
-                    ret = self.set_field(key, value)
-                    if ret:
-                        print ret
-
-        config = {}
-        _init_vm('', self.FIELDS)
-
-
-class VirtualBox(VM):
-    FIELDS = {
-        'VBoxInternal/Devices/pcbios/0/Config': dict(
-
-            # http://blog.prowling.nu/2012/08/modifying-virtualbox-settings-for.html
-            DmiBIOSVendor=('bios', 'vendor'),
-            DmiBIOSVersion=('bios', 'version'),
-            DmiBIOSReleaseDate=('bios', 'release_date'),
-            # DmiBIOSReleaseMajor=
-            # DmiBIOSReleaseMinor=
-            # DmiBIOSFirmwareMajor=
-            # DmiBIOSFirmwareMinor=
-
-            DmiSystemVendor=('system', 'vendor'),
-            DmiSystemProduct=('system', 'product'),
-            DmiSystemVersion=('system', 'version'),
-            DmiSystemSerial=('system', 'serial'),
-            DmiSystemSKU=('system', 'sku'),
-            DmiSystemFamily=('system', 'family'),
-            DmiSystemUuid=('system', 'uuid'),
-
-            # http://blog.prowling.nu/2012/10/modifying-virtualbox-settings-for.html
-            DmiBoardVendor=('board', 'vendor'),
-            DmiBoardProduct=('board', 'product'),
-            DmiBoardVersion=('board', 'version'),
-            DmiBoardSerial=('board', 'serial'),
-            DmiBoardAssetTag=('board', 'asset'),
-            DmiBoardLocInChass=('board', 'location'),
-
-            DmiChassisVendor=('chassis', 'vendor'),
-            DmiChassisVersion=('chassis', 'version'),
-            DmiChassisSerial=('chassis', 'serial'),
-            DmiChassisAssetTag=('chassis', 'asset'),
-        ),
-        'VBoxInternal/Devices/piix3ide/0/Config': {
-            'Port0': dict(
-
-                # http://downloads.cuckoosandbox.org/slides/blackhat.pdf, Page 82
-                # https://forums.virtualbox.org/viewtopic.php?f=1&t=48718
-                # ATAPIProductId='',
-                # ATAPIRevision='',
-                # ATAPIVendorId='',
-            ),
-            'PrimaryMaster': dict(
-
-                # http://blog.prowling.nu/2012/08/modifying-virtualbox-settings-for.html
-                SerialNumber=('harddisk', 'serial'),
-                FirmwareRevision=('harddisk', 'revision'),
-                ModelNumber=('harddisk', 'model'),
-            ),
-        },
-    }
-
-    def __init__(self, *args, **kwargs):
-        self.vboxmanage = kwargs.pop('vboxmanage')
-        VM.__init__(self, *args, **kwargs)
-
-    def _call(self, *args, **kwargs):
-        cmd = [self.vboxmanage] + list(args)
-
-        for k, v in kwargs.items():
-            if v is None or v is True:
-                cmd += ['--' + k]
-            else:
-                cmd += ['--' + k, str(v)]
-
-        try:
-            ret = subprocess.check_output(cmd)
-        except Exception as e:
-            print '[-] Error running command:', e
-            exit(1)
-
-        return ret.strip()
-
-    def _hd_path(self):
-        return os.path.join(self.basedir, self.name, '%s.vdi' % self.name)
-
-    def create_vm(self):
-        return self._call('createvm', name=self.name,
-                          basefolder=self.basedir, register=True)
-
-    def delete_vm(self):
-        self._call('unregistervm', self.name, delete=True)
-
-    def ramsize(self, ramsize):
-        return self._call('modifyvm', self.name, memory=ramsize)
-
-    def os_type(self, os, sp):
-        operating_systems = {
-            'xp': 'WindowsXP',
-        }
-        return self._call('modifyvm', self.name, ostype=operating_systems[os])
-
-    def create_hd(self, fsize):
-        ctlname = 'IDE Controller'
-        self._call('createhd', filename=self._hd_path(), size=fsize)
-        self._call('storagectl', self.name, name=ctlname, add='ide')
-        self._call('storageattach', self.name, storagectl=ctlname,
-                   type='hdd', device=0, port=0, medium=self._hd_path())
-
-    def attach_iso(self, iso):
-        ctlname = 'IDE Controller'
-        self._call('storageattach', self.name, storagectl=ctlname,
-                   type='dvddrive', port=1, device=0, medium=iso)
-
-    def detach_iso(self):
-        ctlname = 'IDE Controller'
-        self._call('storageattach', self.name, storagectl=ctlname,
-                   type='dvddrive', port=1, device=0, medium='emptydrive')
-
-    def set_field(self, key, value):
-        return self._call('setextradata', self.name, key, value)
-
-    def modify_mac(self, macaddr=None, index=1):
-        if macaddr is None:
-            macaddr = random_mac()
-
-        # VBoxManage prefers MAC addresses without colons.
-        vbox_mac = macaddr.replace(':', '')
-
-        mac = {'macaddress%d' % index: vbox_mac}
-        self._call('modifyvm', self.name, **mac)
-        return macaddr
-
-    def hostonly(self, macaddr=None, index=1):
-        if os.name == 'posix':
-            adapter = 'vboxnet0'
-        else:
-            adapter = 'VirtualBox Host-Only Ethernet Adapter'
-
-        nic = {
-            'nic%d' % index: 'hostonly',
-            'nictype%d' % index: 'Am79C973',
-            'nicpromisc%d' % index: 'allow-all',
-            'hostonlyadapter%d' % index: adapter,
-        }
-        self._call('modifyvm', self.name, **nic)
-        return self.modify_mac(macaddr, index)
-
-    def bridged(self, interface, macaddr=None, index=1):
-        nic = {
-            'nic%d' % index: 'bridged',
-            'nictype%d' % index: 'Am79C973',
-            'nicpromisc%d' % index: 'allow-all',
-            'bridgeadapter%d' % index: interface,
-        }
-        self._call('modifyvm', self.name, **nic)
-        return self.modify_mac(macaddr, index)
-
-    def hwvirt(self, enable=True):
-        """Enable or disable the usage of Hardware Virtualization."""
-        self._call('modifyvm', self.name, hwvirtex='on' if enable else 'off')
-
-    def start_vm(self, visible=False):
-        return self._call('startvm', self.name,
-                          type='gui' if visible else 'headless')
-
-    def snapshot(self, label, description=''):
-        return self._call('snapshot', self.name, 'take', label,
-                          description=description, live=True)
-
-    def stopvm(self):
-        return self._call('controlvm', self.name, 'poweroff')
-
-    def list_settings(self):
-        return self._call('getextradata', self.name, 'enumerate')
-
-
-def configure_winnt_sif(path, args):
-    values = {
-        'PRODUCTKEY': args.serial_key,
-        'COMPUTERNAME': random_string(8, 16),
-        'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
-        'ORGANIZATION': '',
-        'WORKGROUP': random_string(4, 8),
-        'KBLAYOUT': args.keyboard_layout,
-    }
-
-    buf = open(path, 'rb').read()
-    for key, value in values.items():
-        buf = buf.replace('@%s@' % key, value)
-    return buf
-
-
-class Configuration(object):
-    def __init__(self):
-        self.conf = {}
-
-    def _process_value(self, value):
-        if isinstance(value, str) and value.startswith('~'):
-            return os.getenv('HOME') + value[1:]
-        if value in ('true', 'True', 'on', 'yes', 'enable'):
-            return True
-        if value in ('false', 'False', 'off', 'no', 'disable'):
-            return False
-        return value
-
-    def from_args(self, args):
-        for key, value in args._get_kwargs():
-            if key not in self.conf or value:
-                self.conf[key] = self._process_value(value)
-
-    def from_file(self, path):
-        p = ConfigParser()
-        p.read(path)
-        for key in p.options('vmcloak'):
-            self.conf[key.replace('-', '_')] = \
-                self._process_value(p.get('vmcloak', key))
-
-    def from_defaults(self, defaults):
-        for key, value in defaults.items():
-            if self.conf[key] is None:
-                self.conf[key] = value
-
-    def __getattr__(self, key):
-        return self.conf[key]
-
-
-def vboxmanage_path(s):
-    if os.path.isfile(s.vboxmanage):
-        return s.vboxmanage
-
-    if not s.cuckoo:
-        print '[-] Please provide your Cuckoo root directory.'
-        print '[-] Or provide the path to the VBoxManage executable.'
-        exit(1)
-
-    conf_path = os.path.join(CUCKOO_ROOT, 'conf', 'virtualbox.conf')
-
-    try:
-        from lib.cuckoo.common.config import Config
-        vboxmanage = Config(conf_path).virtualbox.path
-    except:
-        log.error('Unable to locate VBoxManage path, please '
-                  'configure conf/virtualbox.conf properly.')
-        exit(1)
-
-    if not os.path.isfile(vboxmanage):
-        log.error('The configured VBoxManage path in Cuckoo does not '
-                  'exist, please configure $CUCKOO/conf/virtualbox.conf '
-                  'properly.')
-        exit(1)
-
-    return vboxmanage
-
-
-def add_dependency(f, deps_repo, dependency):
-    conf = ConfigParser()
-    conf.read(deps_repo)
-
-    d = dependency.strip()
-    if d not in conf.sections():
-        print '[-] Dependency %s not found!' % d
-        exit(1)
-
-    kw = dict(conf.items(d))
-    fname = kw.pop('filename')
-    arguments = kw.pop('arguments', '')
-    depends = kw.pop('dependencies', None)
-    marker = kw.pop('marker', None)
-    flags = []
-    cmds = []
-
-    for flag in kw.pop('flags', '').split(','):
-        if flag.strip():
-            flags.append(flag.strip())
-
-    idx = 0
-    while 'cmd%d' % idx in kw:
-        cmds.append(kw.pop('cmd%d' % idx))
-        idx += 1
-
-    # Not used by us.
-    kw.pop('description', None)
-
-    if kw:
-        print '[-] Found an unused value in the configuration,'
-        print '[-] please fix before continuing..'
-        print '[-] Remaining values:', kw
-        exit(1)
-
-    if depends:
-        for dep in depends.split(','):
-            add_dependency(f, deps_repo, dep)
-
-    if d not in DEPS:
-        DEPS.append(d)
-
-        print>>f, 'echo Installing..', fname
-        if marker:
-            print>>f, 'if exist "%s" (' % marker
-            print>>f, 'echo Dependency already installed!'
-            print>>f, ') else ('
-
-        if 'background' in flags:
-            print>>f, 'start C:\\dependencies\\%s' % fname, arguments
-        else:
-            print>>f, 'C:\\dependencies\\%s' % fname, arguments
-
-        for cmd in cmds:
-            if cmd.startswith('click'):
-                print>>f, 'C:\\%s' % cmd
-            else:
-                print>>f, cmd
-
-        if marker:
-            print>>f, ')'
-
-        shutil.copy(os.path.join('deps', 'files', fname),
-                    os.path.join('bootstrap', 'dependencies', fname))
-
-
-def check_keyboard_layout(kblayout):
-    for layout in open(os.path.join('data', 'keyboard_layout_values.txt')):
-        if layout.strip() == kblayout:
-            return True
-
-
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
@@ -538,11 +75,7 @@ if __name__ == '__main__':
     s.from_args(args)
     s.from_defaults(defaults)
 
-    # If the Cuckoo directory has been specified, then load CUCKOO_ROOT.
-    if s.cuckoo:
-        sys.path.append(s.cuckoo)
-        from lib.cuckoo.common.constants import CUCKOO_ROOT
-    elif s.register_cuckoo:
+    if not s.cuckoo and s.register_cuckoo:
         print '[-] To register the Virtual Machine with Cuckoo'
         print '[-] please provide the Cuckoo directory.'
         print '[x] To disable registering please provide --no-register-cuckoo'
@@ -728,14 +261,14 @@ if __name__ == '__main__':
     if s.register_cuckoo:
         print '[x] Registering the VM with Cuckoo.'
         try:
-            machine_py = os.path.join(CUCKOO_ROOT, 'utils', 'machine.py')
+            machine_py = os.path.join(s.cuckoo, 'utils', 'machine.py')
             subprocess.check_call([machine_py, '--add',
                                    '--ip', s.hostonly_ip,
                                    '--platform', 'windows',
                                    '--tags', s.tags,
                                    '--snapshot', 'vmcloak',
                                    s.vmname],
-                                  cwd=CUCKOO_ROOT)
+                                  cwd=s.cuckoo)
         except OSError as e:
             print '[-] Is $CUCKOO/utils/machine.py executable?'
             print e
@@ -746,3 +279,6 @@ if __name__ == '__main__':
             exit(1)
 
     print '[!] Virtual Machine created successfully.'
+
+if __name__ == '__main__':
+    main()
