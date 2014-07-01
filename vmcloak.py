@@ -14,6 +14,7 @@ import time
 from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from lib.conf import check_keyboard_layout
 from lib.deps import Dependency
+from lib.verify import valid_serial_key
 from lib.vm import VirtualBox
 
 
@@ -27,7 +28,6 @@ def main():
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--basedir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
-    parser.add_argument('--list', action='store_true', help='List the cloaked settings for a VM.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
@@ -97,10 +97,6 @@ def main():
         print '[-] Only VirtualBox is supported as of now'
         exit(1)
 
-    if s.list:
-        print m.list_settings()
-        exit(0)
-
     if s.delete:
         print '[x] Unregistering and deleting the VM and its associated files'
         m.delete_vm()
@@ -109,6 +105,11 @@ def main():
     if not s.iso_mount or not os.path.isdir(s.iso_mount):
         print '[-] Please specify the path to a mounted '
         print '[-] Windows Installer ISO image.'
+        exit(1)
+
+    if not s.serial_key or not valid_serial_key(s.serial_key):
+        print '[-] The provided serial key is not encoded correctly!'
+        print '[-] Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.'
         exit(1)
 
     # Make sure the dependencies repository is available.
