@@ -3,6 +3,7 @@
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
+import os.path
 import re
 
 
@@ -17,3 +18,9 @@ def valid_serial_key(serial_key):
             return False
 
     return True
+
+
+def valid_keyboard_layout(kblayout):
+    for layout in open(os.path.join('data', 'keyboard_layout_values.txt')):
+        if layout.strip() == kblayout:
+            return True

@@ -12,9 +12,8 @@ import tempfile
 import time
 
 from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
-from lib.conf import check_keyboard_layout
 from lib.deps import Dependency
-from lib.verify import valid_serial_key
+from lib.verify import valid_serial_key, valid_keyboard_layout
 from lib.vm import VirtualBox
 
 
@@ -119,7 +118,7 @@ def main():
         exit(1)
 
     print '[x] Checking whether the keyboard layout is valid.'
-    if not check_keyboard_layout(s.keyboard_layout):
+    if not valid_keyboard_layout(s.keyboard_layout):
         print '[-] Invalid keyboard layout:', s.keyboard_layout
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)

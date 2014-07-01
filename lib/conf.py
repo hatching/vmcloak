@@ -89,9 +89,3 @@ def vboxmanage_path(s):
         exit(1)
 
     return vboxmanage
-
-
-def check_keyboard_layout(kblayout):
-    for layout in open(os.path.join('data', 'keyboard_layout_values.txt')):
-        if layout.strip() == kblayout:
-            return True
