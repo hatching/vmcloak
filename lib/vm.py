@@ -36,7 +36,7 @@ class VirtualBox(VM):
         return ret.strip()
 
     def _hd_path(self):
-        return os.path.join(self.basedir, self.name, '%s.vdi' % self.name)
+        return os.path.join(self.hdd_dir, '%s.vdi' % self.name)
 
     def create_vm(self):
         return self._call('createvm', name=self.name,

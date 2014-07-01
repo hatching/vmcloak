@@ -11,9 +11,10 @@ from data.config import HW_CONFIG
 class VM(object):
     FIELDS = {}
 
-    def __init__(self, name, basedir):
+    def __init__(self, name, basedir, hdd_dir):
         self.name = name
         self.basedir = basedir
+        self.hdd_dir = hdd_dir
 
     def create_vm(self):
         """Create a new Virtual Machine."""

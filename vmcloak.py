@@ -26,6 +26,7 @@ def main():
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--basedir', type=str, help='Base directory for the virtual machine and its associated files.')
+    parser.add_argument('--hdd-dir', type=str, help='Base directory for the virtual machine harddisks.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
@@ -89,8 +90,12 @@ def main():
         print '[-] Please provide the base directory for the VM.'
         exit(1)
 
+    if not s.hdd_dir:
+        print '[-] Please provide the harddisk directory for the VM.'
+        exit(1)
+
     if s.vm == 'virtualbox':
-        m = VirtualBox(s.vmname, s.basedir,
+        m = VirtualBox(s.vmname, s.basedir, s.hdd_dir,
                        vboxmanage=vboxmanage_path(s))
     else:
         print '[-] Only VirtualBox is supported as of now'
