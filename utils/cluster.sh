@@ -21,5 +21,5 @@ case "$#" in
         ;;
 esac
 
-seq 1 "$COUNT"|xargs -P "$STEP" -I {} \
-    ./vmcloak.py -s vmcloak.conf --hostonly-ip 192.168.56.$((10+{})) egg{}
+seq -w 1 "$COUNT"|xargs -P "$STEP" -I {} \
+    ./vmcloak.py -s vmcloak.conf --hostonly-ip 192.168.56.1{} egg{}
