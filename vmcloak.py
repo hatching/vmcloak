@@ -4,6 +4,7 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 import argparse
+import lockfile
 import logging
 import os.path
 import socket
@@ -128,6 +129,10 @@ def main():
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
+    lock = lockfile.MkdirFileLock('vmcloak')
+
+    lock.acquire()
+
     try:
         # TODO This should be part of m.hostonly().
         print '[x] Ensuring vboxnet0 is running.'
@@ -135,6 +140,7 @@ def main():
     except OSError as e:
         print '[-] Is ./utils/vboxnet.sh executable?'
         print e
+        lock.release()
         exit(1)
 
     print '[x] Static Host IP', s.host_ip
@@ -149,6 +155,7 @@ def main():
     buf = configure_winnt_sif(os.path.join('data', 'winnt.sif'), s)
     if not buf:
         print '[-] Error configuring WINNT.SIF'
+        lock.release()
         exit(1)
 
     # Write the WINNT.SIF file.
@@ -205,10 +212,12 @@ def main():
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e
+        lock.release()
         exit(1)
     except subprocess.CalledProcessError as e:
         print '[-] Error creating ISO file.'
         print e
+        lock.release()
         exit(1)
 
     print '[x] Creating VM'
@@ -246,8 +255,12 @@ def main():
     print '[!] This may take up to 30 minutes'
     t = time.time()
 
+    lock.release()
+
     guest, _ = sock.accept()
     print '[x] It took %d seconds to install Windows!' % (time.time() - t)
+
+    lock.acquire()
 
     print '[x] Setting the resolution to %s' % s.resolution
     if ord(guest.recv(1)):
@@ -258,8 +271,12 @@ def main():
     print '[x] Detaching the Windows Installation disk.'
     m.detach_iso()
 
+    lock.release()
+
     # Give the system a little bit of time to fully initialize.
     time.sleep(10)
+
+    lock.acquire()
 
     print '[x] Taking a snapshot of the current state'
     print m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
@@ -281,13 +298,16 @@ def main():
         except OSError as e:
             print '[-] Is $CUCKOO/utils/machine.py executable?'
             print e
+            lock.release()
             exit(1)
         except subprocess.CalledProcessError as e:
             print '[-] Error registering the VM.'
             print e
+            lock.release()
             exit(1)
 
     print '[!] Virtual Machine created successfully.'
+    lock.release()
 
 if __name__ == '__main__':
     main()
