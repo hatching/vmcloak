@@ -48,7 +48,7 @@ def main():
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
-    parser.add_argument('--no-register-cuckoo', action='store_false', default=True, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
+    parser.add_argument('--no-register-cuckoo', action='store_false', default=None, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
@@ -69,6 +69,7 @@ def main():
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
         keyboard_layout='US',
+        register_cuckoo=True,
     )
 
     args = parser.parse_args()
