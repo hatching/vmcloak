@@ -25,8 +25,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
-    parser.add_argument('--basedir', type=str, help='Base directory for the virtual machine and its associated files.')
-    parser.add_argument('--hdd-dir', type=str, help='Base directory for the virtual machine harddisks.')
+    parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
+    parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
@@ -86,16 +86,16 @@ def main():
         print '[x] or register-cuckoo = false in the configuration.'
         exit(1)
 
-    if not s.basedir:
-        print '[-] Please provide the base directory for the VM.'
+    if not s.vm_dir:
+        print '[-] Please provide a directory for the associated VM files.'
         exit(1)
 
-    if not s.hdd_dir:
-        print '[-] Please provide the harddisk directory for the VM.'
+    if not s.data_dir:
+        print '[-] Please provide the data directory for the VM.'
         exit(1)
 
     if s.vm == 'virtualbox':
-        m = VirtualBox(s.vmname, s.basedir, s.hdd_dir,
+        m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
                        vboxmanage=vboxmanage_path(s))
     else:
         print '[-] Only VirtualBox is supported as of now'
@@ -197,17 +197,11 @@ def main():
 
     deps.write()
 
-    # The image directory doesn't exist yet, probably.
-    if not os.path.exists(os.path.join(s.basedir, s.vmname)):
-        os.mkdir(os.path.join(s.basedir, s.vmname))
-
-    iso_path = os.path.join(s.basedir, s.vmname, 'image.iso')
-
     # Create the ISO file.
     print '[x] Creating ISO file.'
     try:
         subprocess.check_call(['./utils/buildiso.sh',
-                               s.iso_mount, winntsif, iso_path, bootstrap])
+                               s.iso_mount, winntsif, m.iso_path, bootstrap])
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e
@@ -227,7 +221,7 @@ def main():
     m.create_hd(s.hdsize)
 
     print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
-    m.attach_iso(iso_path)
+    m.attach_iso(m.iso_path)
 
     print '[x] Randomizing Hardware'
     m.init_vm()

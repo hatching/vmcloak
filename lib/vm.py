@@ -18,6 +18,8 @@ class VirtualBox(VM):
         self.vboxmanage = kwargs.pop('vboxmanage')
         VM.__init__(self, *args, **kwargs)
 
+        self.hdd_path = os.path.join(self.data_dir, '%s.vdi' % self.name)
+
     def _call(self, *args, **kwargs):
         cmd = [self.vboxmanage] + list(args)
 
@@ -35,12 +37,9 @@ class VirtualBox(VM):
 
         return ret.strip()
 
-    def _hd_path(self):
-        return os.path.join(self.hdd_dir, '%s.vdi' % self.name)
-
     def create_vm(self):
         return self._call('createvm', name=self.name,
-                          basefolder=self.basedir, register=True)
+                          basefolder=self.vm_dir, register=True)
 
     def delete_vm(self):
         self._call('unregistervm', self.name, delete=True)
@@ -56,10 +55,10 @@ class VirtualBox(VM):
 
     def create_hd(self, fsize):
         ctlname = 'IDE Controller'
-        self._call('createhd', filename=self._hd_path(), size=fsize)
+        self._call('createhd', filename=self.hdd_path, size=fsize)
         self._call('storagectl', self.name, name=ctlname, add='ide')
         self._call('storageattach', self.name, storagectl=ctlname,
-                   type='hdd', device=0, port=0, medium=self._hd_path())
+                   type='hdd', device=0, port=0, medium=self.hdd_path)
 
     def attach_iso(self, iso):
         ctlname = 'IDE Controller'

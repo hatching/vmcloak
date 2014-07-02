@@ -3,6 +3,7 @@
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
+import os.path
 import random
 
 from data.config import HW_CONFIG
@@ -11,10 +12,12 @@ from data.config import HW_CONFIG
 class VM(object):
     FIELDS = {}
 
-    def __init__(self, name, basedir, hdd_dir):
+    def __init__(self, name, vm_dir, data_dir):
         self.name = name
-        self.basedir = basedir
-        self.hdd_dir = hdd_dir
+        self.vm_dir = vm_dir
+        self.data_dir = data_dir
+
+        self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)
 
     def create_vm(self):
         """Create a new Virtual Machine."""
