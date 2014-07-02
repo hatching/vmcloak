@@ -3,13 +3,23 @@
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <count>"
-    exit 1
-fi
+case "$#" in
+    1)
+        COUNT="$1"
+        STEP=1
+        ;;
 
-for i in $(seq 1 "$1"); do
-    ./vmcloak.py -s vmcloak.conf --hostonly-ip 192.168.56.$((10+$i)) egg$i &
-done
+    2)
+        COUNT="$1"
+        STEP="$2"
+        ;;
 
-wait
+    0) ;&
+    *)
+        echo "Usage: $0 <count> [step]"
+        exit 1
+        ;;
+esac
+
+seq 1 "$COUNT"|xargs -P "$STEP" -I {} \
+    ./vmcloak.py -s vmcloak.conf --hostonly-ip 192.168.56.$((10+{})) egg{}
