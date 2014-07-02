@@ -121,7 +121,7 @@ def main():
     # Make sure the dependencies repository is available.
     deps_repo = os.path.join('deps', 'repo.ini')
     if not os.path.exists(deps_repo):
-        print '[x] Please run "git submodule update --init" first!'
+        print '[-] Please run "git submodule update --init" first!'
         exit(1)
 
     print '[x] Checking whether the keyboard layout is valid.'
