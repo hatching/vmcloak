@@ -256,8 +256,8 @@ debugging as described as per :ref:`conf-vm-visible`.
 
 .. _conf-vm-visible:
 
-Visisble VM Generation
-^^^^^^^^^^^^^^^^^^^^^^
+Visible VM Generation
+^^^^^^^^^^^^^^^^^^^^^
 
 The ``--vm-visible`` argument, if specified, runs the Virtual Machine in
 **GUI** mode instead of **headless** mode (terms as per VirtualBox.) This
