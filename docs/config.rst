@@ -35,21 +35,22 @@ The order allows one to setup basic configuration in a configuration file and
 have the more specific details either in another configuration file, or on the
 command line.
 
-VMCloak will apply the settings from the first *settings* file (specified with
-``./vmcloak.py -s conf.ini``), if specified. It will then overwrite any of
-the settings that have already been set with the next *settings* file, and so
-forth. Then, if any configuration has been passed on the command line, these
-will overwrite the existing settings. Finally, if certain settings have not
-been set at all, such as, for example, the ``keyboard layout``, then the
-default value will be used.
+VMCloak will take the default settings. Then it will apply the settings from 
+the first *settings* file (specified with ``./vmcloak.py -s conf.ini``) 
+overwriting some default values. It will then overwrite any of the settings
+that have already been set with the next *settings* file, and so forth.
+Then, if any configuration has been passed on the command line, this will 
+overwrite the existing settings.
+
 
 To sum it up:
 
-* First *settings* file.
-* Second *settings* file, if present, overwrites any settings from the first.
-* Third *settings* file, etc.
-* Command line arguments, overwrites any existing settings.
-* Default values, only used when a setting has not been configured already.
+* Default values
+* Overwritten by first *settings* file.
+* Overwritten by second *settings* file
+* Overwritten by third *settings* file, etc.
+* Command line arguments, overwrite any existing settings.
+
 
 Required configuration entries
 ------------------------------
