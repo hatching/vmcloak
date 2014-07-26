@@ -10,7 +10,7 @@ import sys
 
 
 def read_ini(path):
-    ret, cur = {}, None
+    ret, section = {}, None
 
     if os.path.exists(path):
         buf = open(path, 'rb').read()
@@ -27,15 +27,15 @@ def read_ini(path):
             continue
 
         if line[0] == '[' and ']' in line:
-            cur = line[1:line.index(']')]
-            ret[cur] = []
+            section = line[1:line.index(']')]
+            ret[section] = []
             continue
 
         if '=' not in line:
-            ret[cur].append(line)
+            ret[section].append(line)
         else:
             a, b = line.split('=', 1)
-            ret[cur].append('%s=%s' % (a.strip(), b.strip()))
+            ret[section].append('%s=%s' % (a.strip(), b.strip()))
     return mode, ret
 
 
