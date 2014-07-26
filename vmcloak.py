@@ -78,6 +78,7 @@ def main():
         register_cuckoo=True,
         dependencies='',
         lock_dirpath='/tmp/vmcloak',
+        auxiliary_local='auxiliary',
     )
 
     args = parser.parse_args()
@@ -223,12 +224,8 @@ def main():
 
     # Write the auxiliary files.
     if s.auxiliary:
-        if s.auxiliary_local:
-            path = s.auxiliary_local
-        else:
-            path = 'auxiliary'
-
-        shutil.copytree(s.auxiliary, os.path.join(bootstrap, path))
+        aux_path = os.path.join(bootstrap, s.auxiliary_local)
+        shutil.copytree(s.auxiliary, aux_path)
 
     # Create the ISO file.
     print '[x] Creating ISO file.'
