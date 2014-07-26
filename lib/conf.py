@@ -4,6 +4,7 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 from ConfigParser import ConfigParser
+import json
 import logging
 import os
 
@@ -89,3 +90,20 @@ def vboxmanage_path(s):
         exit(1)
 
     return vboxmanage
+
+
+def load_hwconf(dirpath='hwconf'):
+    ret = {}
+
+    for fname in os.listdir(dirpath):
+        if not fname.endswith('.json'):
+            continue
+
+        conf = json.load(open(os.path.join(dirpath, fname), 'rb'))
+        for key, value in conf.items():
+            if key not in ret:
+                ret[key] = []
+
+            ret[key].append(value)
+
+    return ret

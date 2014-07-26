@@ -1,19 +1,5 @@
 
 
-HW_CONFIG = dict(
-    bios=[
-    ],
-    system=[
-    ],
-    board=[
-    ],
-    chassis=[
-    ],
-    harddisk=[
-    ],
-)
-
-
 VBOX_CONFIG = {
     'VBoxInternal/Devices/pcbios/0/Config': dict(
 

@@ -6,7 +6,8 @@
 import os.path
 import random
 
-from data.config import HW_CONFIG
+from lib.conf import load_hwconf
+from lib.rand import random_serial, random_uuid
 
 
 class VM(object):
@@ -85,6 +86,8 @@ class VM(object):
 
     def init_vm(self):
         """Initialize fields as specified by `FIELDS`."""
+        hwconf = load_hwconf()
+
         def _init_vm(path, fields):
             for key, value in fields.items():
                 key = path + '/' + key
@@ -93,17 +96,19 @@ class VM(object):
                 else:
                     if isinstance(value, tuple):
                         k, v = value
-                        if not HW_CONFIG[k]:
+                        if not hwconf[k]:
                             value = 'To be filled by O.E.M.'
                         else:
                             if k not in config:
-                                config[k] = random.choice(HW_CONFIG[k])
+                                config[k] = random.choice(hwconf[k])
 
                             value = config[k][v]
 
-                            # Some values are dynamically generated.
-                            if callable(value):
-                                value = value()
+                            # Some values have to be generated randomly.
+                            if value.startswith('<SERIAL>'):
+                                value = random_serial(int(value.split()[-1]))
+                            elif value.startswith('<UUID>'):
+                                value = random_uuid()
 
                     print '[+] Setting %r to %r' % (key, value)
                     ret = self.set_field(key, value)

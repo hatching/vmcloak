@@ -33,3 +33,8 @@ def random_serial(length=None):
 
     return ''.join(random.choice(string.uppercase + string.digits)
                    for _ in xrange(length))
+
+def random_uuid():
+    value = random_serial(32)
+    return '-'.join((value[:8], value[8:12], value[12:16],
+                     value[16:20], value[20:32]))
