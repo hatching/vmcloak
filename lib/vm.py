@@ -109,6 +109,15 @@ class VirtualBox(VM):
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
+    def nat(self, macaddr=None, index=1):
+        nic = {
+            'nic%d' % index: 'nat',
+            'nictype%d' % index: 'Am79C973',
+            'nicpromisc%d' % index: 'allow-all',
+        }
+        self._call('modifyvm', self.name, **nic)
+        return self.modify_mac(macaddr, index)
+
     def hwvirt(self, enable=True):
         """Enable or disable the usage of Hardware Virtualization."""
         self._call('modifyvm', self.name, hwvirtex='on' if enable else 'off')

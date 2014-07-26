@@ -44,6 +44,7 @@ def main():
     parser.add_argument('--bridged-mask', type=str, help='Static IP address mask to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
+    parser.add_argument('--nat', action='store_true', help='Name of the NAT network to attach to.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -54,7 +55,7 @@ def main():
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
-    parser.add_argument('--hwconfig-profile', type=str, help='Take a particular profile.')
+    parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
 
     defaults = dict(
@@ -250,6 +251,9 @@ def main():
 
     print '[x] Initially configuring Hostonly network'
     m.hostonly(macaddr=s.hostonly_macaddr, index=1)
+
+    if s.nat:
+        m.nat()
 
     if s.bridged:
         m.bridged(s.bridged, macaddr=s.bridged_macaddr, index=2)
