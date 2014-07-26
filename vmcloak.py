@@ -53,6 +53,7 @@ def main():
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
+    parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
 
     defaults = dict(
@@ -71,6 +72,7 @@ def main():
         keyboard_layout='US',
         register_cuckoo=True,
         dependencies='',
+        lock_dirpath='/tmp/vmcloak',
     )
 
     args = parser.parse_args()
@@ -131,14 +133,15 @@ def main():
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
-    lock = lockfile.MkdirFileLock('/tmp/vmcloak')
+    lock = lockfile.MkdirFileLock(s.lock_dirpath)
 
     try:
-        lock.acquire(timeout=2)
-    except lockfile.LockTimeout:
         print '[!] Awaiting the opportunity to obtain the lock.'
-        print '[x] If no other instances of vmcloak are running,',
-        print 'then unlock yourself by deleting the vmcloak.lock directory.'
+        lock.acquire(timeout=1)
+    except lockfile.LockTimeout:
+        print '[x] If no other instances of vmcloak are running then'
+        print '..  unlock the lock by deleting the vmcloak.lock directory:'
+        print '$ rm -rf %s.lock' % s.lock_dirpath
 
         lock.acquire()
 
