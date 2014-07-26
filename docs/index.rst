@@ -20,6 +20,7 @@ Contents:
    requirements
    config
    deps
+   hwconfig
 
 
 Indices and tables
