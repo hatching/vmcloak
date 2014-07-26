@@ -31,26 +31,27 @@ following INI file, *conf.ini*, with ``./vmcloak.py -s conf.ini``.
 Configuration order
 -------------------
 
-The order allows one to setup basic configuration in a configuration file and
-have the more specific details either in another configuration file, or on the
-command line.
+VMCloak features default values for various configuration values. These
+defaults may be overwritten through settings files as well as parameters on
+the command line.
 
-VMCloak will take the default settings. Then it will apply the settings from 
-the first *settings* file (specified with ``./vmcloak.py -s conf.ini``) 
-overwriting some default values. It will then overwrite any of the settings
-that have already been set with the next *settings* file, and so forth.
-Then, if any configuration has been passed on the command line, this will 
-overwrite the existing settings.
+Let's take the following command:
 
+.. code-block:: bash
 
-To sum it up:
+    ./vmcloak.py -s first.conf -s second.conf --iso-mount /mnt/winxp cuckoo1
 
-* Default values
-* Overwritten by first *settings* file.
-* Overwritten by second *settings* file
-* Overwritten by third *settings* file, etc.
-* Command line arguments, overwrite any existing settings.
+In this example the order of precedence is as follows (from lowest to
+highest):
 
+* Default values.
+* The ``first`` settings file.
+* The ``second`` settings file.
+* Command line arguments.
+
+As usual, if a particular value is set twice, the value with the highest
+precedence is used in the end. E.g., if ``first.conf`` set ``--iso-mount``,
+then this value is overwritten by the command line in this case.
 
 Required configuration entries
 ------------------------------
