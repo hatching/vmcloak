@@ -84,7 +84,9 @@ class VirtualBox(VM):
         self._call('modifyvm', self.name, **mac)
         return macaddr
 
-    def hostonly(self, macaddr=None, index=1):
+    def hostonly(self, macaddr=None):
+        index = self.network_index() + 1
+
         if os.name == 'posix':
             adapter = 'vboxnet0'
         else:
@@ -99,7 +101,9 @@ class VirtualBox(VM):
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
-    def bridged(self, interface, macaddr=None, index=1):
+    def bridged(self, interface, macaddr=None):
+        index = self.network_index() + 1
+
         nic = {
             'nic%d' % index: 'bridged',
             'nictype%d' % index: 'Am79C973',
@@ -109,7 +113,9 @@ class VirtualBox(VM):
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
-    def nat(self, macaddr=None, index=1):
+    def nat(self, macaddr=None):
+        index = self.network_index() + 1
+
         nic = {
             'nic%d' % index: 'nat',
             'nictype%d' % index: 'Am79C973',

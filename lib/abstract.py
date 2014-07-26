@@ -18,6 +18,8 @@ class VM(object):
         self.vm_dir = vm_dir
         self.data_dir = data_dir
 
+        self.network_idx = 0
+
         self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)
 
     def create_vm(self):
@@ -55,6 +57,12 @@ class VM(object):
     def modify_mac(self, mac=None):
         """Modify the MAC address of a Virtual Machine."""
         raise
+
+    def network_index(self):
+        """Get the index for the next network interface."""
+        ret = self.network_idx
+        self.network_idx += 1
+        return ret
 
     def hostonly(self, macaddr=None, index=1):
         """Configure a hostonly adapter for the Virtual Machine."""

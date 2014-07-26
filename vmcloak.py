@@ -250,13 +250,13 @@ def main():
     m.init_vm(profile=s.hwconfig_profile)
 
     print '[x] Initially configuring Hostonly network'
-    m.hostonly(macaddr=s.hostonly_macaddr, index=1)
+    m.hostonly(macaddr=s.hostonly_macaddr)
 
     if s.nat:
         m.nat()
 
     if s.bridged:
-        m.bridged(s.bridged, macaddr=s.bridged_macaddr, index=2)
+        m.bridged(s.bridged, macaddr=s.bridged_macaddr)
 
     if s.hwvirt is not None:
         if s.hwvirt:
