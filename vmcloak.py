@@ -7,6 +7,7 @@ import argparse
 import lockfile
 import logging
 import os.path
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -56,6 +57,8 @@ def main():
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
+    parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
+    parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
 
     defaults = dict(
@@ -217,6 +220,15 @@ def main():
             deps.add(d.strip())
 
     deps.write()
+
+    # Write the auxiliary files.
+    if s.auxiliary:
+        if s.auxiliary_local:
+            path = s.auxiliary_local
+        else:
+            path = 'auxiliary'
+
+        shutil.copytree(s.auxiliary, os.path.join(bootstrap, path))
 
     # Create the ISO file.
     print '[x] Creating ISO file.'
