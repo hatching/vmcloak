@@ -131,7 +131,7 @@ def main():
         print '[-] Please use one provided in data/keyboard_layout_values.txt.'
         exit(1)
 
-    lock = lockfile.MkdirFileLock('vmcloak')
+    lock = lockfile.MkdirFileLock('/tmp/vmcloak')
 
     try:
         lock.acquire(timeout=2)
