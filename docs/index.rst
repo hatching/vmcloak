@@ -21,6 +21,7 @@ Contents:
    config
    deps
    hwconfig
+   license
 
 
 Indices and tables
