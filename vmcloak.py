@@ -70,6 +70,7 @@ def main():
         vm_visible=False,
         keyboard_layout='US',
         register_cuckoo=True,
+        dependencies='',
     )
 
     args = parser.parse_args()
@@ -132,7 +133,14 @@ def main():
 
     lock = lockfile.MkdirFileLock('vmcloak')
 
-    lock.acquire()
+    try:
+        lock.acquire(timeout=2)
+    except lockfile.LockTimeout:
+        print '[!] Awaiting the opportunity to obtain the lock.'
+        print '[x] If no other instances of vmcloak are running,',
+        print 'then unlock yourself by deleting the vmcloak.lock directory.'
+
+        lock.acquire()
 
     try:
         # TODO This should be part of m.hostonly().
