@@ -92,10 +92,15 @@ def vboxmanage_path(s):
     return vboxmanage
 
 
-def load_hwconf(dirpath='hwconf'):
+def load_hwconf(profile, dirpath='hwconf'):
     ret = {}
 
-    for fname in os.listdir(dirpath):
+    if profile is not None:
+        files = ['%s.json' % profile]
+    else:
+        files = os.listdir(dirpath)
+
+    for fname in files:
         if not fname.endswith('.json'):
             continue
 
@@ -104,6 +109,9 @@ def load_hwconf(dirpath='hwconf'):
             if key not in ret:
                 ret[key] = []
 
-            ret[key].append(value)
+            if isinstance(value, list):
+                ret[key].extend(value)
+            else:
+                ret[key].append(value)
 
     return ret

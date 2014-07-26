@@ -107,6 +107,7 @@ if __name__ == '__main__':
             version=board.get('Version'),
             serial='<SERIAL> 10',
             asset=board.get('Asset Tag'),
+            location=board.get('Location In Chassis'),
         ),
         chassis=dict(
             chassis_type=chassis.get('dmi_type'),

@@ -54,6 +54,7 @@ def main():
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
+    parser.add_argument('--hwconfig-profile', type=str, help='Take a particular profile.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
 
     defaults = dict(
@@ -245,7 +246,7 @@ def main():
     m.attach_iso(m.iso_path)
 
     print '[x] Randomizing Hardware'
-    m.init_vm()
+    m.init_vm(profile=s.hwconfig_profile)
 
     print '[x] Initially configuring Hostonly network'
     m.hostonly(macaddr=s.hostonly_macaddr, index=1)

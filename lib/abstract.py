@@ -84,9 +84,9 @@ class VM(object):
         """List all settings of a Virtual Machine."""
         raise
 
-    def init_vm(self):
+    def init_vm(self, profile):
         """Initialize fields as specified by `FIELDS`."""
-        hwconf = load_hwconf()
+        hwconf = load_hwconf(profile=profile)
 
         def _init_vm(path, fields):
             for key, value in fields.items():
@@ -96,7 +96,7 @@ class VM(object):
                 else:
                     if isinstance(value, tuple):
                         k, v = value
-                        if not hwconf[k]:
+                        if k not in hwconf or not hwconf[k]:
                             value = 'To be filled by O.E.M.'
                         else:
                             if k not in config:
