@@ -48,7 +48,7 @@ Mode=0
 JoinWorkgroup="@WORKGROUP@"
 
 [GuiRunOnce]
-C:\bootstrap.bat
+C:\vmcloak\bootstrap.bat
 
 [IEPopupBlocker]
 BlockPopups="No"
