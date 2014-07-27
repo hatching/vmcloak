@@ -100,7 +100,16 @@ def load_hwconf(profile, dirpath=HWCONF_PATH):
     if profile is not None:
         files = ['%s.json' % profile]
     else:
+        # Load profiles that ship with VMCloak.
         files = os.listdir(dirpath)
+
+        # Load local profiles.
+        local_hwconf = os.path.join(os.getenv('HOME'),
+                                    '.config', 'vmcloak', 'hwconf')
+
+        if os.path.exists(local_hwconf):
+            for fname in os.listdir(local_hwconf):
+                files.append(os.path.join(local_hwconf, fname))
 
     for fname in files:
         if not fname.endswith('.json'):

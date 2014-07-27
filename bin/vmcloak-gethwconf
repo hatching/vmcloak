@@ -64,7 +64,7 @@ if __name__ == '__main__':
         print '[!] You will probably want to run this tool as root.'
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('fname', type=str, help='Name of this configuration.')
+    parser.add_argument('profile', type=str, help='Name of this configuration.')
     parser.add_argument('--dmidecode', type=str, help='Path to dmidecode(8).')
     parser.add_argument('--lshw', type=str, help='Path to lshw(1).')
     parser.add_argument('--repository', type=str, help='Path to Git repository.')
@@ -134,5 +134,5 @@ if __name__ == '__main__':
     if not os.path.isdir(dirpath):
         os.makedirs(dirpath)
 
-    f = open(os.path.join(dirpath, '%s.json' % args.fname), 'wb')
+    f = open(os.path.join(dirpath, '%s.json' % args.profile), 'wb')
     f.write(json.dumps(d, indent=4))
