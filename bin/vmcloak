@@ -16,6 +16,7 @@ import time
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import Dependency
+from vmcloak.iso import buildiso
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
 

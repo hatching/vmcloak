@@ -7,7 +7,8 @@ import shutil
 import subprocess
 import tempfile
 
-from lib.misc import copy_directory_lower, ini_merge, ini_read, ini_write
+from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.misc import copy_directory_lower, ini_merge, ini_read, ini_write
 
 
 def buildiso(mount, winnt_sif, iso_out, bootstrap):
@@ -19,7 +20,7 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
     copy_directory_lower(mount, tempdir)
 
     # Copy the boot image.
-    shutil.copy(os.path.join('data', 'boot.img'), tempdir)
+    shutil.copy(os.path.join(VMCLOAK_ROOT, 'data', 'boot.img'), tempdir)
 
     dst_winnt = os.path.join(tempdir, 'i386', 'winnt.sif')
 
@@ -29,15 +30,17 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
 
     # There are a couple of optional values that should be set if they have
     # not already been set.
-    ini_merge(winnt, os.path.join('data', 'winnt-opt.sif'), overwrite=False)
+    winnt_opt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt-opt.sif')
+    ini_merge(winnt, winnt_opt_sif, overwrite=False)
 
     ini_write(dst_winnt, mode, winnt)
 
     osdir = os.path.join(tempdir, '$oem$', '$1')
     os.makedirs(osdir)
 
-    for fname in os.listdir(os.path.join('data', 'bootstrap')):
-        shutil.copy(os.path.join('data', 'bootstrap', fname),
+    data_bootstrap = os.path.join(VMCLOAK_ROOT, 'data', 'bootstrap')
+    for fname in os.listdir(data_bootstrap):
+        shutil.copy(os.path.join(data_bootstrap, fname),
                     os.path.join(osdir, fname))
 
     for fname in os.listdir(bootstrap):
