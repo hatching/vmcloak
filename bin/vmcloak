@@ -14,6 +14,7 @@ import tempfile
 import time
 
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
+from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import Dependency
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
@@ -154,7 +155,8 @@ def main():
     try:
         # TODO This should be part of m.hostonly().
         print '[x] Ensuring vboxnet0 is running.'
-        subprocess.check_call(['./utils/vboxnet.sh', vboxmanage_path(s)])
+        vboxnet_sh = os.path.join(VMCLOAK_ROOT, 'utils', 'vboxnet.sh')
+        subprocess.check_call([vboxnet_sh, vboxmanage_path(s)])
     except OSError as e:
         print '[-] Is ./utils/vboxnet.sh executable?'
         print e
@@ -170,7 +172,8 @@ def main():
     _, port = sock.getsockname()
 
     print '[x] Configuring WINNT.SIF'
-    buf = configure_winnt_sif(os.path.join('data', 'winnt.sif'), s)
+    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
+    buf = configure_winnt_sif(winnt_sif, s)
     if not buf:
         print '[-] Error configuring WINNT.SIF'
         lock.release()
