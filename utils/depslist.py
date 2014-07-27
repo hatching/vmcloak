@@ -21,5 +21,5 @@ if __name__ == '__main__':
     print '%-16s: %s' % ('dependency', 'description')
     print '-----------------------------'
     print
-    for dep, info in deps.items():
+    for dep, info in sorted(deps.items()):
         print '%-16s: %s' % (dep, info['description'])
