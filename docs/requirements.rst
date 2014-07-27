@@ -14,3 +14,9 @@ well, as well as the following tools:
 
 * dmidecode
 * lshw
+
+The following Python packages are required:
+
+* lockfile
+* sphinx
+* sphinxcontrib-programoutput

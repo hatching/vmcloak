@@ -146,7 +146,7 @@ As VMCloak has its `own repository for these packages
 <https://github.com/jbremer/vmcloak-deps>`_ it is quite likely that one will
 run into a piece of software which is not in the dependency repository yet.
 In that case, please take a look at :ref:`deps-create` to make your own and
-:ref:`deps-pr`, or alternatively :ref:`deps-open-request`.
+:ref:`deps-submit`, or alternatively :ref:`deps-request`.
 
 Suggested configuration entries
 -------------------------------

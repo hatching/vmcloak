@@ -39,12 +39,12 @@ class Dependency(object):
 
         fname = kw.pop('filename')
         arguments = kw.pop('arguments', '')
-        depends = kw.pop('dependencies', None)
+        depends = kw.pop('dependencies', '')
         marker = kw.pop('marker', None)
         flags = []
         cmds = []
 
-        for flag in kw.pop('flags', '').split(','):
+        for flag in kw.pop('flags', '').split():
             if flag.strip():
                 flags.append(flag.strip())
 
@@ -62,8 +62,8 @@ class Dependency(object):
             log.info('Remaining value(s): %s', kw)
             exit(1)
 
-        if depends:
-            for dep in depends.split(','):
+        for dep in depends.split():
+            if dep.strip():
                 self.add(dep.strip())
 
         self.installed.append(dependency)
