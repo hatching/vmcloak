@@ -67,6 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('fname', type=str, help='Name of this configuration.')
     parser.add_argument('--dmidecode', type=str, help='Path to dmidecode(8).')
     parser.add_argument('--lshw', type=str, help='Path to lshw(1).')
+    parser.add_argument('--repository', type=str, help='Path to Git repository.')
 
     args = parser.parse_args()
 
@@ -123,5 +124,15 @@ if __name__ == '__main__':
         harddisk=harddisks,
     )
 
-    f = open(os.path.join('hwconf', '%s.json' % args.fname), 'wb')
+    if args.repository:
+        dirpath = os.path.join(args.repository,
+                               'vmcloak', 'data', 'hwconf')
+    else:
+        dirpath = os.path.join(os.getenv('HOME'),
+                               '.config', 'vmcloak', 'hwconf')
+
+    if not os.path.isdir(dirpath):
+        os.makedirs(dirpath)
+
+    f = open(os.path.join(dirpath, '%s.json' % args.fname), 'wb')
     f.write(json.dumps(d, indent=4))
