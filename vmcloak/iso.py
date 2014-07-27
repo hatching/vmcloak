@@ -44,7 +44,7 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
         shutil.copy(os.path.join(data_bootstrap, fname),
                     os.path.join(osdir, 'vmcloak', fname))
 
-    copytreeinto(bootstrap, os.path.join(osdir, 'vmcloak'))
+    copytreeinto(bootstrap, osdir)
 
     if os.path.isfile('/usr/bin/genisoimage'):
         isocreate = '/usr/bin/genisoimage'
