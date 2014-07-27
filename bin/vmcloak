@@ -19,6 +19,7 @@ from vmcloak.deps import Dependency
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
 
+BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -155,7 +156,7 @@ def main():
     try:
         # TODO This should be part of m.hostonly().
         print '[x] Ensuring vboxnet0 is running.'
-        vboxnet_sh = os.path.join(VMCLOAK_ROOT, 'utils', 'vboxnet.sh')
+        vboxnet_sh = os.path.join(BIN_ROOT, 'vmcloak-vboxnet.sh')
         subprocess.check_call([vboxnet_sh, vboxmanage_path(s)])
     except OSError as e:
         print '[-] Is ./utils/vboxnet.sh executable?'
@@ -233,8 +234,9 @@ def main():
     # Create the ISO file.
     print '[x] Creating ISO file.'
     try:
-        subprocess.check_call(['./utils/buildiso.sh',
-                               s.iso_mount, winntsif, m.iso_path, bootstrap])
+        buildiso_sh = os.path.join(BIN_ROOT, 'vmcloak-buildiso.sh')
+        subprocess.check_call([buildiso_sh, s.iso_mount, winntsif,
+                               m.iso_path, bootstrap])
     except OSError as e:
         print '[-] Is ./utils/buildiso.sh executable?'
         print e

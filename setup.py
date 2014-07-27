@@ -13,7 +13,14 @@ distutils.core.setup(
         'vmcloak.data.hwconf',
         'vmcloak.utils'
     ],
-    scripts=['bin/vmcloak'],
+    scripts=[
+        'bin/vmcloak',
+        'bin/vmcloak-buildiso.sh',
+        'bin/vmcloak-cplower.py',
+        'bin/vmcloak-gethwconf',
+        'bin/vmcloak-inimodify.py',
+        'bin/vmcloak-vboxnet.sh',
+    ],
     url='http://pypi.python.org/pypi/VMCloak/',
     license='docs/LICENSE.txt',
     description='Automated Virtual Machine Generation and Cloaking '

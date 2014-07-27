@@ -36,7 +36,7 @@ TEMPDIR="$(mktemp -d)"
 # Copy all files to our temporary directory, as
 # mounted ISO files are read-only.
 echo "Copying files around.."
-./utils/cplower.py "$MOUNT" "$TEMPDIR"
+vmcloak-cplower.py "$MOUNT" "$TEMPDIR"
 chmod -R +w "$TEMPDIR"
 
 echo "Overwriting various files.."
@@ -46,8 +46,8 @@ cp data/boot.img "$TEMPDIR"
 # set of configuration values that we overwrite whether they're already
 # present in the original winnt.sif or not, and also a set of optional values
 # which will only be used if they're not present in the configuration already.
-./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge "$WINNTSIF" --overwrite
-./utils/inimodify.py "$TEMPDIR/i386/winnt.sif" merge data/winnt-opt.sif
+vmcloak-inimodify.py "$TEMPDIR/i386/winnt.sif" merge "$WINNTSIF" --overwrite
+vmcloak-inimodify.py "$TEMPDIR/i386/winnt.sif" merge data/winnt-opt.sif
 
 echo "Installing bootstrap files and copying dependencies.."
 OSDIR="$TEMPDIR/\$oem\$/\$1"
