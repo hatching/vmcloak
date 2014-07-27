@@ -20,6 +20,7 @@ Contents:
 
    requirements
    config
+   vbox
    deps
    hwconfig
    license

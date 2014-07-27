@@ -92,6 +92,12 @@ class VirtualBox(VM):
         else:
             adapter = 'VirtualBox Host-Only Ethernet Adapter'
 
+        # Ensure our hostonly interface is actually up and running.
+        if adapter not in self._call('list', 'hostonlyifs'):
+            print '[-] Have you configured %s?' % adapter
+            print '[!] Please refer to the documentation to configure it.'
+            return False
+
         nic = {
             'nic%d' % index: 'hostonly',
             'nictype%d' % index: 'Am79C973',

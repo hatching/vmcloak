@@ -1,15 +1,38 @@
-#!/usr/bin/env python
 # Copyright (C) 2014 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-"""Script that modifies an INI file."""
+import os
+import shutil
+import stat
 
-import os.path
-import sys
+
+def copy_directory_lower(srcdir, dstdir):
+    """Copies the source directory as lowercase to the destination directory.
+
+    Lowercase as in, all directory and filenames are translated to lowercase,
+    thus emulating Windows case-insensitive filepaths.
+    """
+    prefix = len(srcdir) + 1
+    for dirpath, dirnames, filenames in os.walk(srcdir):
+        for dirname in dirnames:
+            os.mkdir(os.path.join(dstdir,
+                                  dirpath[prefix:].lower(),
+                                  dirname.lower()))
+
+        for fname in filenames:
+            path = os.path.join(dirpath, fname)[prefix:]
+
+            # Copy the file.
+            shutil.copyfile(os.path.join(srcdir, path),
+                            os.path.join(dstdir, path.lower()))
+
+            # Make the file writable.
+            os.chmod(os.path.join(dstdir, path.lower()),
+                     stat.S_IRUSR | stat.S_IWUSR)
 
 
-def read_ini(path):
+def ini_read(path):
     ret, section = {}, None
 
     if os.path.exists(path):
@@ -39,7 +62,7 @@ def read_ini(path):
     return mode, ret
 
 
-def write_ini(path, mode, data):
+def ini_write(path, mode, data):
     lines = ['']
     for key in sorted(data.keys()):
         lines.append('[%s]' % key)
@@ -67,7 +90,7 @@ def ini_delete(data, section, value):
 
 
 def ini_merge(data, ini2, overwrite=True):
-    mode, data2 = read_ini(ini2)
+    mode, data2 = ini_read(ini2)
     for section in data2:
         for value in data2[section]:
             if section not in data:
@@ -87,43 +110,3 @@ def ini_merge(data, ini2, overwrite=True):
                     break
             else:
                 data[section].append(value)
-
-
-actions = {
-    'add': (ini_add, 2),
-    'delete': (ini_delete, 2),
-    'merge': (ini_merge, 1),
-}
-
-
-if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print 'Usage: python %s <ini> <action> [args..]' % sys.argv[0]
-        print 'Actions:'
-        print '    add <section> <value>'
-        print '    delete <section> <value>'
-        print '    merge <ini2> [--overwrite]'
-        exit(1)
-
-    path, action = sys.argv[1:3]
-    mode, data = read_ini(path)
-
-    if action not in actions:
-        print '%s is not a valid action' % action
-        exit(1)
-
-    argc = actions[action][1]
-    if len(sys.argv) - 3 < argc:
-        print 'Invalid argument count', len(sys.argv) - 3,
-        print 'instead of', argc
-        exit(1)
-
-    d = dict(overwrite=False)
-
-    for arg in sys.argv[3+argc:]:
-        assert arg[:2] == '--'
-        d[arg[2:]] = True
-
-    actions[action][0](data, *sys.argv[3:3+argc], **d)
-
-    write_ini(path, mode, data)

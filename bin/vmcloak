@@ -153,17 +153,6 @@ def main():
 
         lock.acquire()
 
-    try:
-        # TODO This should be part of m.hostonly().
-        print '[x] Ensuring vboxnet0 is running.'
-        vboxnet_sh = os.path.join(BIN_ROOT, 'vmcloak-vboxnet.sh')
-        subprocess.check_call([vboxnet_sh, vboxmanage_path(s)])
-    except OSError as e:
-        print '[-] Is ./utils/vboxnet.sh executable?'
-        print e
-        lock.release()
-        exit(1)
-
     print '[x] Static Host IP', s.host_ip
     print '[x] Static Guest hostonly IP', s.hostonly_ip
     print '[x] Static Guest bridged IP', s.bridged_ip
@@ -233,18 +222,7 @@ def main():
 
     # Create the ISO file.
     print '[x] Creating ISO file.'
-    try:
-        buildiso_sh = os.path.join(BIN_ROOT, 'vmcloak-buildiso.sh')
-        subprocess.check_call([buildiso_sh, s.iso_mount, winntsif,
-                               m.iso_path, bootstrap])
-    except OSError as e:
-        print '[-] Is ./utils/buildiso.sh executable?'
-        print e
-        lock.release()
-        exit(1)
-    except subprocess.CalledProcessError as e:
-        print '[-] Error creating ISO file.'
-        print e
+    if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap):
         lock.release()
         exit(1)
 
@@ -264,7 +242,9 @@ def main():
     m.init_vm(profile=s.hwconfig_profile)
 
     print '[x] Initially configuring Hostonly network'
-    m.hostonly(macaddr=s.hostonly_macaddr)
+    if m.hostonly(macaddr=s.hostonly_macaddr) is False:
+        lock.release()
+        exit(1)
 
     if s.nat:
         m.nat()
