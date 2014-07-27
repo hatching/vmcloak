@@ -8,7 +8,7 @@ import json
 import logging
 import os
 
-from lib.rand import random_string
+from vmcloak.rand import random_string
 
 
 log = logging.getLogger(__name__)

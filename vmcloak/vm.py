@@ -6,9 +6,9 @@
 import os
 import subprocess
 
-from lib.abstract import VM
-from lib.data.config import VBOX_CONFIG
-from lib.rand import random_mac
+from vmcloak.abstract import VM
+from vmcloak.data.config import VBOX_CONFIG
+from vmcloak.rand import random_mac
 
 
 class VirtualBox(VM):

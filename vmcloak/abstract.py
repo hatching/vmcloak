@@ -6,8 +6,8 @@
 import os.path
 import random
 
-from lib.conf import load_hwconf
-from lib.rand import random_serial, random_uuid
+from vmcloak.conf import load_hwconf
+from vmcloak.rand import random_serial, random_uuid
 
 
 class VM(object):

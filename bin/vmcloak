@@ -13,10 +13,10 @@ import subprocess
 import tempfile
 import time
 
-from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
-from lib.deps import Dependency
-from lib.verify import valid_serial_key, valid_keyboard_layout
-from lib.vm import VirtualBox
+from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
+from vmcloak.deps import Dependency
+from vmcloak.verify import valid_serial_key, valid_keyboard_layout
+from vmcloak.vm import VirtualBox
 
 
 logging.basicConfig(level=logging.INFO)
