@@ -6,8 +6,8 @@
 import os
 import subprocess
 
-from data.config import VBOX_CONFIG
 from lib.abstract import VM
+from lib.data.config import VBOX_CONFIG
 from lib.rand import random_mac
 
 
