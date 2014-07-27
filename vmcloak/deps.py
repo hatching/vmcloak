@@ -75,9 +75,9 @@ class Dependency(object):
             print>>self.f, ') else ('
 
         if 'background' in flags:
-            print>>self.f, '  start C:\\deps\\%s' % fname, arguments
+            print>>self.f, '  start C:\\vmcloak\\deps\\%s' % fname, arguments
         else:
-            print>>self.f, '  C:\\deps\\%s' % fname, arguments
+            print>>self.f, '  C:\\vmcloak\\deps\\%s' % fname, arguments
 
         for cmd in cmds:
             if cmd.startswith('click'):
