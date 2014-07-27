@@ -152,16 +152,6 @@ def main():
 
         lock.acquire()
 
-    try:
-        # TODO This should be part of m.hostonly().
-        print '[x] Ensuring vboxnet0 is running.'
-        subprocess.check_call(['./utils/vboxnet.sh', vboxmanage_path(s)])
-    except OSError as e:
-        print '[-] Is ./utils/vboxnet.sh executable?'
-        print e
-        lock.release()
-        exit(1)
-
     print '[x] Static Host IP', s.host_ip
     print '[x] Static Guest hostonly IP', s.hostonly_ip
     print '[x] Static Guest bridged IP', s.bridged_ip
@@ -250,7 +240,9 @@ def main():
     m.init_vm(profile=s.hwconfig_profile)
 
     print '[x] Initially configuring Hostonly network'
-    m.hostonly(macaddr=s.hostonly_macaddr)
+    if m.hostonly(macaddr=s.hostonly_macaddr) is False:
+        lock.release()
+        exit(1)
 
     if s.nat:
         m.nat()
