@@ -103,6 +103,9 @@ To add a new dependency a few basic steps have to be taken:
     other commands while running the installer, such as happens in the Python
     package.)
 
+Using the new Dependency
+^^^^^^^^^^^^^^^^^^^^^^^^
+
 Having followed all these steps your dependency should be good to go. Now add
 the alias of the newly created dependency to the list of ``--dependencies``
 when calling ``./vmcloak.py``.
