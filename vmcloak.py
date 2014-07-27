@@ -15,6 +15,7 @@ import time
 
 from lib.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from lib.deps import Dependency
+from lib.iso import buildiso
 from lib.verify import valid_serial_key, valid_keyboard_layout
 from lib.vm import VirtualBox
 
@@ -229,17 +230,7 @@ def main():
 
     # Create the ISO file.
     print '[x] Creating ISO file.'
-    try:
-        subprocess.check_call(['./utils/buildiso.sh',
-                               s.iso_mount, winntsif, m.iso_path, bootstrap])
-    except OSError as e:
-        print '[-] Is ./utils/buildiso.sh executable?'
-        print e
-        lock.release()
-        exit(1)
-    except subprocess.CalledProcessError as e:
-        print '[-] Error creating ISO file.'
-        print e
+    if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap):
         lock.release()
         exit(1)
 
