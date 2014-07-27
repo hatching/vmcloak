@@ -8,7 +8,8 @@ import subprocess
 import tempfile
 
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.misc import copy_directory_lower, ini_merge, ini_read, ini_write
+from vmcloak.misc import copy_directory_lower, copytreeinto
+from vmcloak.misc import ini_merge, ini_read, ini_write
 
 
 def buildiso(mount, winnt_sif, iso_out, bootstrap):
@@ -36,21 +37,14 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
     ini_write(dst_winnt, mode, winnt)
 
     osdir = os.path.join(tempdir, '$oem$', '$1')
-    os.makedirs(osdir)
+    os.makedirs(os.path.join(osdir, 'vmcloak'))
 
     data_bootstrap = os.path.join(VMCLOAK_ROOT, 'data', 'bootstrap')
     for fname in os.listdir(data_bootstrap):
         shutil.copy(os.path.join(data_bootstrap, fname),
-                    os.path.join(osdir, fname))
+                    os.path.join(osdir, 'vmcloak', fname))
 
-    for fname in os.listdir(bootstrap):
-        path_in = os.path.join(bootstrap, fname)
-        path_out = os.path.join(osdir, fname)
-
-        if os.path.isfile(path_in):
-            shutil.copy(path_in, path_out)
-        else:
-            shutil.copytree(path_in, path_out)
+    copytreeinto(bootstrap, os.path.join(osdir, 'vmcloak'))
 
     if os.path.isfile('/usr/bin/genisoimage'):
         isocreate = '/usr/bin/genisoimage'

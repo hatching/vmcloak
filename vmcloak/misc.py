@@ -32,6 +32,30 @@ def copy_directory_lower(srcdir, dstdir):
                      stat.S_IRUSR | stat.S_IWUSR)
 
 
+def copytreeinto(srcdir, dstdir):
+    """Copy one directory into another directory.
+
+    Unlike shutil.copytree() this function doesn't require the destination
+    directory to be unexisting.
+
+    """
+    if os.path.isfile(dstdir):
+        raise Exception('Cannot create directory if there is already '
+                        'a file: %s' % dstdir)
+
+    if not os.path.isdir(dstdir):
+        os.mkdir(dstdir)
+
+    for fname in os.listdir(srcdir):
+        path_in = os.path.join(srcdir, fname)
+        path_out = os.path.join(dstdir, fname)
+
+        if os.path.isfile(path_in):
+            shutil.copy(path_in, path_out)
+        else:
+            copytreeinto(path_in, path_out)
+
+
 def ini_read(path):
     ret, section = {}, None
 

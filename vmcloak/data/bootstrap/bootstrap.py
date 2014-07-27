@@ -1,5 +1,6 @@
 from ctypes import c_char, c_ushort, c_uint, c_char_p
 from ctypes import windll, Structure, POINTER, sizeof
+import shutil
 import socket
 from _winreg import CreateKeyEx, SetValueEx
 from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
@@ -69,6 +70,10 @@ def set_regkey(key, subkey, name, typ, value):
 
 
 if __name__ == '__main__':
+    # Remove all vmcloak files that are directly related. This does not
+    # include the auxiliary directory or any of its contents.
+    shutil.rmtree('C:\\vmcloak')
+
     s = socket.create_connection((HOST_IP, HOST_PORT))
 
     width, height = [int(x) for x in RESOLUTION.split('x')]

@@ -1,4 +1,4 @@
-call C:\settings.bat
+call C:\vmcloak\settings.bat
 
 echo Setting static IP address.
 netsh interface ip set address name="Local Area Connection" ^
@@ -10,14 +10,10 @@ if "%BRIDGED%" == "yes" (
 )
 
 echo Installing 3rd party software.
-call C:\deps.bat
+call C:\vmcloak\deps.bat
 
 echo Initiate VM hardening.
-C:\Python27\Python.exe C:\bootstrap.py
+C:\Python27\Python.exe C:\vmcloak\bootstrap.py
 
-echo Cleaning up.
-del C:\click.exe C:\deps.bat C:\bootstrap.py
-del C:\settings.bat C:\settings.py
-echo Y|rmdir /S C:\deps
-
-start C:\Python27\Pythonw.exe C:\agent.py
+echo Starting the agent.
+start C:\Python27\Pythonw.exe C:\vmcloak\agent.py

@@ -8,10 +8,12 @@ import json
 import logging
 import os
 
+from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.rand import random_string
 
 
 log = logging.getLogger(__name__)
+HWCONF_PATH = os.path.join(VMCLOAK_ROOT, 'data', 'hwconf')
 
 
 def configure_winnt_sif(path, args):
@@ -92,7 +94,7 @@ def vboxmanage_path(s):
     return vboxmanage
 
 
-def load_hwconf(profile, dirpath='hwconf'):
+def load_hwconf(profile, dirpath=HWCONF_PATH):
     ret = {}
 
     if profile is not None:

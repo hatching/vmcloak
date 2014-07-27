@@ -192,21 +192,24 @@ def main():
 
     bootstrap = tempfile.mkdtemp()
 
+    vmcloak_dir = os.path.join(bootstrap, 'vmcloak')
+    os.mkdir(vmcloak_dir)
+
     # Write the configuration values for bootstrap.bat.
-    with open(os.path.join(bootstrap, 'settings.bat'), 'wb') as f:
+    with open(os.path.join(vmcloak_dir, 'settings.bat'), 'wb') as f:
         for key, value in settings_bat.items():
             print>>f, 'set %s=%s' % (key, value)
 
     # Write the configuration values for bootstrap.py.
-    with open(os.path.join(bootstrap, 'settings.py'), 'wb') as f:
+    with open(os.path.join(vmcloak_dir, 'settings.py'), 'wb') as f:
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
     # TODO Make sure the deps repository is up-to-date.
 
-    os.mkdir(os.path.join(bootstrap, 'deps'))
+    os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
-    deps = Dependency(deps_repo, bootstrap)
+    deps = Dependency(deps_repo, vmcloak_dir)
 
     deps.add('python27')
 
