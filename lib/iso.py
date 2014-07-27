@@ -40,7 +40,14 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
         shutil.copy(os.path.join('data', 'bootstrap', fname),
                     os.path.join(osdir, fname))
 
-    shutil.copytree(bootstrap, os.path.join(osdir, 'bootstrap'))
+    for fname in os.listdir(bootstrap):
+        path_in = os.path.join(bootstrap, fname)
+        path_out = os.path.join(osdir, fname)
+
+        if os.path.isfile(path_in):
+            shutil.copy(path_in, path_out)
+        else:
+            shutil.copytree(path_in, path_out)
 
     if os.path.isfile('/usr/bin/genisoimage'):
         isocreate = '/usr/bin/genisoimage'
