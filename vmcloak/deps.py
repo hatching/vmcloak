@@ -111,7 +111,8 @@ class DependencyManager(object):
 
         sha1 = sha1_file(filepath)
         if sha1 != self.hashes[fname]:
-            print '[!] Dependency %r downloaded with an incorrect sha1.' % fname
+            print '[!] File %s of dependency %r' % (fname, dependency),
+            print 'downloaded with an incorrect sha1.'
             os.unlink(filepath)
             return False
 
@@ -136,8 +137,8 @@ class DependencyManager(object):
             print '[+] Dependency %r has already been fetched.' % dependency
             return True
 
-        if dependency in self.urls:
-            url = self.urls[dependency]['url']
+        if info['filename'] in self.urls:
+            url = self.urls[info['filename']]
 
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
