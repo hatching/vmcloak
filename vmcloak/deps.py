@@ -28,6 +28,8 @@ class DependencyManager(object):
         self.files_repo = None
         self.files_dir = None
 
+        self._load_config()
+
     def _read_conf_file(self, path):
         ret = {}
         for line in open(path, 'rb'):

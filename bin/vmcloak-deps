@@ -8,12 +8,21 @@ import argparse
 from vmcloak.deps import DependencyManager
 
 
+def list_deps(dm):
+    print '%-16s: %s' % ('dependency', 'description')
+    print '-----------------------------'
+    print
+    for dep, info in sorted(dm.repo.items()):
+        print '%-16s: %s' % (dep, info['description'])
+
+
 actions = {
     'init': lambda dm, _: dm.init(),
     'update': lambda dm, _: dm.update(),
     'fetch': lambda dm, arg: dm.fetch(arg),
     'fetch-all': lambda dm, _: dm.fetch_all(),
     'add': lambda dm, _: None,
+    'list-deps': lambda dm, _: list_deps(dm),
 }
 
 

@@ -158,4 +158,4 @@ To do this, please `make a new issue on Github
 Available Dependencies
 ----------------------
 
-.. program-output:: ../utils/depslist.py
+.. program-output:: vmcloak-deps list-deps
