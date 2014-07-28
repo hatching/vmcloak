@@ -7,11 +7,12 @@ import shutil
 import stat
 
 
-def copy_directory_lower(srcdir, dstdir):
+def copytreelower(srcdir, dstdir):
     """Copies the source directory as lowercase to the destination directory.
 
     Lowercase as in, all directory and filenames are translated to lowercase,
     thus emulating Windows case-insensitive filepaths.
+
     """
     prefix = len(srcdir) + 1
     for dirpath, dirnames, filenames in os.walk(srcdir):

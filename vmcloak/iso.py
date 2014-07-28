@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.misc import copy_directory_lower, copytreeinto
+from vmcloak.misc import copytreelower, copytreeinto
 from vmcloak.misc import ini_merge, ini_read, ini_write
 
 
@@ -18,7 +18,7 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
 
     # Copy all files to our temporary directory as mounted iso files are
     # read-only and we need lowercase (aka case-insensitive) filepaths.
-    copy_directory_lower(mount, tempdir)
+    copytreelower(mount, tempdir)
 
     # Copy the boot image.
     shutil.copy(os.path.join(VMCLOAK_ROOT, 'data', 'boot.img'), tempdir)
