@@ -3,21 +3,15 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from ConfigParser import ConfigParser
 import os.path
 
+from vmcloak.misc import ini_read_dict
 
 VMCLOAK_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
-def read_ini(path):
-    c = ConfigParser()
-    c.read(path)
-    return dict((section, dict(c.items(section)))
-                for section in c.sections())
-
 if __name__ == '__main__':
-    deps = read_ini(os.path.join(VMCLOAK_ROOT, 'deps', 'repo.ini'))
+    deps = ini_read_dict(os.path.join(VMCLOAK_ROOT, 'deps', 'repo.ini'))
     print '%-16s: %s' % ('dependency', 'description')
     print '-----------------------------'
     print

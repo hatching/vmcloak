@@ -2,6 +2,7 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from ConfigParser import ConfigParser
 import os
 import shutil
 import stat
@@ -135,3 +136,13 @@ def ini_merge(data, ini2, overwrite=True):
                     break
             else:
                 data[section].append(value)
+
+
+def ini_read_dict(path):
+    c = ConfigParser()
+    c.read(path)
+
+    ret = {}
+    for section in c.sections():
+        ret[section] = dict(c.items(section))
+    return ret
