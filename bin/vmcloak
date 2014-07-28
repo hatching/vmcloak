@@ -15,7 +15,7 @@ import time
 
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.deps import DependencyWriter, DEPS_DIR
+from vmcloak.deps import DependencyWriter
 from vmcloak.iso import buildiso
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
@@ -128,13 +128,6 @@ def main():
     if not s.serial_key or not valid_serial_key(s.serial_key):
         print '[-] The provided serial key is not encoded correctly!'
         print '[-] Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.'
-        exit(1)
-
-    # Make sure the dependencies repository is available.
-    deps_repo = os.path.join(DEPS_DIR, 'repo.ini')
-    if not os.path.isfile(deps_repo):
-        print '[-] Initialize the vmcloak dependency repository first!'
-        print '[x] Please run "vmcloak-deps init".'
         exit(1)
 
     print '[x] Checking whether the keyboard layout is valid.'

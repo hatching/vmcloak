@@ -191,8 +191,8 @@ class DependencyManager(object):
     def _check(self):
         """Checks whether the dependency repository has been initialized."""
         if not os.path.isdir(DEPS_DIR):
-            print '[-] Initialize the vmcloak dependency repository first!'
-            print '[x] Please run "vmcloak-deps init".'
+            print '[!] Initializing the vmcloak-deps repository.'
+            self.init()
             return False
 
         return True
@@ -207,6 +207,9 @@ class DependencyWriter(object):
         self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')
 
         self.dm = DependencyManager()
+
+        # Make sure the dependency repository is available.
+        self.dm.init()
 
     def add(self, dependency):
         if dependency not in self.repo:
