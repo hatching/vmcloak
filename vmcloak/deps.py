@@ -142,7 +142,8 @@ class DependencyManager(object):
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
             try:
-                print '[x] Fetching %s.' % info['filename']
+                print '[x] Fetching dependency %r: %s.' % (
+                    dependency, info['filename'])
                 subprocess.check_call([WGET, '-O', filepath, url])
             except subprocess.CalledProcessError as e:
                 print '[-] Error downloading %s: %s.' % (
@@ -154,14 +155,15 @@ class DependencyManager(object):
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
             try:
-                print '[x] Fetching %s.' % info['filename']
+                print '[x] Fetching dependency %r: %s.' % (
+                    dependency, info['filename'])
                 subprocess.check_call([WGET, '-O', filepath, url])
             except subprocess.CalledProcessError as e:
                 print '[-] Error downloading %s: %s.' % (
                     info['filename'], e)
                 return False
 
-        if not self.check_hash(dependency):
+        if not self.available(dependency):
             return False
 
         return True
