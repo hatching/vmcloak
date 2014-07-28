@@ -3,25 +3,22 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from ConfigParser import ConfigParser
-import os.path
+import os
 import logging
 import shutil
 
+from vmcloak.misc import ini_read_dict
 
 log = logging.getLogger()
 
+DEPS_DIR = os.path.join(os.getenv('HOME'), '.vmcloak', 'deps')
 
-class Dependency(object):
-    def __init__(self, deps_repo, bootstrap_path):
-        conf = ConfigParser()
-        conf.read(deps_repo)
 
+
+class DependencyWriter(object):
+    def __init__(self, bootstrap_path):
         self.bootstrap = bootstrap_path
-
-        self.repo = {}
-        for section in conf.sections():
-            self.repo[section] = dict(conf.items(section))
+        self.repo = ini_read_dict(os.path.join(DEPS_DIR, 'repo.ini'))
 
         self.installed = []
         self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')

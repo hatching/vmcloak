@@ -15,7 +15,7 @@ import time
 
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.deps import Dependency
+from vmcloak.deps import DependencyWriter
 from vmcloak.iso import buildiso
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
@@ -209,7 +209,7 @@ def main():
 
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
-    deps = Dependency(deps_repo, vmcloak_dir)
+    deps = DependencyWriter(vmcloak_dir)
 
     deps.add('python27')
 
