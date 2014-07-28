@@ -11,7 +11,6 @@ distutils.core.setup(
         'vmcloak.data',
         'vmcloak.data.bootstrap',
         'vmcloak.data.hwconf',
-        'vmcloak.utils'
     ],
     scripts=[
         'bin/vmcloak',
