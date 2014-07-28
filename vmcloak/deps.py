@@ -83,7 +83,7 @@ class DependencyManager(object):
 
     def update(self):
         """Updates the dependency repository."""
-        if not self.check():
+        if not self._check():
             return False
 
         try:
@@ -122,7 +122,7 @@ class DependencyManager(object):
 
     def fetch(self, dependency):
         """Fetch a single dependency."""
-        if not self.check():
+        if not self._check():
             return False
 
         self._load_config()
@@ -173,7 +173,7 @@ class DependencyManager(object):
 
     def fetch_all(self):
         """Fetch all dependencies at once."""
-        if not self.check():
+        if not self._check():
             return False
 
         self._load_config()
@@ -188,7 +188,7 @@ class DependencyManager(object):
 
         return True
 
-    def check(self):
+    def _check(self):
         """Checks whether the dependency repository has been initialized."""
         if not os.path.isdir(DEPS_DIR):
             print '[-] Initialize the vmcloak dependency repository first!'
