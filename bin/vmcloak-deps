@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# Copyright (C) 2014 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+import argparse
+
+from vmcloak.deps import DependencyManager
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('action', type=str, choices=['init', 'update', 'fetch', 'fetch-all', 'add'], help='Action to perform.')
+    parser.add_argument('argument', type=str, nargs='?', help='Arguments.')
+
+    args = parser.parse_args()
+
+    dm = DependencyManager()
+
+    if args.action == 'init':
+        dm.init()
+
+    if args.action == 'update':
+        dm.update()
+
+    if args.action == 'fetch':
+        dm.fetch(args.argument)
+
+    if args.action == 'fetch-all':
+        dm.fetch_all()
+
+    if args.action == 'add':
+        pass
+
+
+if __name__ == '__main__':
+    main()

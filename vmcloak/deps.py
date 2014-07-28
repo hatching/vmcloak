@@ -6,13 +6,187 @@
 import os
 import logging
 import shutil
+import subprocess
 
-from vmcloak.misc import ini_read_dict
+from vmcloak.misc import ini_read_dict, sha1_file
 
 log = logging.getLogger()
 
 DEPS_DIR = os.path.join(os.getenv('HOME'), '.vmcloak', 'deps')
 
+GIT = '/usr/bin/git'
+WGET = '/usr/bin/wget'
+
+DEPS_REPO = 'git://github.com/jbremer/vmcloak-deps.git'
+
+
+class DependencyManager(object):
+    def __init__(self):
+        self.conf = {}
+        self.repo = {}
+        self.urls = {}
+        self.files_repo = None
+        self.files_dir = None
+
+    def _read_conf_file(self, path):
+        ret = {}
+        for line in open(path, 'rb'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+
+            key, value = line.split('=', 1)
+            ret[key.strip()] = value.strip()
+        return ret
+
+    def _load_config(self):
+        if os.path.isdir(DEPS_DIR) and not self.repo:
+            self.conf = ini_read_dict(os.path.join(DEPS_DIR, 'conf.ini'))
+            self.repo = ini_read_dict(os.path.join(DEPS_DIR, 'repo.ini'))
+
+            self.urls = self._read_conf_file(
+                os.path.join(DEPS_DIR, 'urls.txt'))
+            self.hashes = self._read_conf_file(
+                os.path.join(DEPS_DIR, 'hashes.txt'))
+
+            self.files_repo = self.conf['vmcloak-files']['git']
+            self.files_dir = os.path.join(DEPS_DIR, 'files')
+
+    def init(self):
+        """Initializes the dependency repository."""
+        if not os.path.isdir(DEPS_DIR):
+            try:
+                print '[x] Cloning vmcloak-deps.'
+                subprocess.check_call([GIT, 'clone', DEPS_REPO, DEPS_DIR])
+            except subprocess.CalledProcessError as e:
+                print '[-] Error cloning vmcloak-deps: %s.' % e
+                return False
+
+        self._load_config()
+
+        if not os.path.isdir(self.files_dir):
+            files_git = os.path.join(DEPS_DIR, 'files')
+
+            try:
+                print '[x] Setting up vmcloak-files.'
+                subprocess.check_call([GIT, 'init', files_git])
+                subprocess.check_call([GIT, 'remote', 'add',
+                                       'origin', self.files_repo],
+                                      cwd=files_git)
+            except subprocess.CalledProcessError as e:
+                print '[-] Error setting up vmcloak-files directory: %s' % e
+                return False
+
+        return True
+
+    def update(self):
+        """Updates the dependency repository."""
+        if not self.check():
+            return False
+
+        try:
+            print '[x] Updating vmcloak-deps.'
+            subprocess.check_call([GIT, 'pull', 'origin', 'master'],
+                                  cwd=DEPS_DIR)
+        except subprocess.CalledProcessError as e:
+            print '[-] Error updating the vmcloak-deps repository: %s' % e
+            return False
+
+        return True
+
+    def check_hash(self, dependency):
+        """Checks the integrity of a downloaded dependency."""
+        self._load_config()
+
+        if dependency not in self.repo:
+            print '[-] No such dependency: %s.' % dependency
+            return False
+
+        fname = self.repo[dependency]['filename']
+        filepath = os.path.join(DEPS_DIR, 'files', fname)
+
+        if not os.path.exists(filepath):
+            return False
+
+        sha1 = sha1_file(filepath)
+        if sha1 != self.hashes[fname]:
+            print '[!] Dependency downloaded with an incorrect sha1.'
+            os.unlink(filepath)
+            return False
+
+        return True
+
+    def fetch(self, dependency):
+        """Fetch a single dependency."""
+        self._load_config()
+
+        if dependency not in self.repo:
+            print '[-] No such dependency: %s.' % dependency
+            return False
+
+        info = self.repo[dependency]
+
+        filepath = os.path.join(DEPS_DIR, 'files', info['filename'])
+
+        if os.path.isfile(filepath) and self.check_hash(dependency):
+            print '[+] Dependency %r has already been fetched.' % dependency
+            return True
+
+        if dependency in self.urls:
+            url = self.urls[dependency]['url']
+
+            # Using wget seems the easiest as it shows the progress.
+            # TODO Should we be using a Python library for this?
+            try:
+                print '[x] Fetching %s.' % info['filename']
+                subprocess.check_call([WGET, '-O', filepath, url])
+            except subprocess.CalledProcessError as e:
+                print '[-] Error downloading %s: %s.' % (
+                    info['filename'], e)
+                return False
+        else:
+            url = self.conf['vmcloak-files']['raw'] % info['filename']
+
+            # Using wget seems the easiest as it shows the progress.
+            # TODO Should we be using a Python library for this?
+            try:
+                print '[x] Fetching %s.' % info['filename']
+                subprocess.check_call([WGET, '-O', filepath, url])
+            except subprocess.CalledProcessError as e:
+                print '[-] Error downloading %s: %s.' % (
+                    info['filename'], e)
+                return False
+
+        if not self.check_hash(dependency):
+            return False
+
+        return True
+
+    def fetch_all(self):
+        """Fetch all dependencies at once."""
+        if not self.check():
+            return False
+
+        self._load_config()
+
+        try:
+            print '[x] Cloning the vmcloak-files repository.'
+            subprocess.check_call([GIT, 'pull', 'origin', 'master'],
+                                  cwd=self.files_dir)
+        except subprocess.CalledProcessError as e:
+            print '[-] Error fetching vmcloak-files repository: %s' % e
+            return False
+
+        return True
+
+    def check(self):
+        """Checks whether the dependency repository has been initialized."""
+        if not os.path.isdir(DEPS_DIR):
+            print '[-] The vmcloak-deps repository has not been initialized!'
+            print '[!] Please refer to vmcloak-deps and the documentation.'
+            return False
+
+        return True
 
 
 class DependencyWriter(object):
@@ -85,7 +259,7 @@ class DependencyWriter(object):
         if marker:
             print>>self.f, ')'
 
-        shutil.copy(os.path.join('deps', 'files', fname),
+        shutil.copy(os.path.join(DEPS_DIR, 'files', fname),
                     os.path.join(self.bootstrap, 'deps', fname))
 
     def write(self):

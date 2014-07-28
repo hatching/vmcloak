@@ -15,6 +15,7 @@ distutils.core.setup(
     ],
     scripts=[
         'bin/vmcloak',
+        'bin/vmcloak-deps',
         'bin/vmcloak-gethwconf',
     ],
     url='http://pypi.python.org/pypi/vmcloak/',

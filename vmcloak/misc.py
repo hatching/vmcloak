@@ -3,6 +3,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from ConfigParser import ConfigParser
+import hashlib
 import os
 import shutil
 import stat
@@ -146,3 +147,18 @@ def ini_read_dict(path):
     for section in c.sections():
         ret[section] = dict(c.items(section))
     return ret
+
+
+def sha1_file(path):
+    """Calculate the sha1 hash of a file."""
+    h = hashlib.sha1()
+    f = open(path, 'rb')
+
+    while True:
+        buf = f.read(1024*1024)
+        if not buf:
+            break
+
+        h.update(buf)
+
+    return h.hexdigest()
