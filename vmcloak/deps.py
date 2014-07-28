@@ -201,7 +201,6 @@ class DependencyManager(object):
 class DependencyWriter(object):
     def __init__(self, bootstrap_path):
         self.bootstrap = bootstrap_path
-        self.repo = ini_read_dict(os.path.join(DEPS_DIR, 'repo.ini'))
 
         self.installed = []
         self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')
@@ -210,6 +209,9 @@ class DependencyWriter(object):
 
         # Make sure the dependency repository is available.
         self.dm.init()
+
+        # Copy the repository information from the dependency manager.
+        self.repo = self.dm.repo
 
     def add(self, dependency):
         if dependency not in self.repo:
