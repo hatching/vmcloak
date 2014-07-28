@@ -8,30 +8,24 @@ import argparse
 from vmcloak.deps import DependencyManager
 
 
+actions = {
+    'init': lambda dm, _: dm.init(),
+    'update': lambda dm, _: dm.update(),
+    'fetch': lambda dm, arg: dm.fetch(arg),
+    'fetch-all': lambda dm, _: dm.fetch_all(),
+    'add': lambda dm, _: None,
+}
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', type=str, choices=['init', 'update', 'fetch', 'fetch-all', 'add'], help='Action to perform.')
+    parser.add_argument('action', type=str, choices=actions.keys(), help='Action to perform.')
     parser.add_argument('argument', type=str, nargs='?', help='Arguments.')
 
     args = parser.parse_args()
 
     dm = DependencyManager()
-
-    if args.action == 'init':
-        dm.init()
-
-    if args.action == 'update':
-        dm.update()
-
-    if args.action == 'fetch':
-        dm.fetch(args.argument)
-
-    if args.action == 'fetch-all':
-        dm.fetch_all()
-
-    if args.action == 'add':
-        pass
-
+    actions[args.action](dm, args.argument)
 
 if __name__ == '__main__':
     main()
