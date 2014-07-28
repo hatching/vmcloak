@@ -3,4 +3,4 @@
 Keyboard Layout possibilities
 -----------------------------
 
-.. literalinclude:: ../data/keyboard_layout_values.txt
+.. literalinclude:: ../vmcloak/data/keyboard_layout_values.txt

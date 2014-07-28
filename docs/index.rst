@@ -24,6 +24,7 @@ Contents:
    deps
    hwconfig
    license
+   credits
 
 
 Indices and tables
