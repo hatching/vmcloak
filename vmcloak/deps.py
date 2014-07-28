@@ -94,8 +94,9 @@ class DependencyManager(object):
 
         return True
 
-    def check_hash(self, dependency):
-        """Checks the integrity of a downloaded dependency."""
+    def available(self, dependency):
+        """Checks whether a dependency is available and whether its integrity
+        is correct."""
         self._load_config()
 
         if dependency not in self.repo:
@@ -110,7 +111,7 @@ class DependencyManager(object):
 
         sha1 = sha1_file(filepath)
         if sha1 != self.hashes[fname]:
-            print '[!] Dependency downloaded with an incorrect sha1.'
+            print '[!] Dependency %r downloaded with an incorrect sha1.' % fname
             os.unlink(filepath)
             return False
 
@@ -118,6 +119,9 @@ class DependencyManager(object):
 
     def fetch(self, dependency):
         """Fetch a single dependency."""
+        if not self.check():
+            return False
+
         self._load_config()
 
         if dependency not in self.repo:
@@ -128,7 +132,7 @@ class DependencyManager(object):
 
         filepath = os.path.join(DEPS_DIR, 'files', info['filename'])
 
-        if os.path.isfile(filepath) and self.check_hash(dependency):
+        if self.available(dependency):
             print '[+] Dependency %r has already been fetched.' % dependency
             return True
 
@@ -182,8 +186,8 @@ class DependencyManager(object):
     def check(self):
         """Checks whether the dependency repository has been initialized."""
         if not os.path.isdir(DEPS_DIR):
-            print '[-] The vmcloak-deps repository has not been initialized!'
-            print '[!] Please refer to vmcloak-deps and the documentation.'
+            print '[-] Initialize the vmcloak dependency repository first!'
+            print '[x] Please run "vmcloak-deps init".'
             return False
 
         return True
@@ -197,14 +201,20 @@ class DependencyWriter(object):
         self.installed = []
         self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')
 
+        self.dm = DependencyManager()
+
     def add(self, dependency):
         if dependency not in self.repo:
             log.error('Dependency %s not found!', dependency)
-            exit(1)
+            return False
 
         if dependency in self.installed:
             log.debug('Dependency %s has already been handled.', dependency)
-            return
+            return True
+
+        if not self.dm.available(dependency):
+            if not self.dm.fetch(dependency):
+                return False
 
         kw = self.repo[dependency]
 
@@ -261,6 +271,7 @@ class DependencyWriter(object):
 
         shutil.copy(os.path.join(DEPS_DIR, 'files', fname),
                     os.path.join(self.bootstrap, 'deps', fname))
+        return True
 
     def write(self):
         self.f.close()

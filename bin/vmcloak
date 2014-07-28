@@ -15,7 +15,7 @@ import time
 
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.deps import DependencyWriter
+from vmcloak.deps import DependencyWriter, DEPS_DIR
 from vmcloak.iso import buildiso
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox
@@ -131,9 +131,10 @@ def main():
         exit(1)
 
     # Make sure the dependencies repository is available.
-    deps_repo = os.path.join('deps', 'repo.ini')
-    if not os.path.exists(deps_repo):
-        print '[-] Please run "git submodule update --init" first!'
+    deps_repo = os.path.join(DEPS_DIR, 'repo.ini')
+    if not os.path.isfile(deps_repo):
+        print '[-] Initialize the vmcloak dependency repository first!'
+        print '[x] Please run "vmcloak-deps init".'
         exit(1)
 
     print '[x] Checking whether the keyboard layout is valid.'
@@ -205,17 +206,21 @@ def main():
         for key, value in settings_py.items():
             print>>f, '%s = %r' % (key, value)
 
-    # TODO Make sure the deps repository is up-to-date.
-
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
     deps = DependencyWriter(vmcloak_dir)
 
-    deps.add('python27')
+    if not deps.add('python27'):
+        lock.release()
+        exit(1)
 
-    for d in s.dependencies.split(','):
-        if d.strip():
-            deps.add(d.strip())
+    for d in s.dependencies.split():
+        if not d.strip():
+            continue
+
+        if not deps.add(d.strip()):
+            lock.release()
+            exit(1)
 
     deps.write()
 
