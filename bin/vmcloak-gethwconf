@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 
+SUDO = '/usr/bin/sudo'
 DMIDECODE = '/usr/sbin/dmidecode'
 LSHW = '/usr/bin/lshw'
 
@@ -16,7 +17,7 @@ def get_dmi(t):
     ret = {}
 
     try:
-        output = subprocess.check_output([DMIDECODE, '-t', '%d' % t])
+        output = subprocess.check_output([SUDO, DMIDECODE, '-t', '%d' % t])
     except subprocess.CalledProcessError:
         return ret
 
@@ -35,7 +36,7 @@ def get_dmi(t):
 
 def get_lshw(c):
     try:
-        output = subprocess.check_output([LSHW, '-C', c])
+        output = subprocess.check_output([SUDO, LSHW, '-C', c])
     except subprocess.CalledProcessError:
         return
 
@@ -60,9 +61,6 @@ def get_lshw(c):
 
 
 if __name__ == '__main__':
-    if os.geteuid():
-        print '[!] You will probably want to run this tool as root.'
-
     parser = argparse.ArgumentParser()
     parser.add_argument('profile', type=str, help='Name of this configuration.')
     parser.add_argument('--dmidecode', type=str, help='Path to dmidecode(8).')
@@ -70,6 +68,15 @@ if __name__ == '__main__':
     parser.add_argument('--repository', type=str, help='Path to Git repository.')
 
     args = parser.parse_args()
+
+    if args.repository:
+        dirpath = os.path.join(args.repository, 'vmcloak', 'data', 'hwconf')
+    else:
+        dirpath = os.path.join(os.getenv('HOME'), '.vmcloak', 'hwconf')
+
+    if not os.geteuid() and dirpath.startswith('/root/'):
+        print '[!] You are running this tool from a root shell, this will'
+        print '..  write the hardware profile to: %s!' % dirpath
 
     if args.dmidecode:
         DMIDECODE = args.dmidecode
@@ -123,13 +130,6 @@ if __name__ == '__main__':
         ),
         harddisk=harddisks,
     )
-
-    if args.repository:
-        dirpath = os.path.join(args.repository,
-                               'vmcloak', 'data', 'hwconf')
-    else:
-        dirpath = os.path.join(os.getenv('HOME'),
-                               '.config', 'vmcloak', 'hwconf')
 
     if not os.path.isdir(dirpath):
         os.makedirs(dirpath)
