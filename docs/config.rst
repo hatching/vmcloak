@@ -20,8 +20,8 @@ a single one, VMCloak supports one or more configuration file(s) to be
 specified using the ``-s`` (short for ``--settings``) switch.
 
 Configuration entries in the INI files should be present in the ``vmcloak``
-section. E.g., ``./vmcloak.py --basedir ~/vms`` would be equal to having the
-following INI file, *conf.ini*, with ``./vmcloak.py -s conf.ini``.
+section. E.g., ``vmcloak --basedir ~/vms`` would be equal to having the
+following INI file, *conf.ini*, with ``vmcloak -s conf.ini``.
 
 .. code-block:: ini
 
@@ -39,7 +39,7 @@ Let's take the following command:
 
 .. code-block:: bash
 
-    ./vmcloak.py -s first.conf -s second.conf --iso-mount /mnt/winxp cuckoo1
+    vmcloak -s first.conf -s second.conf --iso-mount /mnt/winxp cuckoo1
 
 In this example the order of precedence is as follows (from lowest to
 highest):
@@ -79,8 +79,7 @@ root as well. The following bash snippet depicts how to setup the ISO mount.
     sudo mkdir /mnt/winxp
     sudo mount -o loop,ro winxp.iso /mnt/winxp
 
-Then, when mounted, one would give ``--iso-mount /mnt/winxp`` to
-``./vmcloak.py``.
+Then, when mounted, one would give ``--iso-mount /mnt/winxp`` to ``vmcloak``.
 
 .. _conf-basedir:
 
@@ -110,7 +109,7 @@ VM Name
 
 The Virtual Machine name represents the unique identifier for this VM. This
 value is the extra argument on the command line, e.g.,
-``cuckoo1`` in ``./vmcloak.py -s conf.ini cuckoo1``.
+``cuckoo1`` in ``vmcloak -s conf.ini cuckoo1``.
 
 Semi-required configuration entries
 -----------------------------------

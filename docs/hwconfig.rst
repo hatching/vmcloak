@@ -13,7 +13,7 @@ Creating a Hardware Profile
 ---------------------------
 
 Creating a new hardware profile of a machine requires one to run
-``./utils/gethwconf.py <profile>`` on said machine. The ``profile`` represents
+``vmcloak-gethwconf <profile>`` on said machine. The ``profile`` represents
 the name of this profile - the profile will be called after it and put in the
 ``hwconf/`` directory.
 
@@ -21,4 +21,4 @@ As an example, to create a hardware profile of a lenovo thinkpad, one may do:
 
 .. code-block:: bash
 
-    ./utils/gethwconf.py lenovo_x220
+    vmcloak-gethwconf lenovo_x220

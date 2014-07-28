@@ -3,10 +3,10 @@ Dependencies
 
 VMCloak features various dependencies. These dependencies allow one to install
 critical and/or useful software packages in the Virtual Machine without any
-user interaction. For example, to run Cuckoo Python is required, and to run
-.NET applications the .NET framework is required.
+user interaction. For example, to run Cuckoo ``Python`` is required, and to
+run .NET applications the ``.NET framework`` is required.
 
-For a list of all available extensions, please refer to
+For a list of all available extensions, please refer to the
 :ref:`deps-available`. If you find yourself requiring a package that is not
 yet supported, then you can either :ref:`create a new dependency yourself
 <deps-create>` and :ref:`submit the dependency <deps-submit>` or
@@ -21,7 +21,7 @@ To add a new dependency a few basic steps have to be taken:
 
 * Add the installer to the ``files/`` directory of the ``vmcloak-deps``
   repository. (The ``vmcloak`` repository clones the ``vmcloak-deps``
-  repository into the ``deps/`` directory.)
+  repository into the ``~/.vmcloak/deps`` directory.)
 * Create a new section in ``vmcloak-deps``'s ``repo.ini``. The name of the
   section will become the alias of the new dependency:
 
@@ -108,7 +108,7 @@ Using the new Dependency
 
 Having followed all these steps your dependency should be good to go. Now add
 the alias of the newly created dependency to the list of ``--dependencies``
-when calling ``./vmcloak.py``.
+when calling ``vmcloak``.
 
 .. _deps-submit:
 
