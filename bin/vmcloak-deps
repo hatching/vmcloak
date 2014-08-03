@@ -17,12 +17,16 @@ def list_deps(dm):
 
 
 actions = {
-    'init': lambda dm, _: dm.init(),
-    'update': lambda dm, _: dm.update(),
+    'init': lambda dm: dm.init(),
+    'update': lambda dm: dm.update(),
     'fetch': lambda dm, arg: dm.fetch(arg),
-    'fetch-all': lambda dm, _: dm.fetch_all(),
-    'add': lambda dm, _: None,
-    'list-deps': lambda dm, _: list_deps(dm),
+    'fetch-all': lambda dm: dm.fetch_all(),
+    'add': lambda dm: None,
+    'list-deps': lambda dm: list_deps(dm),
+}
+
+action_args = {
+    'fetch': 'dependency',
 }
 
 
@@ -33,8 +37,17 @@ def main():
 
     args = parser.parse_args()
 
+    if args.action in action_args and args.argument is None:
+        print '[-] Action %r requires an argument: %r.' % (
+            args.action, action_args[args.action])
+        exit(1)
+
     dm = DependencyManager()
-    actions[args.action](dm, args.argument)
+
+    if args.argument is None:
+        actions[args.action](dm)
+    else:
+        actions[args.action](dm, args.argument)
 
 if __name__ == '__main__':
     main()
