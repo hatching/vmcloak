@@ -3,12 +3,15 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import logging
 import os
 import subprocess
 
 from vmcloak.abstract import VM
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.rand import random_mac
+
+log = logging.getLogger()
 
 
 class VirtualBox(VM):
@@ -32,7 +35,7 @@ class VirtualBox(VM):
         try:
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            print '[-] Error running command:', e
+            log.error('[-] Error running command: %s', e)
             exit(1)
 
         return ret.strip()
@@ -94,8 +97,8 @@ class VirtualBox(VM):
 
         # Ensure our hostonly interface is actually up and running.
         if adapter not in self._call('list', 'hostonlyifs'):
-            print '[-] Have you configured %s?' % adapter
-            print '[!] Please refer to the documentation to configure it.'
+            log.error('Have you configured %s?', adapter)
+            log.info('Please refer to the documentation to configure it.')
             return False
 
         nic = {

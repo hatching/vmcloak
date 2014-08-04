@@ -71,9 +71,9 @@ def vboxmanage_path(s):
         return s.vboxmanage
 
     if not s.cuckoo or not os.path.isdir(s.cuckoo):
-        print '[-] Please provide your Cuckoo root directory.'
-        print '[-] Or provide the path to the VBoxManage executable.'
-        exit(1)
+        log.error('Please provide your Cuckoo root directory.')
+        log.info('Or provide the path to the VBoxManage executable.')
+        return
 
     conf_path = os.path.join(s.cuckoo, 'conf', 'virtualbox.conf')
 

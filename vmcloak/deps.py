@@ -58,10 +58,10 @@ class DependencyManager(object):
         """Initializes the dependency repository."""
         if not os.path.isdir(DEPS_DIR):
             try:
-                print '[x] Cloning vmcloak-deps.'
+                log.info('Cloning vmcloak-deps.')
                 subprocess.check_call([GIT, 'clone', DEPS_REPO, DEPS_DIR])
             except subprocess.CalledProcessError as e:
-                print '[-] Error cloning vmcloak-deps: %s.' % e
+                log.error('Error cloning vmcloak-deps: %s.', e)
                 return False
 
         self._load_config()
@@ -70,13 +70,13 @@ class DependencyManager(object):
             files_git = os.path.join(DEPS_DIR, 'files')
 
             try:
-                print '[x] Setting up vmcloak-files.'
+                log.info('Setting up vmcloak-files.')
                 subprocess.check_call([GIT, 'init', files_git])
                 subprocess.check_call([GIT, 'remote', 'add',
                                        'origin', self.files_repo],
                                       cwd=files_git)
             except subprocess.CalledProcessError as e:
-                print '[-] Error setting up vmcloak-files directory: %s' % e
+                log.error('Error setting up vmcloak-files directory: %s', e)
                 return False
 
         return True
@@ -87,11 +87,11 @@ class DependencyManager(object):
             return False
 
         try:
-            print '[x] Updating vmcloak-deps.'
+            log.info('Updating vmcloak-deps.')
             subprocess.check_call([GIT, 'pull', 'origin', 'master'],
                                   cwd=DEPS_DIR)
         except subprocess.CalledProcessError as e:
-            print '[-] Error updating the vmcloak-deps repository: %s' % e
+            log.error('Error updating the vmcloak-deps repository: %s', e)
             return False
 
         return True
@@ -102,7 +102,7 @@ class DependencyManager(object):
         self._load_config()
 
         if dependency not in self.repo:
-            print '[-] No such dependency: %s.' % dependency
+            log.info('No such dependency: %s.', dependency)
             return False
 
         fname = self.repo[dependency]['filename']
@@ -113,8 +113,8 @@ class DependencyManager(object):
 
         sha1 = sha1_file(filepath)
         if sha1 != self.hashes[fname]:
-            print '[!] File %s of dependency %r' % (fname, dependency),
-            print 'downloaded with an incorrect sha1.'
+            log.warning('File %s of dependency %r downloaded with '
+                        'an incorrect sha1.', fname, dependency)
             os.unlink(filepath)
             return False
 
@@ -128,7 +128,7 @@ class DependencyManager(object):
         self._load_config()
 
         if dependency not in self.repo:
-            print '[-] No such dependency: %s.' % dependency
+            log.warning('No such dependency: %s.', dependency)
             return False
 
         info = self.repo[dependency]
@@ -136,7 +136,7 @@ class DependencyManager(object):
         filepath = os.path.join(DEPS_DIR, 'files', info['filename'])
 
         if self.available(dependency):
-            print '[+] Dependency %r has already been fetched.' % dependency
+            log.info('Dependency %r has already been fetched.', dependency)
             return True
 
         if info['filename'] in self.urls:
@@ -145,12 +145,11 @@ class DependencyManager(object):
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
             try:
-                print '[x] Fetching dependency %r: %s.' % (
-                    dependency, info['filename'])
+                log.debug('Fetching dependency %r: %s.',
+                          dependency, info['filename'])
                 subprocess.check_call([WGET, '-O', filepath, url])
             except subprocess.CalledProcessError as e:
-                print '[-] Error downloading %s: %s.' % (
-                    info['filename'], e)
+                log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
         else:
             url = self.conf['vmcloak-files']['raw'] % info['filename']
@@ -158,12 +157,11 @@ class DependencyManager(object):
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
             try:
-                print '[x] Fetching dependency %r: %s.' % (
-                    dependency, info['filename'])
+                log.debug('Fetching dependency %r: %s.',
+                          dependency, info['filename'])
                 subprocess.check_call([WGET, '-O', filepath, url])
             except subprocess.CalledProcessError as e:
-                print '[-] Error downloading %s: %s.' % (
-                    info['filename'], e)
+                log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
 
         if not self.available(dependency):
@@ -179,11 +177,11 @@ class DependencyManager(object):
         self._load_config()
 
         try:
-            print '[x] Cloning the vmcloak-files repository.'
+            log.info('Cloning the vmcloak-files repository.')
             subprocess.check_call([GIT, 'pull', 'origin', 'master'],
                                   cwd=self.files_dir)
         except subprocess.CalledProcessError as e:
-            print '[-] Error fetching vmcloak-files repository: %s' % e
+            log.error('Error fetching vmcloak-files repository: %s', e)
             return False
 
         return True
@@ -191,7 +189,7 @@ class DependencyManager(object):
     def _check(self):
         """Checks whether the dependency repository has been initialized."""
         if not os.path.isdir(DEPS_DIR):
-            print '[!] Initializing the vmcloak-deps repository.'
+            log.debug('Initializing the vmcloak-deps repository.')
             self.init()
             return False
 

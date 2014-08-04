@@ -3,6 +3,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import os.path
+import logging
 import shutil
 import subprocess
 import tempfile
@@ -10,6 +11,8 @@ import tempfile
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.misc import copytreelower, copytreeinto
 from vmcloak.misc import ini_merge, ini_read, ini_write
+
+log = logging.getLogger()
 
 
 def buildiso(mount, winnt_sif, iso_out, bootstrap):
@@ -51,7 +54,7 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
     elif os.path.isfile('/usr/bin/mkisofs'):
         isocreate = '/usr/bin/mkisofs'
     else:
-        print '[-] Either genisoimage or mkisofs is required!'
+        log.error('Either genisoimage or mkisofs is required!')
         shutil.rmtree(tempdir)
         return False
 
@@ -65,7 +68,7 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap):
 
         subprocess.check_call(args)
     except subprocess.CalledProcessError as e:
-        print '[-] Error creating ISO file: %s' % e
+        log.error('Error creating ISO file: %s', e)
         shutil.rmtree(tempdir)
         return False
 

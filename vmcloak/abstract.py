@@ -3,11 +3,14 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import logging
 import os.path
 import random
 
 from vmcloak.conf import load_hwconf
 from vmcloak.rand import random_serial, random_uuid
+
+log = logging.getLogger()
 
 
 class VM(object):
@@ -122,10 +125,10 @@ class VM(object):
                             elif value.startswith('<UUID>'):
                                 value = random_uuid()
 
-                    print '[+] Setting %r to %r' % (key, value)
+                    log.debug('Setting %r to %r.', key, value)
                     ret = self.set_field(key, value)
                     if ret:
-                        print ret
+                        log.debug(ret)
 
         config = {}
         _init_vm('', self.FIELDS)

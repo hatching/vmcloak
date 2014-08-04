@@ -94,75 +94,85 @@ def main():
     s.from_defaults(defaults)
 
     if not s.cuckoo and s.register_cuckoo:
-        print '[-] To register the Virtual Machine with Cuckoo'
-        print '[-] please provide the Cuckoo directory.'
-        print '[x] To disable registering please provide --no-register-cuckoo'
-        print '[x] or register-cuckoo = false in the configuration.'
+        log.error('To register the Virtual Machine with Cuckoo '
+                  'the Cuckoo directory has to be provided.')
+        log.info('To disable registering please provide --no-register-cuckoo '
+                 'or specify register-cuckoo = false in the configuration.')
         exit(1)
 
     if not s.vm_dir:
-        print '[-] Please provide a directory for the associated VM files.'
+        log.error('Please provide --vm-dir a directory for the '
+                  'associated VM files.')
+        log.info('Optionally this directory can be put into tmpfs for '
+                 'improved speed.')
         exit(1)
 
     if not s.data_dir:
-        print '[-] Please provide the data directory for the VM.'
+        log.error('Please provide --data-dir a directory for the harddisk '
+                  'and .iso files for the virtual machine.')
+        log.info('It is recommended to store this directory on a regular '
+                 'harddisk or SSD - not in tmpfs.')
         exit(1)
 
-    if s.vm == 'virtualbox':
+    if s.vm.lower() == 'virtualbox':
+        vboxmanage = vboxmanage_path(s)
+        if not vboxmanage:
+            exit(1)
+
         m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
-                       vboxmanage=vboxmanage_path(s))
+                       vboxmanage=vboxmanage)
     else:
-        print '[-] Only VirtualBox is supported as of now'
+        log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
 
     if s.delete:
-        print '[x] Unregistering and deleting the VM and its associated files'
+        log.info('Unregistering and deleting the VM and its associated '
+                 'files.')
         m.delete_vm()
         exit(0)
 
     if not s.iso_mount or not os.path.isdir(s.iso_mount):
-        print '[-] Please specify the path to a mounted '
-        print '[-] Windows Installer ISO image.'
+        log.error('Please specify --iso-mount to a directory containing the '
+                  'mounted Windows Installer ISO image.')
+        log.info('Refer to the documentation on mounting an .iso image.')
         exit(1)
 
     if not s.serial_key or not valid_serial_key(s.serial_key):
-        print '[-] The provided serial key is not encoded correctly!'
-        print '[-] Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.'
+        log.error('The provided --serial-key is not encoded correctly.')
+        log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
         exit(1)
 
-    print '[x] Checking whether the keyboard layout is valid.'
+    log.debug('Checking whether the keyboard layout is valid.')
     if not valid_keyboard_layout(s.keyboard_layout):
-        print '[-] Invalid keyboard layout:', s.keyboard_layout
-        print '[-] Please use one provided in data/keyboard_layout_values.txt.'
+        log.error('Invalid keyboard layout: %s', s.keyboard_layout)
+        log.info('Please use one provided as described in the documentation.')
         exit(1)
 
     lock = lockfile.MkdirFileLock(s.lock_dirpath)
 
     try:
-        print '[!] Awaiting the opportunity to obtain the lock.'
+        log.debug('Awaiting the opportunity to obtain the vmcloak lock.')
         lock.acquire(timeout=1)
     except lockfile.LockTimeout:
-        print '[x] If no other instances of vmcloak are running then'
-        print '..  unlock the lock by deleting the vmcloak.lock directory:'
-        print '$ rm -rf %s.lock' % s.lock_dirpath
+        log.warning('If no other instances of vmcloak are running then '
+                    'unlock the vmcloak lock by deleting the vmcloak.lock '
+                    'directory:')
+        log.info('$ rm -rf %s.lock', s.lock_dirpath)
 
         lock.acquire()
 
-    print '[x] Static Host IP', s.host_ip
-    print '[x] Static Guest hostonly IP', s.hostonly_ip
-    print '[x] Static Guest bridged IP', s.bridged_ip
+    log.debug('Static Host IP: %s', s.host_ip)
+    log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
+    log.debug('Static Guest bridged IP: %s', s.bridged_ip)
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((s.host_ip, 0))
     sock.listen(1)
     _, port = sock.getsockname()
 
-    print '[x] Configuring WINNT.SIF'
+    log.debug('Configuring WINNT.SIF')
     winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
     buf = configure_winnt_sif(winnt_sif, s)
-    if not buf:
-        print '[-] Error configuring WINNT.SIF'
-        lock.release()
-        exit(1)
 
     # Write the WINNT.SIF file.
     _, winntsif = tempfile.mkstemp(suffix='.sif')
@@ -223,27 +233,27 @@ def main():
         shutil.copytree(s.auxiliary, aux_path)
 
     # Create the ISO file.
-    print '[x] Creating ISO file.'
+    log.debug('Creating ISO file.')
     if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap):
         lock.release()
         exit(1)
 
-    print '[x] Creating VM'
-    print m.create_vm()
+    log.debug('Creating VM.')
+    log.debug(m.create_vm())
 
     m.ramsize(s.ramsize)
     m.os_type(os='xp', sp=3)
 
-    print '[x] Creating Harddisk'
+    log.debug('Creating Harddisk.')
     m.create_hd(s.hdsize)
 
-    print '[x] Temporarily attaching DVD-Rom unit for the ISO installer'
+    log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
     m.attach_iso(m.iso_path)
 
-    print '[x] Randomizing Hardware'
+    log.debug('Randomizing Hardware.')
     m.init_vm(profile=s.hwconfig_profile)
 
-    print '[x] Initially configuring Hostonly network'
+    log.debug('Checking VirtualBox hostonly network.')
     if m.hostonly(macaddr=s.hostonly_macaddr) is False:
         lock.release()
         exit(1)
@@ -256,32 +266,32 @@ def main():
 
     if s.hwvirt is not None:
         if s.hwvirt:
-            print '[x] Enabling Hardware Virtualization'
+            log.debug('Enabling Hardware Virtualization.')
         else:
-            print '[x] Disabling Hardware Virtualization'
+            log.debug('Disabling Hardware Virtualization.')
         m.hwvirt(s.hwvirt)
 
-    print '[!] Starting the Virtual Machine to install Windows'
-    print m.start_vm(visible=s.vm_visible)
+    log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
+    log.debug(m.start_vm(visible=s.vm_visible))
 
-    print '[x] Waiting for the Virtual Machine to connect back'
-    print '[!] This may take up to 30 minutes'
+    log.info('Waiting for the Virtual Machine %r to connect back, this may '
+             'take up to 30 minutes.', s.vmname)
     t = time.time()
 
     lock.release()
 
     guest, _ = sock.accept()
-    print '[x] It took %d seconds to install Windows!' % (time.time() - t)
+    log.debug('It took %d seconds to install Windows!', time.time() - t)
 
     lock.acquire()
 
-    print '[x] Setting the resolution to %s' % s.resolution
+    log.debug('Setting the resolution to %s', s.resolution)
     if ord(guest.recv(1)):
-        print '[+] Resolution was set successfully'
+        log.debug('Resolution was set successfully.')
     else:
-        print '[-] Error setting the resolution'
+        log.error('Error setting the resolution.')
 
-    print '[x] Detaching the Windows Installation disk.'
+    log.debug('Detaching the Windows Installation disk.')
     m.detach_iso()
 
     lock.release()
@@ -291,14 +301,14 @@ def main():
 
     lock.acquire()
 
-    print '[x] Taking a snapshot of the current state'
-    print m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
+    log.debug('Taking a snapshot of the current state.')
+    log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
 
-    print '[x] Powering off the virtual machine'
-    print m.stopvm()
+    log.debug('Powering off the virtual machine.')
+    log.debug(m.stopvm())
 
     if s.register_cuckoo:
-        print '[x] Registering the VM with Cuckoo.'
+        log.debug('Registering the Virtual Machine with Cuckoo.')
         try:
             machine_py = os.path.join(s.cuckoo, 'utils', 'machine.py')
             subprocess.check_call([machine_py, '--add',
@@ -309,17 +319,15 @@ def main():
                                    s.vmname],
                                   cwd=s.cuckoo)
         except OSError as e:
-            print '[-] Is $CUCKOO/utils/machine.py executable?'
-            print e
+            log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
             lock.release()
             exit(1)
         except subprocess.CalledProcessError as e:
-            print '[-] Error registering the VM.'
-            print e
+            log.error('Error registering the VM: %s.', e)
             lock.release()
             exit(1)
 
-    print '[!] Virtual Machine created successfully.'
+    log.info('Virtual Machine %r created successfully.', s.vmname)
     lock.release()
 
 if __name__ == '__main__':
