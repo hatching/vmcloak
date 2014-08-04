@@ -1,2 +1,2 @@
-include *.txt
-recursive-include docs *.txt
+include CHANGES.txt README.txt requirements.txt
+recursive-include docs *.html
