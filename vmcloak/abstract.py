@@ -117,11 +117,13 @@ class VM(object):
                             value = config[k][v]
 
                             # Some values have to be generated randomly.
-                            if value.startswith('<SERIAL>'):
-                                value = random_serial(int(value.split()[-1]))
-                            elif value.startswith('<UUID>'):
-                                value = random_uuid()
-
+                            if not value is None:
+                                if value.startswith('<SERIAL>'):
+                                    value = random_serial(int(value.split()[-1]))
+                                elif value.startswith('<UUID>'):
+                                    value = random_uuid()
+                    if value is None:
+                        value = "To be filled by O.E.M."
                     print '[+] Setting %r to %r' % (key, value)
                     ret = self.set_field(key, value)
                     if ret:
