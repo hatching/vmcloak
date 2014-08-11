@@ -20,6 +20,7 @@ Contents:
 
    requirements
    config
+   setup
    vbox
    deps
    hwconfig
