@@ -272,7 +272,7 @@ class DependencyWriter(object):
 
         for cmd in cmds:
             if cmd.startswith('click'):
-                print>>self.f, '  C:\\%s' % cmd
+                print>>self.f, '  C:\\vmcloak\\%s' % cmd
             else:
                 print>>self.f, '  %s' % cmd
 
