@@ -136,8 +136,8 @@ unique. Normally one would start counting at ``192.168.56.101`` to
 Dependencies
 ^^^^^^^^^^^^
 
-``--dependencies`` accepts a *comma-separated* list of 3rd party software
-packages that should be installed automatically in the VM. These packages
+``--dependencies`` accepts a list of 3rd party software packages, separated by
+whitespaces, that should be installed automatically in the VM. These packages
 allow one to quickly and easily install commonly used software, such as, the
 .NET framework, Adobe PDF Reader, Firefox, Chrome, Microsoft Office, etc.
 
