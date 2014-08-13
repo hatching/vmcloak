@@ -12,8 +12,5 @@ if "%BRIDGED%" == "yes" (
 echo Installing 3rd party software.
 call C:\vmcloak\deps.bat
 
-echo Initiate VM hardening.
+echo Initiate VM hardening and start the guest.
 C:\Python27\Python.exe C:\vmcloak\bootstrap.py
-
-echo Starting the agent.
-start C:\Python27\Pythonw.exe C:\vmcloak\agent.py

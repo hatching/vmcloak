@@ -207,9 +207,8 @@ if __name__ == "__main__":
         if not BIND_IP:
             BIND_IP = socket.gethostbyname(socket.gethostname())
 
-        # Delete bootstrap.bat and itself.
-        os.unlink('C:\\bootstrap.bat')
-        os.unlink('C:\\agent.py')
+        # Remove this file.
+        os.unlink(os.path.abspath(__file__))
 
         print("[+] Starting agent on %s:%s ..." % (BIND_IP, BIND_PORT))
 

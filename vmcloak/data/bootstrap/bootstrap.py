@@ -2,6 +2,8 @@ from ctypes import c_char, c_ushort, c_uint, c_char_p
 from ctypes import windll, Structure, POINTER, sizeof
 import shutil
 import socket
+import subprocess
+import tempfile
 from _winreg import CreateKeyEx, SetValueEx
 from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
 from _winreg import KEY_SET_VALUE, REG_DWORD
@@ -70,6 +72,9 @@ def set_regkey(key, subkey, name, typ, value):
 
 
 if __name__ == '__main__':
+    # Read the agent.py file so we can drop it again later on.
+    agent = open('C:\\vmcloak\\agent.py', 'rb').read()
+
     # Remove all vmcloak files that are directly related. This does not
     # include the auxiliary directory or any of its contents.
     shutil.rmtree('C:\\vmcloak')
@@ -81,3 +86,11 @@ if __name__ == '__main__':
 
     for key, subkey, name, typ, value in REGISTRY:
         set_regkey(key, subkey, name, typ, value)
+
+    # Drop the agent and execute it.
+    _, path = tempfile.mkstemp(suffix='.py')
+    open(path, 'wb').write(agent)
+
+    # Don't wait for this process to end. Also, the agent will remove the
+    # temporary agent file itself.
+    subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
