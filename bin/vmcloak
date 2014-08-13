@@ -29,6 +29,7 @@ log = logging.getLogger()
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
+    parser.add_argument('-d', '--debug', action='store_true', help='Display debug messages.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
@@ -85,6 +86,10 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.debug:
+        log.setLevel(logging.DEBUG)
+
     s = Configuration()
 
     for settings in args.settings:
