@@ -299,6 +299,9 @@ def main():
     log.debug('Detaching the Windows Installation disk.')
     m.detach_iso()
 
+    log.debug('Removing Windows Installation ISO file.')
+    os.unlink(m.iso_path)
+
     lock.release()
 
     # Give the system a little bit of time to fully initialize.
