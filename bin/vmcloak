@@ -23,7 +23,7 @@ from vmcloak.vm import VirtualBox
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger()
+log = logging.getLogger('vmcloak')
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
         keyboard_layout='US',
         register_cuckoo=True,
         dependencies='',
-        lock_dirpath='/tmp/vmcloak',
+        lock_dirpath=os.path.join(os.getenv('HOME'), '.vmcloak', 'lock'),
         auxiliary_local='auxiliary',
     )
 
