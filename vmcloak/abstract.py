@@ -6,6 +6,7 @@
 import logging
 import os.path
 import random
+import tempfile
 
 from vmcloak.conf import load_hwconf
 from vmcloak.rand import random_serial, random_uuid
@@ -16,14 +17,17 @@ log = logging.getLogger()
 class VM(object):
     FIELDS = {}
 
-    def __init__(self, name, vm_dir, data_dir):
+    def __init__(self, name, vm_dir=None, data_dir=None):
         self.name = name
         self.vm_dir = vm_dir
         self.data_dir = data_dir
 
         self.network_idx = 0
 
-        self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)
+        if data_dir:
+            self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)
+        else:
+            _, self.iso_path = tempfile.mkstemp(suffix='.iso')
 
     def create_vm(self):
         """Create a new Virtual Machine."""

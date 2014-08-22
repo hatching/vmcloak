@@ -18,7 +18,7 @@ from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyWriter
 from vmcloak.iso import buildiso
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
-from vmcloak.vm import VirtualBox
+from vmcloak.vm import VirtualBox, VBoxRPC
 
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -34,6 +34,8 @@ def main():
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
+    parser.add_argument('--vboxrpc-url', type=str, help='URL to VBoxRPC instance.')
+    parser.add_argument('--vboxrpc-auth', type=str, help='Credentials to VBoxRPC instance.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
@@ -67,6 +69,8 @@ def main():
 
     defaults = dict(
         vm='virtualbox',
+        vboxrpc_url='http://localhost:9002/',
+        vboxrpc_auth='root:toor',
         ramsize=1024,
         resolution='1024x768',
         hdsize=256*1024,
@@ -126,6 +130,9 @@ def main():
 
         m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
                        vboxmanage=vboxmanage)
+    elif s.vm.lower() == 'vboxrpc':
+        m = VBoxRPC(s.vmname, url=s.vboxrpc_url,
+                    auth=tuple(s.vboxrpc_auth.split(':')))
     else:
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
