@@ -8,7 +8,7 @@ import tempfile
 import random
 import string
 from _winreg import CreateKeyEx, SetValueEx
-from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_CREATE_SUB_KEY, KEY_ALL_ACCESS
+from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
 from settings import HOST_IP, HOST_PORT, RESOLUTION
@@ -34,10 +34,10 @@ class _DevMode(Structure):
 
 class UNICODE_STRING(Structure):
     _fields_ = [
-        ("Length", c_ushort),
-        ("MaximumLength", c_ushort),
-        ("Buffer", c_wchar_p),
-        ]
+        ('Length', c_ushort),
+        ('MaximumLength', c_ushort),
+        ('Buffer', c_wchar_p),
+    ]
 
 EnumDisplaySettings = windll.user32.EnumDisplaySettingsA
 EnumDisplaySettings.argtypes = c_char_p, c_uint, POINTER(_DevMode)
@@ -59,41 +59,53 @@ ENUM_CURRENT_SETTINGS = -1
 CDS_UPDATEREGISTRY = 1
 DISP_CHANGE_SUCCESSFUL = 0
 
-def random_string():
-    """ Create silly char combinations
+HARDDISK_NAMES = [
+    'HD', 'HARDDISK', 'IBM', 'WD', 'Western Digital', 'Seagate',
+    'HGST', 'Samsung', 'Harddisk', 'Drive', 'TB', 'GB', 'Desk',
+    'IDE', 'SATA', 'USB', 'Desktop',
+]
 
-    :return:
-    """
+CD_NAMES = [
+    'CD', 'CDROM', 'IBM', 'WD', 'Western Digital', 'Seagate', 'HGST',
+    'Samsung', 'CD-ROM', 'Drive', 'TB', 'GB', 'Desk', 'IDE', 'SATA',
+    'USB', 'BlueRay', 'Blue-Ray', 'DVD', 'DVD-ROM', 'DVD ROM', 'RW',
+]
+
+BIOS_NAMES = [
+    'BIOS', '3.6', '5.4', 'System', 'Version', 'Award', 'AMI', 'EFI',
+    'UEFI', 'Insyde', 'SeaBIOS',
+]
+
+VGA_BIOS_NAMES = [
+    'BIOS', '3.6', '5.24', 'VGA', 'Version', 'Gigabyte', 'Dell',
+    'Sapphire', 'Alienware', 'Gainward', 'Asus',
+]
+
+
+def random_string(length=6):
+    """Create silly char combinations."""
     return "".join(random.sample(string.letters, 6))
 
+
 def generate_hd():
-    """ Generates random HD names
-    :return: a string with a  registry hd description
-    """
-    return " ".join(random.sample(["HD", "HARDDISK", "IBM", "WD", "Western Digital", "Seagate", "HGST", "Samsung",
-                                   "Harddisk", "Drive", "TB", "GB", "Desk", "IDE", "SATA", "USB", "Desktop"], 3))
+    """Generates a random harddisk name."""
+    return " ".join(random.sample(HARDDISK_NAMES, 3))
+
 
 def generate_cd():
-    """ Generates random CD names
-    :return: a string with a  registry hd description
-    """
-    return " ".join(random.sample(["CD", "CDROM", "IBM", "WD", "Western Digital", "Seagate", "HGST", "Samsung",
-                                   "CD-ROM", "Drive", "TB", "GB", "Desk", "IDE", "SATA", "USB",
-                                   "BlueRay", "Blue-Ray", "DVD", "DVD-ROM", "DVD ROM", "RW"], 3))
+    """Generates a random CD name."""
+    return " ".join(random.sample(CD_NAMES, 3))
+
 
 def generate_bios():
-    """ Generates random BIOS names
-    :return: a string with a  registry hd description
-    """
-    return " ".join(random.sample(["BIOS", "3.6", "5.4", "System", "Version", "Award", "AMI", "EFI", "UEFI",
-                                   "Insyde", "SeaBIOS"], 3))
+    """Generates a random BIOS name."""
+    return " ".join(random.sample(BIOS_NAMES, 3))
+
 
 def generate_vga_bios():
-    """ Generates random VGA BIOS names
-    :return: a string with a  registry hd description
-    """
-    return " ".join(random.sample(["BIOS", "3.6", "5.24", "VGA", "Version", "Gigabyte", "Dell", "Sapphire", "Alienware",
-                                   "Gainward", "Asus"], 3))
+    """Generates a random VGA BIOS name."""
+    return " ".join(random.sample(VGA_BIOS_NAMES, 3))
+
 
 REGISTRY = [
     # Disable "Windows XP Tour" prompt.
@@ -104,23 +116,21 @@ REGISTRY = [
     # http://www.wikihow.com/Turn-Off-Windows-XP%E2%80%99s-Indexing-Service
     (HKEY_LOCAL_MACHINE, 'System\\CurrentControlSet\\Services\\CiSvc', 'Start', REG_DWORD, 4),
 
-    # Hide HD device identifier (pafish 1)
-    (HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", 'Identifier', REG_SZ, generate_hd()),
+    # Cloak HD device identifier.
+    (HKEY_LOCAL_MACHINE, 'HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 0\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0', 'Identifier', REG_SZ, generate_hd()),
 
-    # Hide CDROM (pafish 1+)
-    (HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 1\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0", 'Identifier', REG_SZ, generate_cd()),
+    # Cloak CDROM.
+    (HKEY_LOCAL_MACHINE, 'HARDWARE\\DEVICEMAP\\Scsi\\Scsi Port 1\\Scsi Bus 0\\Target Id 0\\Logical Unit Id 0', 'Identifier', REG_SZ, generate_cd()),
 
-    # Hide SystemBios Version (pafish 2)
-    (HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "SystemBiosVersion", REG_MULTI_SZ, [generate_bios()]),
+    # Cloak SystemBios Version.
+    (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'SystemBiosVersion', REG_MULTI_SZ, [generate_bios()]),
 
-    # Hide SystemBios Version (pafish 4)
-    (HKEY_LOCAL_MACHINE, "HARDWARE\\Description\\System", "VideoBiosVersion", REG_MULTI_SZ,
-     [generate_vga_bios(), generate_vga_bios()])
-    ]
+    # Cloak SystemBios Version.
+    (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
+]
 
 
 class SetupWindows():
-
     def __init__(self, keep_evidence=False):
         """
 
@@ -136,14 +146,8 @@ class SetupWindows():
         self.log.addHandler(ch)
         self.keep_evidence = keep_evidence
 
-
     def set_resolution(self, width, height):
-        """ Set the screen resolution
-
-        :param width: width
-        :param height: height
-        :return:
-        """
+        """Set the screen resolution."""
         dm = _DevMode()
         dm.dmSize = sizeof(dm)
         if not EnumDisplaySettings(None, ENUM_CURRENT_SETTINGS, dm):
@@ -155,31 +159,23 @@ class SetupWindows():
         ret = ChangeDisplaySettings(dm, CDS_UPDATEREGISTRY)
         return ret == DISP_CHANGE_SUCCESSFUL
 
-
     def set_regkey(self, key, subkey, name, typ, value):
-        """ Set a specified registry key
-
-        :param key: Main key
-        :param subkey: Sub key
-        :param name: key
-        :param typ: Type of key
-        :param value: Value to set
-        :return:
-        """
+        """Set a specified registry key."""
         parts = subkey.split('\\')
         for off in xrange(1, len(parts)):
             CreateKeyEx(key, '\\'.join(parts[:off]), 0, KEY_SET_VALUE).Close()
 
         with CreateKeyEx(key, subkey, 0, KEY_SET_VALUE) as handle:
             SetValueEx(handle, name, 0, typ, value)
-            self.log.info("Set value to %s %s", key, subkey)
+            self.log.info('Set value to %r %r', key, subkey)
 
     def rename_regkey(self, skey, ssubkey, dsubkey):
         res_handle = HANDLE()
         options = DWORD(0)
-        res = RegOpenKeyExW(skey, ssubkey, options, KEY_ALL_ACCESS, byref(res_handle))
+        res = RegOpenKeyExW(skey, ssubkey, options,
+                            KEY_ALL_ACCESS, byref(res_handle))
         if not res:
-            bsize = c_ushort(len(dsubkey)*2)
+            bsize = c_ushort(len(dsubkey) * 2)
             us = UNICODE_STRING()
             us.Buffer = c_wchar_p(dsubkey)
             us.Length = bsize
@@ -187,22 +183,19 @@ class SetupWindows():
 
             res = NtRenameKey(res_handle, pointer(us))
             if res:
-                self.log.error("Could not rename %s", ssubkey)
+                self.log.error("Could not rename %r", ssubkey)
             else:
-                self.log.info("Renameed %s to %s", ssubkey, dsubkey)
+                self.log.info("Renamed %r to %r", ssubkey, dsubkey)
 
         if res_handle:
             RegCloseKey(res_handle)
 
     def run(self):
-        """ Modify the system settings
-
-        :return:
-        """
+        """Modify the system settings."""
         self.log.info("Starting system modifications")
+
         # Read the agent.py file so we can drop it again later on.
         agent = open('C:\\vmcloak\\agent.py', 'rb').read()
-        self.log.info("Agent read")
 
         try:
             s = socket.create_connection((HOST_IP, HOST_PORT))
@@ -212,14 +205,19 @@ class SetupWindows():
         except socket.error:
             self.log.error("Error connecting to socket")
 
-        # Set registry keys
+        # Set registry keys.
         for key, subkey, name, typ, value in REGISTRY:
             self.set_regkey(key, subkey, name, typ, value)
 
-        # Rename registry keys
-        self.rename_regkey(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\DSDT\\VBOX__", random_string())
-        self.rename_regkey(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\FADT\\VBOX__", random_string())
-        self.rename_regkey(HKEY_LOCAL_MACHINE, "HARDWARE\\ACPI\\RSDT\\VBOX__", random_string())
+        # Rename registry keys.
+        self.rename_regkey(HKEY_LOCAL_MACHINE,
+                           'HARDWARE\\ACPI\\DSDT\\VBOX__', random_string())
+
+        self.rename_regkey(HKEY_LOCAL_MACHINE,
+                           'HARDWARE\\ACPI\\FADT\\VBOX__', random_string())
+
+        self.rename_regkey(HKEY_LOCAL_MACHINE,
+                           'HARDWARE\\ACPI\\RSDT\\VBOX__', random_string())
 
         # Drop the agent and execute it.
         _, path = tempfile.mkstemp(suffix='.py')
