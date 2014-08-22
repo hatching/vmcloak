@@ -96,8 +96,21 @@ REGISTRY = [
 
 class SetupWindows():
 
-    def __init__(self):
-        pass
+    def __init__(self, keep_evidence=False):
+        """
+
+        :param keep_evidence: Keep some evidence. Use that for debugging
+        :return:
+        """
+        self.log = logging.getLogger('Setup Windows')
+        self.log.setLevel(logging.DEBUG)
+        ch = logging.FileHandler("c:\\vmcloak\\windows_setup.log")
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        self.log.addHandler(ch)
+        self.keep_evidence = keep_evidence
+
 
     def set_resolution(self, width, height):
         """ Set the screen resolution
@@ -134,14 +147,17 @@ class SetupWindows():
 
         with CreateKeyEx(key, subkey, 0, KEY_SET_VALUE) as handle:
             SetValueEx(handle, name, 0, typ, value)
+            self.log.info("Set value to %s %s", key, subkey)
 
     def run(self):
         """ Modify the system settings
 
         :return:
         """
+        self.log.info("Starting system modifications")
         # Read the agent.py file so we can drop it again later on.
         agent = open('C:\\vmcloak\\agent.py', 'rb').read()
+        self.log.info("Agent read")
 
         try:
             s = socket.create_connection((HOST_IP, HOST_PORT))
@@ -149,7 +165,7 @@ class SetupWindows():
             width, height = [int(x) for x in RESOLUTION.split('x')]
             s.send('\x01' if self.set_resolution(width, height) else '\x00')
         except socket.error:
-            print("Socket error")
+            self.log.error("Error connecting to socket")
 
         for key, subkey, name, typ, value in REGISTRY:
             self.set_regkey(key, subkey, name, typ, value)
@@ -157,16 +173,23 @@ class SetupWindows():
         # Drop the agent and execute it.
         _, path = tempfile.mkstemp(suffix='.py')
         open(path, 'wb').write(agent)
+        self.log.info("Agent dropped")
 
         # Don't wait for this process to end. Also, the agent will remove the
         # temporary agent file itself.
         subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
+        self.log.info("Started agent")
 
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.
-        shutil.rmtree('C:\\vmcloak')
+        if not self.keep_evidence:
+            shutil.rmtree('C:\\vmcloak')
+        else:
+            self.log.info("Keeping evidence")
+
+        self.log.info("System modifications done")
 
 
 if __name__ == '__main__':
-    sw = SetupWindows()
+    sw = SetupWindows(keep_evidence=True)
     sw.run()
