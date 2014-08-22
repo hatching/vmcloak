@@ -10,6 +10,7 @@ from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
 from settings import HOST_IP, HOST_PORT, RESOLUTION
+import logging
 
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
@@ -93,54 +94,79 @@ REGISTRY = [
     ]
 
 
+class SetupWindows():
+
+    def __init__(self):
+        pass
+
+    def set_resolution(self, width, height):
+        """ Set the screen resolution
+
+        :param width: width
+        :param height: height
+        :return:
+        """
+        dm = _DevMode()
+        dm.dmSize = sizeof(dm)
+        if not EnumDisplaySettings(None, ENUM_CURRENT_SETTINGS, dm):
+            return False
+
+        dm.dmPelsWidth = width
+        dm.dmPelsHeight = height
+
+        ret = ChangeDisplaySettings(dm, CDS_UPDATEREGISTRY)
+        return ret == DISP_CHANGE_SUCCESSFUL
 
 
+    def set_regkey(self, key, subkey, name, typ, value):
+        """ Set a specified registry key
 
-def set_resolution(width, height):
-    dm = _DevMode()
-    dm.dmSize = sizeof(dm)
-    if not EnumDisplaySettings(None, ENUM_CURRENT_SETTINGS, dm):
-        return False
+        :param key: Main key
+        :param subkey: Sub key
+        :param name: key
+        :param typ: Type of key
+        :param value: Value to set
+        :return:
+        """
+        parts = subkey.split('\\')
+        for off in xrange(1, len(parts)):
+            CreateKeyEx(key, '\\'.join(parts[:off]), 0, KEY_SET_VALUE).Close()
 
-    dm.dmPelsWidth = width
-    dm.dmPelsHeight = height
+        with CreateKeyEx(key, subkey, 0, KEY_SET_VALUE) as handle:
+            SetValueEx(handle, name, 0, typ, value)
 
-    ret = ChangeDisplaySettings(dm, CDS_UPDATEREGISTRY)
-    return ret == DISP_CHANGE_SUCCESSFUL
+    def run(self):
+        """ Modify the system settings
 
+        :return:
+        """
+        # Read the agent.py file so we can drop it again later on.
+        agent = open('C:\\vmcloak\\agent.py', 'rb').read()
 
-def set_regkey(key, subkey, name, typ, value):
-    parts = subkey.split('\\')
-    for off in xrange(1, len(parts)):
-        CreateKeyEx(key, '\\'.join(parts[:off]), 0, KEY_SET_VALUE).Close()
+        try:
+            s = socket.create_connection((HOST_IP, HOST_PORT))
 
-    with CreateKeyEx(key, subkey, 0, KEY_SET_VALUE) as handle:
-        SetValueEx(handle, name, 0, typ, value)
+            width, height = [int(x) for x in RESOLUTION.split('x')]
+            s.send('\x01' if self.set_resolution(width, height) else '\x00')
+        except socket.error:
+            print("Socket error")
+
+        for key, subkey, name, typ, value in REGISTRY:
+            self.set_regkey(key, subkey, name, typ, value)
+
+        # Drop the agent and execute it.
+        _, path = tempfile.mkstemp(suffix='.py')
+        open(path, 'wb').write(agent)
+
+        # Don't wait for this process to end. Also, the agent will remove the
+        # temporary agent file itself.
+        subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
+
+        # Remove all vmcloak files that are directly related. This does not
+        # include the auxiliary directory or any of its contents.
+        shutil.rmtree('C:\\vmcloak')
 
 
 if __name__ == '__main__':
-    # Read the agent.py file so we can drop it again later on.
-    agent = open('C:\\vmcloak\\agent.py', 'rb').read()
-
-    try:
-        s = socket.create_connection((HOST_IP, HOST_PORT))
-
-        width, height = [int(x) for x in RESOLUTION.split('x')]
-        s.send('\x01' if set_resolution(width, height) else '\x00')
-    except socket.error:
-        print("Socket error")
-
-    for key, subkey, name, typ, value in REGISTRY:
-        set_regkey(key, subkey, name, typ, value)
-
-    # Drop the agent and execute it.
-    _, path = tempfile.mkstemp(suffix='.py')
-    open(path, 'wb').write(agent)
-
-    # Don't wait for this process to end. Also, the agent will remove the
-    # temporary agent file itself.
-    subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
-
-    # Remove all vmcloak files that are directly related. This does not
-    # include the auxiliary directory or any of its contents.
-    shutil.rmtree('C:\\vmcloak')
+    sw = SetupWindows()
+    sw.run()
