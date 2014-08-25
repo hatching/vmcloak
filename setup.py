@@ -27,4 +27,9 @@ distutils.core.setup(
         'vmcloak.data.hwconf': ['*'],
         'vmcloak.utils': ['*.sh'],
     },
+    install_requires=[
+        'lockfile',
+        'sphinx',
+        'sphinxcontrib-programoutput',
+    ],
 )
