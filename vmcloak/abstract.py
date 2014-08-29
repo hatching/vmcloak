@@ -17,7 +17,7 @@ log = logging.getLogger()
 class VM(object):
     FIELDS = {}
 
-    def __init__(self, name, vm_dir=None, data_dir=None):
+    def __init__(self, name, vm_dir=None, data_dir=None, temp_dir=None):
         self.name = name
         self.vm_dir = vm_dir
         self.data_dir = data_dir
@@ -27,7 +27,7 @@ class VM(object):
         if data_dir:
             self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)
         else:
-            _, self.iso_path = tempfile.mkstemp(suffix='.iso')
+            _, self.iso_path = tempfile.mkstemp(suffix='.iso', dir=temp_dir)
 
     def create_vm(self):
         """Create a new Virtual Machine."""

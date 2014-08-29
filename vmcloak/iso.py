@@ -15,9 +15,9 @@ from vmcloak.misc import ini_merge, ini_read, ini_write
 log = logging.getLogger()
 
 
-def buildiso(mount, winnt_sif, iso_out, bootstrap):
+def buildiso(mount, winnt_sif, iso_out, bootstrap, tmp_dir=None):
     """Builds an ISO file containing all our modifications."""
-    tempdir = tempfile.mkdtemp()
+    tempdir = tempfile.mkdtemp(dir=tmp_dir)
 
     # Copy all files to our temporary directory as mounted iso files are
     # read-only and we need lowercase (aka case-insensitive) filepaths.
