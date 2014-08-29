@@ -49,7 +49,8 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap, tmp_dir=None):
 
     copytreeinto(bootstrap, osdir)
 
-    isocreate = first_available_path('/usr/bin/genisoimage',
+    isocreate = first_available_path('genisoimage',
+                                     '/usr/bin/genisoimage',
                                      '/usr/bin/mkisofs',
                                      '/usr/pkg/bin/mkisofs')
     if not isocreate:
