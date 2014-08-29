@@ -141,10 +141,11 @@ def main():
             exit(1)
 
         m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
-                       vboxmanage=vboxmanage)
+                       vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
     elif s.vm.lower() == 'vboxrpc':
         m = VBoxRPC(s.vmname, url=s.vboxrpc_url,
-                    auth=tuple(s.vboxrpc_auth.split(':')))
+                    auth=tuple(s.vboxrpc_auth.split(':')),
+                    temp_dir=s.temp_dirpath)
     else:
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
