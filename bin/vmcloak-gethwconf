@@ -84,6 +84,14 @@ if __name__ == '__main__':
     if args.lshw:
         LSHW = args.lshw
 
+    if not os.path.exists(DMIDECODE):
+        print '[!] dmidecode is not available.'
+        exit(1)
+
+    if not os.path.exists(LSHW):
+        print '[!] lshw is not available.'
+        exit(1)
+
     bios = get_dmi(0)
     system = get_dmi(1)
     board = get_dmi(2)
