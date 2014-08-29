@@ -65,6 +65,7 @@ def main():
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
     parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
+    parser.add_argument('--unlock', action='store_true', default=None, help='Unlock the Virtual Machine mutex/lock.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
 
     defaults = dict(
@@ -101,6 +102,9 @@ def main():
 
     s.from_args(args)
     s.from_defaults(defaults)
+
+    if args.unlock:
+        shutil.rmtree(s.lock_dirpath)
 
     if not s.cuckoo and s.register_cuckoo:
         log.error('To register the Virtual Machine with Cuckoo '
@@ -170,9 +174,8 @@ def main():
         lock.acquire(timeout=1)
     except lockfile.LockTimeout:
         log.warning('If no other instances of vmcloak are running then '
-                    'unlock the vmcloak lock by deleting the vmcloak.lock '
-                    'directory:')
-        log.info('$ rm -rf %s.lock', s.lock_dirpath)
+                    'unlock the vmcloak lock by running the following '
+                    'command: vmcloak --unlock')
 
         lock.acquire()
 
