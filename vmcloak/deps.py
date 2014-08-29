@@ -8,14 +8,14 @@ import logging
 import shutil
 import subprocess
 
-from vmcloak.misc import ini_read_dict, sha1_file
+from vmcloak.misc import ini_read_dict, sha1_file, first_available_path
 
 log = logging.getLogger()
 
 DEPS_DIR = os.path.join(os.getenv('HOME'), '.vmcloak', 'deps')
 
-GIT = '/usr/bin/git'
-WGET = '/usr/bin/wget'
+GIT = first_available_path('git', '/usr/bin/git', '/usr/pkg/bin/git')
+WGET = first_available_path('wget', '/usr/bin/wget', '/usr/pkg/bin/wget')
 
 DEPS_REPO = 'git://github.com/jbremer/vmcloak-deps.git'
 

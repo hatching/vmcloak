@@ -4,9 +4,12 @@
 
 from ConfigParser import ConfigParser
 import hashlib
+import logging
 import os
 import shutil
 import stat
+
+log = logging.getLogger(__name__)
 
 
 def copytreelower(srcdir, dstdir):
@@ -162,3 +165,12 @@ def sha1_file(path):
         h.update(buf)
 
     return h.hexdigest()
+
+
+def first_available_path(app, *paths):
+    """Returns the first available path."""
+    for path in paths:
+        if os.path.exists(path):
+            return path
+
+    log.error('No executable path found for %s!', app)
