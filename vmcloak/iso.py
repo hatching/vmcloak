@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.misc import copytreelower, copytreeinto
+from vmcloak.misc import copytreelower, copytreeinto, first_available_path
 from vmcloak.misc import ini_merge, ini_read, ini_write
 
 log = logging.getLogger()
@@ -49,11 +49,10 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap, tmp_dir=None):
 
     copytreeinto(bootstrap, osdir)
 
-    if os.path.isfile('/usr/bin/genisoimage'):
-        isocreate = '/usr/bin/genisoimage'
-    elif os.path.isfile('/usr/bin/mkisofs'):
-        isocreate = '/usr/bin/mkisofs'
-    else:
+    isocreate = first_available_path('/usr/bin/genisoimage',
+                                     '/usr/bin/mkisofs',
+                                     '/usr/pkg/bin/mkisofs')
+    if not isocreate:
         log.error('Either genisoimage or mkisofs is required!')
         shutil.rmtree(tempdir)
         return False
