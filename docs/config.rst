@@ -72,14 +72,23 @@ Mounted ISO Image
 ``--iso-mount`` accepts a path to a **mounted** Windows Installer ISO image.
 In order to mount a Windows Installer ISO image a directory should be created
 with **root**, and then the image should be mounted on that directory, with
-root as well. The following bash snippet depicts how to setup the ISO mount.
+root as well. The following bash snippet depicts how to setup an ISO mount on
+a Ubuntu/Debian system.
 
 .. code-block:: bash
 
-    sudo mkdir /mnt/winxp
-    sudo mount -o loop,ro winxp.iso /mnt/winxp
+    mkdir /mnt/winxp
+    mount -o loop,ro winxp.iso /mnt/winxp
 
 Then, when mounted, one would give ``--iso-mount /mnt/winxp`` to ``vmcloak``.
+
+In order to mount an image under BSD the following commands might be required.
+
+.. code-block:: bash
+
+    mkdir /mnt/winxp
+    vnconfig /dev/vnd0d winxp.iso
+    mount -t cd9660 /dev/vnd0d /mnt/winxp
 
 .. _conf-basedir:
 
