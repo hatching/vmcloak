@@ -6,6 +6,7 @@
 import logging
 import os
 import requests
+import requests_toolbelt
 import subprocess
 
 from vmcloak.abstract import VM
@@ -190,8 +191,15 @@ class VBoxRPC(VM):
     def attach_iso(self, iso):
         url = os.path.join(self.url, 'api', 'push-iso')
 
+        fname = '%s.iso' % self.name
+
         # And now we wait.
-        requests.post(url, auth=self.auth, files={'file': open(iso, 'rb')})
+        m = requests_toolbelt.MultipartEncoder(fields={
+            'file': (fname, open(iso, 'rb'), ' application/iso-image'),
+        })
+
+        requests.post(url, auth=self.auth, data=m,
+                      headers={'content-type': m.content_type})
 
         return self._query('attach-iso', self.name, os.path.basename(iso))
 

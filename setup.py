@@ -31,9 +31,18 @@ setup(
                 'for Cuckoo Sandbox.',
     include_package_data=True,
     install_requires=[
+        # Useful when running multiple instances of VMCloak at once.
         'lockfile',
+
+        # Libraries to build the documentation.
         'sphinx',
         'sphinxcontrib-programoutput',
-        'jinja2',  # Required on BSD systems for unknown reasons.
+
+        # Required on BSD systems for unknown reasons.
+        'jinja2',
+
+        # Required for the VBoxRPC virtual machine module.
+        'requests',
+        'requests-toolbelt',
     ],
 )
