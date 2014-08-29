@@ -28,7 +28,7 @@ log = logging.getLogger('vmcloak')
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('vmname', type=str, help='Name of the Virtual Machine.')
+    parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
     parser.add_argument('-d', '--debug', action='store_true', help='Display debug messages.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
@@ -104,7 +104,14 @@ def main():
     s.from_defaults(defaults)
 
     if args.unlock:
-        shutil.rmtree(s.lock_dirpath)
+        path = '%s.lock' % s.lock_dirpath
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        exit(0)
+
+    if not s.vmname:
+        log.error('A name for the Virtual Machine is required.')
+        exit(1)
 
     if not s.cuckoo and s.register_cuckoo:
         log.error('To register the Virtual Machine with Cuckoo '
