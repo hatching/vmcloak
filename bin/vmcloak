@@ -59,7 +59,7 @@ def main():
     parser.add_argument('--no-register-cuckoo', action='store_false', default=None, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
     parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
-    parser.add_argument('--vm-visible', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
+    parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
