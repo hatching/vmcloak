@@ -189,19 +189,17 @@ class VBoxRPC(VM):
         return self._query('create-hdd', self.name, '%s' % disksize)
 
     def attach_iso(self, iso):
-        url = os.path.join(self.url, 'api', 'push-iso')
-
-        fname = '%s.iso' % self.name
+        url = os.path.join(self.url, 'api', 'push-iso', '%s.iso' % self.name)
 
         # And now we wait.
         m = requests_toolbelt.MultipartEncoder(fields={
-            'file': (fname, open(iso, 'rb'), ' application/iso-image'),
+            'file': ('file', open(iso, 'rb'), ' application/iso-image'),
         })
 
         requests.post(url, auth=self.auth, data=m,
                       headers={'content-type': m.content_type})
 
-        return self._query('attach-iso', self.name, os.path.basename(iso))
+        return self._query('attach-iso', self.name, '%s.iso' % self.name)
 
     def detach_iso(self):
         return self._query('detach-iso', self.name)
