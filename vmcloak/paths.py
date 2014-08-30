@@ -3,7 +3,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
-import os.path
+import os
 
 
 log = logging.getLogger(__name__)
@@ -24,6 +24,21 @@ PATHS = {
     ],
 }
 
+INSTALL = {
+    'git': {
+        'Linux': 'apt-get install git',
+        'NetBSD': 'pkgin install git',
+    },
+    'wget': {
+        'Linux': 'apt-get install wget',
+        'NetBSD': 'pkgin install wget',
+    },
+    'genisoimage': {
+        'Linux': 'apt-get install genisoimage',
+        'NetBSD': 'pkgin install cdrtools',
+    },
+}
+
 
 def get_path(app):
     """Returns the path to an application."""
@@ -32,3 +47,5 @@ def get_path(app):
             return path
 
     log.error('No executable path found for %s!', app)
+    log.info('In order to install it, run %r',
+             INSTALL[app].get(os.uname()[0], '?'))
