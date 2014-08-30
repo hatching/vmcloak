@@ -16,6 +16,8 @@ log = logging.getLogger()
 
 class VM(object):
     FIELDS = {}
+    vm_dir_required = True
+    data_dir_required = True
 
     def __init__(self, name, vm_dir=None, data_dir=None, temp_dir=None):
         self.name = name
@@ -23,6 +25,20 @@ class VM(object):
         self.data_dir = data_dir
 
         self.network_idx = 0
+
+        if self.vm_dir_required and not vm_dir:
+            log.error('Please provide --vm-dir a directory for the '
+                      'associated VM files.')
+            log.info('Optionally this directory can be put into tmpfs for '
+                     'improved speed.')
+            exit(1)
+
+        if self.data_dir_required and not data_dir:
+            log.error('Please provide --data-dir a directory for the '
+                      'harddisk and .iso files for the virtual machine.')
+            log.info('It is recommended to store this directory on a regular '
+                     'harddisk or SSD - not in tmpfs.')
+            exit(1)
 
         if data_dir:
             self.iso_path = os.path.join(self.data_dir, '%s.iso' % self.name)

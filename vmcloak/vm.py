@@ -156,6 +156,8 @@ class VirtualBox(VM):
 
 class VBoxRPC(VM):
     FIELDS = VBOX_CONFIG
+    vm_dir_required = False
+    data_dir_required = False
 
     def __init__(self, *args, **kwargs):
         self.url = kwargs.pop('url')

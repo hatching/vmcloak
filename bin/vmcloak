@@ -123,20 +123,6 @@ def main():
                  'or specify register-cuckoo = false in the configuration.')
         exit(1)
 
-    if not s.vm_dir:
-        log.error('Please provide --vm-dir a directory for the '
-                  'associated VM files.')
-        log.info('Optionally this directory can be put into tmpfs for '
-                 'improved speed.')
-        exit(1)
-
-    if not s.data_dir:
-        log.error('Please provide --data-dir a directory for the harddisk '
-                  'and .iso files for the virtual machine.')
-        log.info('It is recommended to store this directory on a regular '
-                 'harddisk or SSD - not in tmpfs.')
-        exit(1)
-
     if s.vm.lower() == 'virtualbox':
         vboxmanage = vboxmanage_path(s)
         if not vboxmanage:
