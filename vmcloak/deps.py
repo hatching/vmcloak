@@ -3,20 +3,17 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os
 import logging
+import os
 import shutil
 import subprocess
 
-from vmcloak.misc import ini_read_dict, sha1_file, first_available_path
+from vmcloak.misc import ini_read_dict, sha1_file
+from vmcloak.paths import get_path
 
 log = logging.getLogger()
 
 DEPS_DIR = os.path.join(os.getenv('HOME'), '.vmcloak', 'deps')
-
-GIT = first_available_path('git', '/usr/bin/git', '/usr/pkg/bin/git')
-WGET = first_available_path('wget', '/usr/bin/wget', '/usr/pkg/bin/wget')
-
 DEPS_REPO = 'git://github.com/jbremer/vmcloak-deps.git'
 
 
@@ -59,7 +56,8 @@ class DependencyManager(object):
         if not os.path.isdir(DEPS_DIR):
             try:
                 log.info('Cloning vmcloak-deps.')
-                subprocess.check_call([GIT, 'clone', DEPS_REPO, DEPS_DIR])
+                subprocess.check_call([get_path('git'), 'clone',
+                                       DEPS_REPO, DEPS_DIR])
             except subprocess.CalledProcessError as e:
                 log.error('Error cloning vmcloak-deps: %s.', e)
                 return False
@@ -147,7 +145,7 @@ class DependencyManager(object):
             try:
                 log.debug('Fetching dependency %r: %s.',
                           dependency, info['filename'])
-                subprocess.check_call([WGET, '-O', filepath, url])
+                subprocess.check_call([get_path('wget'), '-O', filepath, url])
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
@@ -159,7 +157,7 @@ class DependencyManager(object):
             try:
                 log.debug('Fetching dependency %r: %s.',
                           dependency, info['filename'])
-                subprocess.check_call([WGET, '-O', filepath, url])
+                subprocess.check_call([get_path('wget'), '-O', filepath, url])
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
