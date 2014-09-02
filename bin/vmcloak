@@ -54,6 +54,7 @@ def main():
     parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
     parser.add_argument('--nat', action='store_true', help='Name of the NAT network to attach to.')
+    parser.add_argument('--dns-server', type=str, help='Address of DNS server to be used.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
     parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -83,6 +84,7 @@ def main():
         hostonly_mask='255.255.255.0',
         hostonly_gateway='192.168.56.1',
         bridged_mask='255.255.255.0',
+        dns_server='8.8.8.8',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
@@ -201,6 +203,7 @@ def main():
         BRIDGEDIP=s.bridged_ip,
         BRIDGEDMASK=s.bridged_mask,
         BRIDGEDGATEWAY=s.bridged_gateway,
+        DNSSERVER=s.dns_server,
     )
 
     settings_py = dict(

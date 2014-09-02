@@ -2,7 +2,10 @@ call C:\vmcloak\settings.bat
 
 echo Setting static IP address.
 netsh interface ip set address name="Local Area Connection" ^
-  static %HOSTONLYIP% %HOSTONLYMASK% %HOSTONLYGATEWAY% 1
+    static %HOSTONLYIP% %HOSTONLYMASK% %HOSTONLYGATEWAY% 1
+
+echo Setting the DNS Server IP address.
+netsh interface ip set dns name="Local Area Connection" static %DNSSERVER%
 
 if "%BRIDGED%" == "yes" (
     netsh interface ip set address name="Local Area Connection 2" ^
