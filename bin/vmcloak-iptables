@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Credits to Mark Schloesser, https://github.com/rep/cuckoo-contrib
+
 iptables -F
 iptables -t nat -F
 
