@@ -69,8 +69,8 @@ class DependencyManager(object):
 
             try:
                 log.info('Setting up vmcloak-files.')
-                subprocess.check_call([GIT, 'init', files_git])
-                subprocess.check_call([GIT, 'remote', 'add',
+                subprocess.check_call([get_path('git'), 'init', files_git])
+                subprocess.check_call([get_path('git'), 'remote', 'add',
                                        'origin', self.files_repo],
                                       cwd=files_git)
             except subprocess.CalledProcessError as e:
@@ -86,7 +86,8 @@ class DependencyManager(object):
 
         try:
             log.info('Updating vmcloak-deps.')
-            subprocess.check_call([GIT, 'pull', 'origin', 'master'],
+            subprocess.check_call([get_path('git'), 'pull',
+                                   'origin', 'master'],
                                   cwd=DEPS_DIR)
         except subprocess.CalledProcessError as e:
             log.error('Error updating the vmcloak-deps repository: %s', e)
@@ -176,7 +177,8 @@ class DependencyManager(object):
 
         try:
             log.info('Cloning the vmcloak-files repository.')
-            subprocess.check_call([GIT, 'pull', 'origin', 'master'],
+            subprocess.check_call([get_path('git'), 'pull',
+                                   'origin', 'master'],
                                   cwd=self.files_dir)
         except subprocess.CalledProcessError as e:
             log.error('Error fetching vmcloak-files repository: %s', e)
