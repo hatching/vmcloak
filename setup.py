@@ -24,12 +24,17 @@ setup(
         'bin/vmcloak',
         'bin/vmcloak-deps',
         'bin/vmcloak-gethwconf',
+        'bin/vmcloak-iptables',
     ],
     url='http://pypi.python.org/pypi/vmcloak/',
     license='docs/LICENSE.txt',
     description='Automated Virtual Machine Generation and Cloaking '
                 'for Cuckoo Sandbox.',
     include_package_data=True,
+    package_data={
+        'vmcloak.data': ['*.*'],
+        'vmcloak.data.bootstrap': ['*.*'],
+    },
     install_requires=[
         # Useful when running multiple instances of VMCloak at once.
         'lockfile',
