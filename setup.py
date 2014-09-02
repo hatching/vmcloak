@@ -11,7 +11,7 @@ except ImportError:
 
 setup(
     name='VMCloak',
-    version='0.1.0',
+    version='0.1.1',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
