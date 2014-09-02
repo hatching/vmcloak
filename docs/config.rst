@@ -258,6 +258,14 @@ If the ``--cuckoo`` argument is not provided, or it is provided but the
 created VM should not be registered with Cuckoo Sandbox, then the
 ``--no-register-cuckoo`` argument allows one to do that.
 
+.. _conf-dns-server:
+
+DNS Server
+^^^^^^^^^^
+
+By default the generated Virtual Machine will use Google's 8.8.8.8 DNS Server.
+This can be changed through ``--dns-server``.
+
 Debugging configuration entries
 -------------------------------
 

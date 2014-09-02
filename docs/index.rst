@@ -22,6 +22,7 @@ Contents:
    config
    setup
    vbox
+   network
    deps
    hwconfig
    license

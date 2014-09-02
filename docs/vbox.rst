@@ -9,13 +9,21 @@ with the Virtual Machine. If ``vboxnet0`` is not yet running (VMCloak will
 inform you about this), then :ref:`you have to create vboxnet0
 <vbox-vboxnet0>`.
 
+To check whether ``vboxnet0`` exists run the following command. If it returns
+nothing then :ref:`you have to create it <vbox-vboxnet0>`.
+
+.. code-block:: bash
+
+    VBoxManage list hostonlyifs
+
 .. _vbox-vboxnet0:
 
 Creating vboxnet0
 -----------------
 
 Executing the following two commands on the command line will create and start
-the ``vboxnet0`` network:
+the ``vboxnet0`` network: (again, only required when **vboxnet0 is not already
+present**)
 
 .. code-block:: bash
 
