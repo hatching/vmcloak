@@ -10,6 +10,7 @@ import os.path
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -107,6 +108,12 @@ def main():
 
     s.from_args(args)
     s.from_defaults(defaults)
+
+    # Not really sure if this is possible in a cleaner way, but if no
+    # arguments have been given on the command line, then show the usage.
+    if len(sys.argv) == 1:
+        parser.print_help()
+        exit(0)
 
     if args.unlock:
         path = '%s.lock' % s.lock_dirpath
