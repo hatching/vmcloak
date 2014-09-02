@@ -1,6 +1,15 @@
 Credits
 =======
 
+The development of the VMCloak project has been sponsored by the
+`iTES Project <http://www.ites-project.org/index_en.html>`_, a research
+project between `Avira <http://www.avira.com/>`_ and the `German Federal
+Ministry of Education and Research <http://www.bmbf.de/en/index.php>`_.
+
+.. image:: images/credit_avira.png
+.. image:: images/credit_ites.png
+.. image:: images/credit_ministry.jpg
+
 nLite
 -----
 
