@@ -84,27 +84,27 @@ VGA_BIOS_NAMES = [
 
 def random_string(length=6):
     """Create silly char combinations."""
-    return "".join(random.sample(string.letters, 6))
+    return ''.join(random.sample(string.letters, 6))
 
 
 def generate_hd():
     """Generates a random harddisk name."""
-    return " ".join(random.sample(HARDDISK_NAMES, 3))
+    return ' '.join(random.sample(HARDDISK_NAMES, 3))
 
 
 def generate_cd():
     """Generates a random CD name."""
-    return " ".join(random.sample(CD_NAMES, 3))
+    return ' '.join(random.sample(CD_NAMES, 3))
 
 
 def generate_bios():
     """Generates a random BIOS name."""
-    return " ".join(random.sample(BIOS_NAMES, 3))
+    return ' '.join(random.sample(BIOS_NAMES, 3))
 
 
 def generate_vga_bios():
     """Generates a random VGA BIOS name."""
-    return " ".join(random.sample(VGA_BIOS_NAMES, 3))
+    return ' '.join(random.sample(VGA_BIOS_NAMES, 3))
 
 
 REGISTRY = [
@@ -130,18 +130,14 @@ REGISTRY = [
 ]
 
 
-class SetupWindows():
+class SetupWindows(object):
     def __init__(self, keep_evidence=False):
-        """
-
-        :param keep_evidence: Keep some evidence. Use that for debugging
-        :return:
-        """
         self.log = logging.getLogger('Setup Windows')
         self.log.setLevel(logging.DEBUG)
-        ch = logging.FileHandler("c:\\vmcloak\\windows_setup.log")
+        ch = logging.FileHandler('c:\\vmcloak\\windows_setup.log')
         ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - '
+                                      '%(levelname)s - %(message)s')
         ch.setFormatter(formatter)
         self.log.addHandler(ch)
         self.keep_evidence = keep_evidence
@@ -183,16 +179,16 @@ class SetupWindows():
 
             res = NtRenameKey(res_handle, pointer(us))
             if res:
-                self.log.error("Could not rename %r", ssubkey)
+                self.log.error('Could not rename %r', ssubkey)
             else:
-                self.log.info("Renamed %r to %r", ssubkey, dsubkey)
+                self.log.info('Renamed %r to %r', ssubkey, dsubkey)
 
         if res_handle:
             RegCloseKey(res_handle)
 
     def run(self):
         """Modify the system settings."""
-        self.log.info("Starting system modifications")
+        self.log.info('Starting system modifications')
 
         # Read the agent.py file so we can drop it again later on.
         agent = open('C:\\vmcloak\\agent.py', 'rb').read()
@@ -203,7 +199,7 @@ class SetupWindows():
             width, height = [int(x) for x in RESOLUTION.split('x')]
             s.send('\x01' if self.set_resolution(width, height) else '\x00')
         except socket.error:
-            self.log.error("Error connecting to socket")
+            self.log.error('Error connecting to socket')
 
         # Set registry keys.
         for key, subkey, name, typ, value in REGISTRY:
@@ -222,23 +218,23 @@ class SetupWindows():
         # Drop the agent and execute it.
         _, path = tempfile.mkstemp(suffix='.py')
         open(path, 'wb').write(agent)
-        self.log.info("Agent dropped")
+        self.log.info('Agent dropped')
 
         # Don't wait for this process to end. Also, the agent will remove the
         # temporary agent file itself.
         subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
-        self.log.info("Started agent")
+        self.log.info('Started agent')
 
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.
         if not self.keep_evidence:
             shutil.rmtree('C:\\vmcloak')
         else:
-            self.log.info("Keeping evidence")
+            self.log.info('Keeping evidence')
 
-        self.log.info("System modifications done")
+        self.log.info('System modifications done')
 
 
 if __name__ == '__main__':
-    sw = SetupWindows(keep_evidence=True)
+    sw = SetupWindows(keep_evidence=False)
     sw.run()
