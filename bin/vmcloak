@@ -7,6 +7,7 @@ import argparse
 import lockfile
 import logging
 import os.path
+import pkg_resources
 import shutil
 import socket
 import subprocess
@@ -33,6 +34,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
     parser.add_argument('-d', '--debug', action='store_true', help='Display debug messages.')
+    parser.add_argument('-v', '--version', action='store_true', help='Display the VMCloak version.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
@@ -113,6 +115,11 @@ def main():
     # arguments have been given on the command line, then show the usage.
     if len(sys.argv) == 1:
         parser.print_help()
+        exit(0)
+
+    if args.version:
+        version = pkg_resources.require('VMCloak')[0].version
+        print 'VMCloak version', version
         exit(0)
 
     if args.unlock:
