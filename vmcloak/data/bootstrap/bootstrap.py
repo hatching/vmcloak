@@ -46,14 +46,14 @@ ChangeDisplaySettings = windll.user32.ChangeDisplaySettingsA
 ChangeDisplaySettings.argtypes = POINTER(_DevMode), c_uint
 
 NtRenameKey = windll.ntdll.NtRenameKey
-NtRenameKey.argtypes = [HANDLE, POINTER(UNICODE_STRING)]
+NtRenameKey.argtypes = HANDLE, POINTER(UNICODE_STRING)
 
 RegOpenKeyExW = windll.advapi32.RegOpenKeyExW
-RegOpenKeyExW.argtypes = [HANDLE, LPCWSTR, DWORD, ULONG, POINTER(HANDLE)]
+RegOpenKeyExW.argtypes = HANDLE, LPCWSTR, DWORD, ULONG, POINTER(HANDLE)
 RegOpenKeyExW.restype = LONG
 
 RegCloseKey = windll.advapi32.RegCloseKey
-RegCloseKey.argtypes = [HANDLE]
+RegCloseKey.argtypes = HANDLE,
 
 ENUM_CURRENT_SETTINGS = -1
 CDS_UPDATEREGISTRY = 1
