@@ -141,12 +141,15 @@ class DependencyManager(object):
         if info['filename'] in self.urls:
             url = self.urls[info['filename']]
 
+            # TODO We have to check the sha1sum of the downloaded binary.
+
             # Using wget seems the easiest as it shows the progress.
             # TODO Should we be using a Python library for this?
             try:
                 log.debug('Fetching dependency %r: %s.',
                           dependency, info['filename'])
-                subprocess.check_call([get_path('wget'), '-O', filepath, url])
+                subprocess.check_call([get_path('wget'), '-O', filepath, url,
+                                       '--no-check-certificate'])
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
@@ -158,7 +161,8 @@ class DependencyManager(object):
             try:
                 log.debug('Fetching dependency %r: %s.',
                           dependency, info['filename'])
-                subprocess.check_call([get_path('wget'), '-O', filepath, url])
+                subprocess.check_call([get_path('wget'), '-O', filepath, url,
+                                       '--no-check-certificate'])
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
