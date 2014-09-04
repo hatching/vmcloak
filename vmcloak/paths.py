@@ -19,6 +19,7 @@ PATHS = {
     ],
     'genisoimage': [
         '/usr/bin/genisoimage',
+        '/usr/pkg/bin/genisoimage',
         '/usr/bin/mkisofs',
         '/usr/pkg/bin/mkisofs',
     ],
@@ -35,7 +36,7 @@ INSTALL = {
     },
     'genisoimage': {
         'Linux': 'apt-get install genisoimage',
-        'NetBSD': 'pkgin install cdrtools',
+        'NetBSD': 'pkgin install cdrkit',
     },
 }
 
