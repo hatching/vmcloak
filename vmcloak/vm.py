@@ -42,6 +42,13 @@ class VirtualBox(VM):
 
         return ret.strip()
 
+    def api_status(self):
+        if not os.path.isfile(self.vboxmanage):
+            log.error('VBoxManage not found!')
+            return False
+
+        return True
+
     def create_vm(self):
         return self._call('createvm', name=self.name,
                           basefolder=self.vm_dir, register=True)
@@ -174,6 +181,14 @@ class VBoxRPC(VM):
         r = requests.get(url, auth=self.auth, params=kwargs.get('params'),
                          headers=headers)
         return r.json()
+
+    def api_status(self):
+        try:
+            self._query('api-status')
+            return True
+        except Exception as e:
+            log.error('Error connecting to the API: %s %s', e.args, e.message)
+            return False
 
     def create_vm(self):
         return self._query('createvm', self.name)

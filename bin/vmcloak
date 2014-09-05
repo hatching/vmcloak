@@ -154,6 +154,9 @@ def main():
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
 
+    if not m.api_status():
+        exit(1)
+
     if s.delete:
         log.info('Unregistering and deleting the VM and its associated '
                  'files.')
