@@ -19,7 +19,12 @@ def copytreelower(srcdir, dstdir):
     thus emulating Windows case-insensitive filepaths.
 
     """
-    prefix = len(srcdir) + 1
+    # If the source directory doesn't end with a slash then we have to take
+    # this into account when slicing it later on. Namely, when the source
+    # directory is "/mnt/winxp" then we slice up to "/mnt/winxp/", thus we
+    # require one extra character for the slash. When the source directory is
+    # "/mnt/winxp/" then of course we don't an extra character for the slice.
+    prefix = len(srcdir) + (not srcdir.endswith('/'))
     for dirpath, dirnames, filenames in os.walk(srcdir):
         for dirname in dirnames:
             os.mkdir(os.path.join(dstdir,
