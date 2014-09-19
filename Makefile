@@ -1,4 +1,5 @@
-DIST = build/ deb_dist/ dist/ $(wildcard VMCloak-*.tar.gz)
+DIST = build/ deb_dist/ dist/ VMCloak.egg-info/ \
+	   $(wildcard VMCloak-*.tar.gz) MANIFEST
 
 all: pypi deb
 	make -C utils/
@@ -12,5 +13,6 @@ deb:
 
 clean:
 	rm -rf $(DIST)
+	rm -f $(shell find .|grep .pyc)
 	make -C docs/ clean
 	make -C utils/ clean

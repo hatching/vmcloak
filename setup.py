@@ -11,7 +11,7 @@ except ImportError:
 
 setup(
     name='VMCloak',
-    version='0.1.1',
+    version='0.1.3',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
@@ -30,11 +30,6 @@ setup(
     license='docs/LICENSE.txt',
     description='Automated Virtual Machine Generation and Cloaking '
                 'for Cuckoo Sandbox.',
-    include_package_data=True,
-    package_data={
-        'vmcloak.data': ['*.*'],
-        'vmcloak.data.bootstrap': ['*.*'],
-    },
     install_requires=[
         # Useful when running multiple instances of VMCloak at once.
         'lockfile',
