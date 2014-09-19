@@ -158,4 +158,18 @@ To do this, please `make a new issue on Github
 Available Dependencies
 ----------------------
 
-.. program-output:: vmcloak-deps list-deps
+Following is a list of the dependencies that are currently available::
+
+    dependency      : description
+    -----------------------------
+
+    dotnet40        : .NET v4.0
+    firefox3_6      : Mozilla Firefox 3.6
+    python27        : Python 2.7.6
+    vcredist2005    : Microsoft Visual C++ 2005 x86 Redistributable
+    vcredist2008    : Microsoft Visual C++ 2008 x86 Redistributable
+    vcredist2010    : Microsoft Visual C++ 2010 x86 Redistributable
+    vcredist2012    : Microsoft Visual C++ 2012 x86 Redistributable
+    vcredist2013    : Microsoft Visual C++ 2013 x86 Redistributable
+    wic             : Windows Imaging Component
+    winstaller31    : Windows Installer 3.1 Redistributable v2
