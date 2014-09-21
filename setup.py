@@ -26,7 +26,7 @@ setup(
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
     ],
-    url='http://pypi.python.org/pypi/vmcloak/',
+    url='http://vmcloak.org/',
     license='docs/LICENSE.txt',
     description='Automated Virtual Machine Generation and Cloaking '
                 'for Cuckoo Sandbox.',
