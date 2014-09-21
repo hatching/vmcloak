@@ -19,4 +19,3 @@ The following Python packages are required:
 
 * lockfile
 * sphinx
-* sphinxcontrib-programoutput

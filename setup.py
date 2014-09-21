@@ -36,7 +36,6 @@ setup(
 
         # Libraries to build the documentation.
         'sphinx',
-        'sphinxcontrib-programoutput',
 
         # Required on BSD systems for unknown reasons.
         'jinja2',
