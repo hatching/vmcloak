@@ -74,6 +74,7 @@ def main():
     parser.add_argument('-u', '--unlock', action='store_true', default=None, help='Unlock the Virtual Machine mutex/lock.')
     parser.add_argument('--temp-dirpath', type=str, help='Directory where to put temporary files.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
+    parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
 
     defaults = dict(
         vm='virtualbox',
@@ -104,6 +105,9 @@ def main():
         log.setLevel(logging.DEBUG)
 
     s = Configuration()
+
+    if args.recommended_settings:
+        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
 
     for settings in args.settings:
         s.from_file(settings)
