@@ -170,3 +170,11 @@ def sha1_file(path):
         h.update(buf)
 
     return h.hexdigest()
+
+
+class DummyLock(object):
+    def acquire(self, timeout=None):
+        pass
+
+    def release(self):
+        pass

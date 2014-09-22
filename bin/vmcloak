@@ -19,6 +19,7 @@ from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyWriter
 from vmcloak.iso import buildiso
+from vmcloak.misc import DummyLock
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC
 
@@ -95,7 +96,6 @@ def main():
         keyboard_layout='US',
         register_cuckoo=True,
         dependencies='',
-        lock_dirpath=os.path.join(os.getenv('HOME'), '.vmcloak', 'lock'),
         auxiliary_local='auxiliary',
     )
 
@@ -127,7 +127,11 @@ def main():
         exit(0)
 
     if args.unlock:
-        path = '%s.lock' % s.lock_dirpath
+        # Default lock dirpath.
+        default_lock_dirpath = os.path.join(os.getenv('HOME'),
+                                            '.vmcloak', 'lock')
+
+        path = '%s.lock' % (s.lock_dirpath or default_lock_dirpath)
         if os.path.isdir(path):
             shutil.rmtree(path)
         exit(0)
@@ -187,7 +191,10 @@ def main():
     if not os.path.isdir(os.path.join(os.getenv('HOME'), '.vmcloak')):
         os.mkdir(os.path.join(os.getenv('HOME'), '.vmcloak'))
 
-    lock = lockfile.MkdirFileLock(s.lock_dirpath)
+    if s.lock_dirpath:
+        lock = lockfile.MkdirFileLock(s.lock_dirpath)
+    else:
+        lock = DummyLock()
 
     try:
         log.debug('Awaiting the opportunity to obtain the vmcloak lock.')
