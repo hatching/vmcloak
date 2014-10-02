@@ -11,7 +11,7 @@ except ImportError:
 
 setup(
     name='VMCloak',
-    version='0.1.4',
+    version='0.1.5',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
@@ -27,7 +27,7 @@ setup(
         'bin/vmcloak-iptables',
     ],
     url='http://vmcloak.org/',
-    license='docs/LICENSE.txt',
+    license='GPLv3',
     description='Automated Virtual Machine Generation and Cloaking '
                 'for Cuckoo Sandbox.',
     install_requires=[
