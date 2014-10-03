@@ -73,7 +73,7 @@ class VirtualBox(VM):
                    type='hdd', device=0, port=0, medium=self.hdd_path)
 
     def cpus(self, count):
-        self._call('modifyvm', self.name, cpus=count)
+        self._call('modifyvm', self.name, cpus=count, ioapic='on')
 
     def attach_iso(self, iso):
         ctlname = 'IDE Controller'
