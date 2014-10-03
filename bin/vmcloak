@@ -68,6 +68,7 @@ def main():
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
+    parser.add_argument('--cpu-count', type=int, help='Number of CPUs to use with this Virtual Machine.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
@@ -94,6 +95,7 @@ def main():
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
         keyboard_layout='US',
+        cpu_count=1,
         register_cuckoo=True,
         dependencies='',
         auxiliary_local='auxiliary',
@@ -299,6 +301,9 @@ def main():
 
     log.debug('Randomizing Hardware.')
     m.init_vm(profile=s.hwconfig_profile)
+
+    log.debug('Setting CPU count to %d', s.cpu_count)
+    m.cpus(s.cpu_count)
 
     log.debug('Checking VirtualBox hostonly network.')
     if m.hostonly(macaddr=s.hostonly_macaddr) is False:

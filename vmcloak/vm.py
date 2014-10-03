@@ -72,6 +72,9 @@ class VirtualBox(VM):
         self._call('storageattach', self.name, storagectl=ctlname,
                    type='hdd', device=0, port=0, medium=self.hdd_path)
 
+    def cpus(self, count):
+        self._call('modifyvm', self.name, cpus=count)
+
     def attach_iso(self, iso):
         ctlname = 'IDE Controller'
         self._call('storageattach', self.name, storagectl=ctlname,
@@ -204,6 +207,9 @@ class VBoxRPC(VM):
 
     def create_hd(self, disksize):
         return self._query('create-hdd', self.name, '%s' % disksize)
+
+    def cpus(self, count):
+        log.warning('VBoxRPC.cpus() has not been implemented yet')
 
     def attach_iso(self, iso):
         url = os.path.join(self.url, 'api', 'push-iso', '%s.iso' % self.name)

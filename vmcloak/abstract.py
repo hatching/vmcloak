@@ -65,6 +65,10 @@ class VM(object):
         """Create a harddisk."""
         raise
 
+    def cpus(self, count):
+        """Set the number of CPUs to assign to this Virtual Machine."""
+        raise
+
     def attach_iso(self, iso):
         """Attach a ISO file as DVDRom drive."""
         raise
