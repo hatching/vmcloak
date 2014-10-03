@@ -1,0 +1,30 @@
+#!/bin/sh
+# Copyright (C) 2014 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+# http://stackoverflow.com/questions/3231804/in-bash-how-to-add-are-you-sure-y-n-to-any-command-or-alias
+confirm () {
+    # Call with a prompt string or use a default.
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case $response in
+        [yY][eE][sS]|[yY])
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+echo 'Running this command will remove all your virtual machines!'
+confirm || exit
+
+# Remove all VMs and delete their files through VirtualBox.
+for vmname in $(VBoxManage list vms|cut -d'"' -f2); do
+    VBoxManage controlvm "$vmname" poweroff
+    VBoxManage unregistervm "$vmname" --delete
+done
+
+# Remove broken VMs and whatnot.
+rm -rf ~/.config/VirtualBox/ ~/.VirtualBox/

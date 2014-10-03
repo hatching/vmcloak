@@ -25,6 +25,8 @@ setup(
         'bin/vmcloak-deps',
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
+        'bin/vmcloak-killvbox',
+        'bin/vmcloak-removevms',
     ],
     url='http://vmcloak.org/',
     license='GPLv3',
