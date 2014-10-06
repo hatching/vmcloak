@@ -172,24 +172,6 @@ class DependencyManager(object):
 
         return True
 
-    def fetch_all(self):
-        """Fetch all dependencies at once."""
-        if not self._check():
-            return False
-
-        self._load_config()
-
-        try:
-            log.info('Cloning the vmcloak-files repository.')
-            subprocess.check_call([get_path('git'), 'pull',
-                                   'origin', 'master'],
-                                  cwd=self.files_dir)
-        except subprocess.CalledProcessError as e:
-            log.error('Error fetching vmcloak-files repository: %s', e)
-            return False
-
-        return True
-
     def _check(self):
         """Checks whether the dependency repository has been initialized."""
         if not os.path.isdir(DEPS_DIR):

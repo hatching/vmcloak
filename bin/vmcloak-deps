@@ -20,7 +20,6 @@ actions = {
     'init': lambda dm: dm.init(),
     'update': lambda dm: dm.update(),
     'fetch': lambda dm, arg: dm.fetch(arg),
-    'fetch-all': lambda dm: dm.fetch_all(),
     'add': lambda dm: None,
     'list-deps': lambda dm: list_deps(dm),
 }
