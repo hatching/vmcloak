@@ -11,12 +11,14 @@ log = logging.getLogger(__name__)
 PATHS = {
     'wget': [
         '/usr/bin/wget',
+        '/usr/local/bin/wget',
         '/usr/pkg/bin/wget'
     ],
     'genisoimage': [
         '/usr/bin/genisoimage',
         '/usr/pkg/bin/genisoimage',
         '/usr/bin/mkisofs',
+        '/usr/local/bin/mkisofs',
         '/usr/pkg/bin/mkisofs',
     ],
 }
