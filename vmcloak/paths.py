@@ -9,10 +9,6 @@ import os
 log = logging.getLogger(__name__)
 
 PATHS = {
-    'git': [
-        '/usr/bin/git',
-        '/usr/pkg/bin/git'
-    ],
     'wget': [
         '/usr/bin/wget',
         '/usr/pkg/bin/wget'
@@ -26,10 +22,6 @@ PATHS = {
 }
 
 INSTALL = {
-    'git': {
-        'Linux': 'apt-get install git',
-        'NetBSD': 'pkgin install git',
-    },
     'wget': {
         'Linux': 'apt-get install wget',
         'NetBSD': 'pkgin install wget',

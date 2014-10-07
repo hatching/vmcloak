@@ -4,6 +4,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import argparse
+import os
 
 from vmcloak.deps import DependencyManager
 
@@ -33,6 +34,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, choices=actions.keys(), help='Action to perform.')
     parser.add_argument('argument', type=str, nargs='?', help='Arguments.')
+    parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
+    parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
 
     args = parser.parse_args()
 
@@ -41,7 +44,18 @@ def main():
             args.action, action_args[args.action])
         exit(1)
 
-    dm = DependencyManager()
+    if args.deps_directory:
+        deps_directory = args.deps_directory
+    else:
+        deps_directory = os.path.join(os.getenv('HOME'), '.vmcloak', 'deps')
+
+    if args.deps_repository:
+        deps_repository = args.deps_repository
+    else:
+        deps_repository = \
+            'https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/'
+
+    dm = DependencyManager(deps_directory, deps_repository)
 
     if args.argument is None:
         actions[args.action](dm)

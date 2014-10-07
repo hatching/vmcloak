@@ -6,3 +6,4 @@ v0.1.4, September 22th 2014 -- Recommended settings.
 v0.1.5, September 22th 2014 -- By default don't use a lock.
 v0.1.6, October 2nd 2014 -- Set CPU count for Virtual Machines.
 v0.1.7, October 3rd 2014 -- Introduce vboxkill and removevms utilities.
+v0.1.8, October 7th 2014 -- Ability to use a 3rd party repository.

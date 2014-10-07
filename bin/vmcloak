@@ -17,7 +17,7 @@ import time
 
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.deps import DependencyWriter
+from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.iso import buildiso
 from vmcloak.misc import DummyLock
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
@@ -77,6 +77,8 @@ def main():
     parser.add_argument('--temp-dirpath', type=str, help='Directory where to put temporary files.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
+    parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
+    parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
 
     defaults = dict(
         vm='virtualbox',
@@ -99,6 +101,8 @@ def main():
         register_cuckoo=True,
         dependencies='',
         auxiliary_local='auxiliary',
+        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
+        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
     )
 
     args = parser.parse_args()
@@ -259,7 +263,8 @@ def main():
 
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
-    deps = DependencyWriter(vmcloak_dir)
+    dm = DependencyManager(s.deps_directory, s.deps_repository)
+    deps = DependencyWriter(dm, vmcloak_dir)
 
     if not deps.add('python27'):
         lock.release()
