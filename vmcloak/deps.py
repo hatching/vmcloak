@@ -223,6 +223,9 @@ class DependencyWriter(object):
         # Not used by us.
         kw.pop('description', None)
 
+        # Will be used at some point.
+        kw.pop('filename64', None)
+
         if kw:
             log.error('Found one or more remaining value(s) in the '
                       'configuration, please it fix before continuing..')
