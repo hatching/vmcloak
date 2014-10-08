@@ -316,4 +316,4 @@ class VBoxRPC(VM):
 
     def vrde(self, vrde):
         vrde = 'on' if vrde else 'off'
-        return self.query('modifyvm', self.name, vrde=vrde)
+        return self._query('modifyvm', self.name, vrde=vrde)
