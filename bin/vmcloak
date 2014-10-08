@@ -43,9 +43,9 @@ def main():
     parser.add_argument('--vboxrpc-url', type=str, help='URL to VBoxRPC instance.')
     parser.add_argument('--vboxrpc-auth', type=str, help='Credentials to VBoxRPC instance.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
-    parser.add_argument('--ramsize', type=int, help='Available virtual memory (in MB) for this virtual machine.')
+    parser.add_argument('--ramsize', help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
-    parser.add_argument('--hdsize', type=int, help='Maximum size (in MB) of the dynamically allocated harddisk.')
+    parser.add_argument('--hdsize', help='Maximum size (in MB) of the dynamically allocated harddisk.')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
     parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
@@ -68,7 +68,7 @@ def main():
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
-    parser.add_argument('--cpu-count', type=int, help='Number of CPUs to use with this Virtual Machine.')
+    parser.add_argument('--cpu-count', help='Number of CPUs to use with this Virtual Machine.')
     parser.add_argument('--vrde', action='store_true', help='Enable VRDE support in VirtualBox.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
@@ -107,6 +107,12 @@ def main():
         vrde=False
     )
 
+    types = dict(
+        ramsize=int,
+        hdsize=int,
+        cpu_count=int,
+    )
+
     args = parser.parse_args()
 
     if args.debug:
@@ -122,6 +128,14 @@ def main():
 
     s.from_args(args)
     s.from_defaults(defaults)
+
+    for k, v in s.conf.items():
+        if k in types:
+            try:
+                s.conf[k] = types[k](v)
+            except ValueError:
+                log.critical('Flag %r should be an %r.', k, types[k].__name__)
+                exit(1)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
