@@ -163,6 +163,10 @@ class VirtualBox(VM):
     def list_settings(self):
         return self._call('getextradata', self.name, 'enumerate')
 
+    def vrde(self, vrde):
+        vrde = 'on' if vrde else 'off'
+        return self._call('modifyvm', self.name, vrde=vrde)
+
 
 class VBoxRPC(VM):
     FIELDS = VBOX_CONFIG
@@ -309,3 +313,7 @@ class VBoxRPC(VM):
 
     def stopvm(self):
         return self._query('stopvm', self.name)
+
+    def vrde(self, vrde):
+        vrde = 'on' if vrde else 'off'
+        return self.query('modifyvm', self.name, vrde=vrde)

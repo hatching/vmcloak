@@ -69,6 +69,7 @@ def main():
     parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--cpu-count', type=int, help='Number of CPUs to use with this Virtual Machine.')
+    parser.add_argument('--vrde', action='store_true', help='Enable VRDE support in VirtualBox.')
     parser.add_argument('--lock-dirpath', type=str, help='Path to directory for creating an inter-process lock.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
@@ -103,6 +104,7 @@ def main():
         auxiliary_local='auxiliary',
         deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
         deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
+        vrde=False
     )
 
     args = parser.parse_args()
@@ -327,6 +329,9 @@ def main():
         else:
             log.debug('Disabling Hardware Virtualization.')
         m.hwvirt(s.hwvirt)
+
+    if args.vrde:
+        m.vrde(True)
 
     log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
     log.debug(m.start_vm(visible=s.vm_visible))
