@@ -134,6 +134,10 @@ A few configuration entries are not required, but should in most cases be
 provided.
 
 * :ref:`conf-hostonly-ip`
+* :ref:`conf-hostonly-gateway`
+* :ref:`conf-hostonly-mask`
+* :ref:`conf-hostonly-macaddr`
+* :ref:`conf-host-ip`
 * :ref:`conf-dependencies`
 
 .. _conf-hostonly-ip:
@@ -141,11 +145,42 @@ provided.
 Guest hostonly IP address
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default Guest ``--hostonly-ip`` address defaults to ``192.168.56.101``,
-which is perfectly fine when one only intends to create one VM. However, if
-one wants to create multiple VMs, then the static IP addresses should be
-unique. Normally one would start counting at ``192.168.56.101`` to
-``192.168.56.102``, ``192.168.56.103``, etc.
+The IP address to assign to the Guest is set by ``--hostonly-ip``. It defaults
+to ``192.168.56.101``, which is perfectly fine when one only intends to
+create one VM. However, if one wants to create multiple VMs, then the static 
+IP addresses should be unique. Normally one would start counting at 
+``192.168.56.101`` to ``192.168.56.102``, ``192.168.56.103``, etc.
+
+.. _conf-hostonly-gateway:
+
+Guest hostonly Gateway
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The Gateway IP for the Guest to use. Set by ``--hostonly-gateway``
+
+.. _conf-hostonly-mask:
+
+Guest hostonly network mask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Network mask for the Guest to use. Set by ``--hostonly-mask``
+
+.. _conf-hostonly-macaddr:
+
+Guest hostonly MAC address
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The MAC address for the guest to use. Set by ``--hostonly-macaddr``
+
+.. _conf-host-ip:
+
+Host host-ip
+^^^^^^^^^^^^
+
+The IP address of the vboxnet interface for communication between guest and host.
+The communication is relevant for the installation process to finish. 
+Set by ``--host-ip``
+
 
 .. _conf-dependencies:
 
