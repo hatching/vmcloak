@@ -20,13 +20,13 @@ a single one, VMCloak supports one or more configuration file(s) to be
 specified using the ``-s`` (short for ``--settings``) switch.
 
 Configuration entries in the INI files should be present in the ``vmcloak``
-section. E.g., ``vmcloak --basedir ~/vms`` would be equal to having the
+section. E.g., ``vmcloak --data-dir ~/vms`` would be equal to having the
 following INI file, *conf.ini*, with ``vmcloak -s conf.ini``.
 
 .. code-block:: ini
 
     [vmcloak]
-    basedir = ~/vms
+    data_dir = ~/vms
 
 Configuration order
 -------------------
@@ -59,7 +59,8 @@ Required configuration entries
 A few configuration entries are required.
 
 * :ref:`conf-mounted-iso`
-* :ref:`conf-basedir`
+* :ref:`conf-vm-dir`
+* :ref:`conf-data-dir`
 * :ref:`conf-serial-key`
 * :ref:`conf-vmname`
 
@@ -90,15 +91,21 @@ In order to mount an image under BSD the following commands might be required.
     vnconfig /dev/vnd0d winxp.iso
     mount -t cd9660 /dev/vnd0d /mnt/winxp
 
-.. _conf-basedir:
+.. _conf-vm-dir:
 
-Base Directory
-^^^^^^^^^^^^^^
+VM-dir Directory
+^^^^^^^^^^^^^^^^
 
-``--basedir`` specifies the path to the base directory where a directory will
+``--vm-dir`` specifies the path to the directory where a directory will
 be created for the Virtual Machine. The directory will contain files such as
-the machine information, snapshots, the ISO disk image, and the *harddrive*
-image.
+the machine information, snapshots and the ISO disk image
+
+.. _conf-data-dir:
+
+Data-dir Directory
+^^^^^^^^^^^^^^^^^^
+
+``--data-dir`` specifies the path to the directory where the hard disk images are stored.
 
 .. _conf-serial-key:
 
