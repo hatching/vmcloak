@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version='0.1.10',
+    version='0.1.11',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
@@ -43,9 +43,5 @@ setup(
 
         # Required on BSD systems for unknown reasons.
         'jinja2',
-
-        # Required for the VBoxRPC virtual machine module.
-        'requests',
-        'requests-toolbelt',
     ],
 )

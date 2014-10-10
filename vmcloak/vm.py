@@ -5,9 +5,16 @@
 
 import logging
 import os
-import requests
-import requests_toolbelt
 import subprocess
+import sys
+
+try:
+    import requests
+    import requests_toolbelt
+    HAVE_REQUESTS = True
+except ImportError:
+    HAVE_REQUESTS = False
+
 
 from vmcloak.abstract import VM
 from vmcloak.data.config import VBOX_CONFIG
@@ -178,6 +185,10 @@ class VBoxRPC(VM):
         self.auth = kwargs.pop('auth')
 
         VM.__init__(self, *args, **kwargs)
+
+        if not HAVE_REQUESTS:
+            sys.exit('Please install requests and requests-toolbelt: '
+                     'sudo pip install requests requests-toolbelt')
 
     def _query(self, *args, **kwargs):
         url = os.path.join(self.url, 'api', *args)

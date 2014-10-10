@@ -9,3 +9,4 @@ v0.1.7, October 3rd 2014 -- Introduce vboxkill and removevms utilities.
 v0.1.8, October 7th 2014 -- Ability to use a 3rd party repository.
 v0.1.9, October 8th 2014 -- Mac OS X, VRDE, enforce integer types.
 v0.1.10, October 9th 2014 -- Correctly install data files.
+v0.1.11, October 10th 2014 -- Do not require requests imports by default.
