@@ -205,7 +205,8 @@ Hardware Virtualization
 
 If one hasn't enabled **VT-x** in the BIOS then it is not possible to use
 hardware virtualization. If one gets such error, then provide ``--no-hwvirt``.
-To explicitly enable hardware virtualization provide ``--hwvirt``.
+To explicitly enable hardware virtualization provide ``--hwvirt``. In the config
+file disable it with ``hwvirt = false``.
 
 .. _conf-keyboard-layout:
 
