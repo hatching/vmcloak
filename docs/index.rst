@@ -19,8 +19,8 @@ Contents:
    :maxdepth: 2
 
    requirements
-   config
    setup
+   config   
    vbox
    network
    deps
