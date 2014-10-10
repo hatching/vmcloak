@@ -98,7 +98,8 @@ VM-dir Directory
 
 ``--vm-dir`` specifies the path to the directory where a directory will
 be created for the Virtual Machine. The directory will contain files such as
-the machine information, snapshots and the ISO disk image
+the machine information and snapshot files. You can load that in tempfs to
+gain additional speed.
 
 .. _conf-data-dir:
 
