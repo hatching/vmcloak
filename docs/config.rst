@@ -175,7 +175,8 @@ RAM Size
 ^^^^^^^^
 
 With ``--ramsize`` one can specify the required RAM size of the VM in
-megabytes. By default this value will be set to **1024mb**.
+megabytes. By default this value will be set to **1024** (which results to
+1 GB of RAM).
 
 .. _conf-resolution:
 
