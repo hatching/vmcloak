@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ -z "$(VBoxManage list hostonlyifs)" ]; then
+    VBoxManage hostonlyif create
+    VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.56.1
+fi

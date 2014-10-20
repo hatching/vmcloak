@@ -29,3 +29,5 @@ present**)
 
     VBoxManage hostonlyif create
     VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.56.1
+
+This is equivalent to executing the ``vmcloak-vboxnet0`` script.
