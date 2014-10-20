@@ -1,3 +1,9 @@
+0.1.12, October 20th 2014
+
+    New: Introduce vmcloak-vboxnet0 to easily create the
+        hostonly vboxnet0 network.
+    Tweak: vmcloak-killvbox now also kills tcpdump(8) processes.
+
 0.1.11, October 10th 2014
 
     Do not require requests imports by default.
