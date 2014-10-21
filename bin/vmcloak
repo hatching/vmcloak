@@ -85,6 +85,7 @@ def main():
         vm='virtualbox',
         vboxrpc_url='http://localhost:9002/',
         vboxrpc_auth='root:toor',
+        cuckoo='',
         ramsize=1024,
         resolution='1024x768',
         hdsize=256*1024,
@@ -162,9 +163,9 @@ def main():
         log.error('A name for the Virtual Machine is required.')
         exit(1)
 
-    if not s.cuckoo and s.register_cuckoo:
+    if s.register_cuckoo and not os.path.isdir(s.cuckoo):
         log.error('To register the Virtual Machine with Cuckoo '
-                  'the Cuckoo directory has to be provided.')
+                  'the Cuckoo directory has to be provided with --cuckoo.')
         log.info('To disable registering please provide --no-register-cuckoo '
                  'or specify register-cuckoo = false in the configuration.')
         exit(1)

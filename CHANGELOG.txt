@@ -1,3 +1,7 @@
+0.1.13, October 21th 2014
+
+    Tweak: Use ~/cuckoo/ as Cuckoo directory in the recommended settings.
+
 0.1.12, October 20th 2014
 
     New: Introduce vmcloak-vboxnet0 to easily create the
