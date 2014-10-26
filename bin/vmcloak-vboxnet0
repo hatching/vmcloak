@@ -1,6 +1,10 @@
 #!/bin/sh
 
+# Only create a new hostonly interface if it does not already exist.
 if [ -z "$(VBoxManage list hostonlyifs)" ]; then
     VBoxManage hostonlyif create
-    VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.56.1
 fi
+
+# Configure the hostonly interface and automatically enable it (also in
+# case it already existed but was disabled).
+VBoxManage hostonlyif ipconfig vboxnet0 --ip 192.168.56.1
