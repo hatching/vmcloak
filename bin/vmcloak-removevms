@@ -20,9 +20,13 @@ confirm () {
 echo 'Running this command will remove all your virtual machines!'
 confirm || exit
 
+# Stop all running VMs.
+for vmname in $(VBoxManage list runningvms|cut -d'"' -f2); do
+    VBoxManage controlvm "$vmname" poweroff
+done
+
 # Remove all VMs and delete their files through VirtualBox.
 for vmname in $(VBoxManage list vms|cut -d'"' -f2); do
-    VBoxManage controlvm "$vmname" poweroff
     VBoxManage unregistervm "$vmname" --delete
 done
 
