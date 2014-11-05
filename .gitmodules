@@ -1,3 +1,0 @@
-[submodule "deps"]
-	path = deps
-	url = git://github.com/jbremer/vmcloak-deps.git
