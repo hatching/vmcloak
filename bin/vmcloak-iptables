@@ -2,13 +2,18 @@
 
 # Credits to Mark Schloesser, https://github.com/rep/cuckoo-contrib
 
+if [ "$#" -ne 0 ]; then
+    INTERFACES="$*"
+else
+    INTERFACES="eth0 wlan0"
+fi
+
 iptables -F
 iptables -t nat -F
 
-OUT_DEVS="eth0 wlan0"
 VBOXNET="192.168.56.0/24"
 
-for i in $OUT_DEVS; do
+for i in $INTERFACES; do
     iptables -t nat -A POSTROUTING -o $i -s $VBOXNET -j MASQUERADE
 done
 
