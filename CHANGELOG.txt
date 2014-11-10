@@ -1,3 +1,8 @@
+0.1.14, November 10th 2014
+
+    Tweak: Maintenance of various executable scripts.
+    Tweak: Removed unused vmcloak-deps submodule.
+
 0.1.13, October 21th 2014
 
     Tweak: Use ~/cuckoo/ as Cuckoo directory in the recommended settings.
