@@ -258,6 +258,9 @@ class DependencyWriter(object):
         if marker:
             print>>self.f, ')'
 
+        if not os.path.isdir(os.path.join(self.bootstrap, 'deps')):
+            os.mkdir(os.path.join(self.bootstrap, 'deps'))
+
         shutil.copy(os.path.join(self.dm.deps_directory, 'files', fname),
                     os.path.join(self.bootstrap, 'deps', fname))
         return True

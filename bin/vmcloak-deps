@@ -5,8 +5,9 @@
 
 import argparse
 import os
+import tempfile
 
-from vmcloak.deps import DependencyManager
+from vmcloak.deps import DependencyManager, DependencyWriter
 
 
 def list_deps(dm):
@@ -17,16 +18,30 @@ def list_deps(dm):
         print '%-16s: %s' % (dep, info['description'])
 
 
+def write_batch_file(dm, args):
+    dw = DependencyWriter(dm, tempfile.gettempdir())
+
+    for arg in args.split():
+        dw.add(arg)
+
+    dw.write()
+
+    batch_path = os.path.join(tempfile.gettempdir(), 'deps.bat')
+    print open(batch_path, 'rb').read()
+
+
 actions = {
     'init': lambda dm: dm.init(),
     'update': lambda dm: dm.update(),
     'fetch': lambda dm, arg: dm.fetch(arg),
     'add': lambda dm: None,
     'list-deps': lambda dm: list_deps(dm),
+    'write-batch': lambda dm, args: write_batch_file(dm, args),
 }
 
 action_args = {
     'fetch': 'dependency',
+    'write-batch': 'dependencies',
 }
 
 
