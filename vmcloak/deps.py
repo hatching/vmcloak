@@ -64,7 +64,7 @@ class DependencyManager(object):
         if url is None:
             url = urlparse.urljoin(self.deps_repository, filename)
 
-        args = [get_path('wget'), '-O', path, url, '--no-check-certificate']
+        args = get_path('wget'), '-O', path, url, '--no-check-certificate'
         subprocess.check_call(args)
 
     def init(self):
