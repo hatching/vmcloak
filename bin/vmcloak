@@ -30,6 +30,371 @@ logging.getLogger('requests').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 log = logging.getLogger('vmcloak')
 
+class VMGenesis():
+
+    defaults = dict(
+        vm='virtualbox',
+        vboxrpc_url='http://localhost:9002/',
+        vboxrpc_auth='root:toor',
+        cuckoo='',
+        ramsize=1024,
+        resolution='1024x768',
+        hdsize=256*1024,
+        host_ip='192.168.56.1',
+        hostonly_ip='192.168.56.101',
+        hostonly_mask='255.255.255.0',
+        hostonly_gateway='192.168.56.1',
+        bridged_mask='255.255.255.0',
+        dns_server='8.8.8.8',
+        tags='',
+        vboxmanage='/usr/bin/VBoxManage',
+        vm_visible=False,
+        keyboard_layout='US',
+        cpu_count=1,
+        register_cuckoo=True,
+        dependencies='',
+        auxiliary_local='auxiliary',
+        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
+        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
+        vrde=False,
+        temp_dirpath = "/tmp"
+    )
+
+    types = dict(
+        ramsize=int,
+        hdsize=int,
+        cpu_count=int,
+    )
+
+    init_time = 100  # Time the system gets to initialise itself
+
+    def __init__(self, args, simulate=False):
+        """
+
+        @param simulate: Only simulate generation
+        @return:
+        """
+        self.simulate = simulate
+        self.args = args
+        self.conf=None
+        self.sock = None
+        self.port = None
+
+    def _process_config(self):
+        self.conf = Configuration()
+
+        if self.args.recommended_settings:
+            self.conf.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
+
+        for settings in self.args.settings:
+            self.conf.from_file(settings)
+
+        self.conf.from_args(self.args)
+        self.conf.from_defaults(self.defaults)
+
+        for k, v in self.conf.conf.items():
+            if k in self.types:
+                try:
+                    self.conf.conf[k] = self.types[k](v)
+                except ValueError:
+                    log.critical('Flag %r should be an %r.', k, self.types[k].__name__)
+                    exit(1)
+
+        if not self.conf.vmname:
+            log.error('A name for the Virtual Machine is required.')
+            exit(1)
+
+        if self.conf.register_cuckoo and not os.path.isdir(self.conf.cuckoo):
+            log.error('To register the Virtual Machine with Cuckoo '
+                      'the Cuckoo directory has to be provided with --cuckoo.')
+            log.info('To disable registering please provide --no-register-cuckoo '
+                     'or specify register-cuckoo = false in the configuration.')
+            exit(1)
+
+    def _make_bootstrap(self):
+        """ Create the bootstrap scripts
+
+        @return:
+        """
+        settings_bat = dict(
+            HOSTONLYIP=self.conf.hostonly_ip,
+            HOSTONLYMASK=self.conf.hostonly_mask,
+            HOSTONLYGATEWAY=self.conf.hostonly_gateway,
+            BRIDGED='yes' if self.conf.bridged else 'no',
+            BRIDGEDIP=self.conf.bridged_ip,
+            BRIDGEDMASK=self.conf.bridged_mask,
+            BRIDGEDGATEWAY=self.conf.bridged_gateway,
+            DNSSERVER=self.conf.dns_server,
+        )
+
+        settings_py = dict(
+            HOST_IP=self.conf.host_ip,
+            HOST_PORT=self.port,
+            RESOLUTION=self.conf.resolution,
+        )
+
+        bootstrap = tempfile.mkdtemp(dir=self.conf.temp_dirpath)
+
+        vmcloak_dir = os.path.join(bootstrap, 'vmcloak')
+        os.mkdir(vmcloak_dir)
+
+        # Write the configuration values for bootstrap.bat.
+        with open(os.path.join(vmcloak_dir, 'settings.bat'), 'wb') as f:
+            for key, value in settings_bat.items():
+                print>>f, 'set %s=%s' % (key, value)
+
+        # Write the configuration values for bootstrap.py.
+        with open(os.path.join(vmcloak_dir, 'settings.py'), 'wb') as f:
+            for key, value in settings_py.items():
+                print>>f, '%s = %r' % (key, value)
+
+        return bootstrap, vmcloak_dir
+
+    def generate(self):
+        """
+
+        @return: 0 on success,
+        """
+
+        if self.args.debug:
+            log.setLevel(logging.DEBUG)
+
+        if self.simulate:
+            log.debug("Simulation mode")
+
+
+        self._process_config()
+
+
+        if self.args.unlock:
+            # Default lock dirpath.
+            default_lock_dirpath = os.path.join(os.getenv('HOME'),
+                                                '.vmcloak', 'lock')
+
+            path = '%s.lock' % (self.conf.lock_dirpath or default_lock_dirpath)
+            if os.path.isdir(path):
+                if not self.simulate:
+                    shutil.rmtree(path)
+            exit(0)
+
+
+
+        if self.conf.vm.lower() == 'virtualbox':
+            vboxmanage = vboxmanage_path(self.conf)
+            if not vboxmanage:
+                exit(1)
+
+            m = VirtualBox(self.conf.vmname, self.conf.vm_dir, self.conf.data_dir,
+                           vboxmanage=vboxmanage, temp_dir=self.conf.temp_dirpath)
+        elif self.conf.vm.lower() == 'vboxrpc':
+            m = VBoxRPC(self.conf.vmname, url=self.conf.vboxrpc_url,
+                        auth=tuple(self.conf.vboxrpc_auth.split(':')),
+                        temp_dir=self.conf.temp_dirpath)
+        else:
+            log.error('Only the VirtualBox --vm is supported as of now.')
+            exit(1)
+
+        if not m.api_status():
+            exit(1)
+
+        if self.conf.delete:
+            log.info('Unregistering and deleting the VM and its associated '
+                     'files.')
+            if not self.simulate:
+                m.delete_vm()
+            exit(0)
+
+        if not self.conf.iso_mount or not os.path.isdir(self.conf.iso_mount):
+            log.error('Please specify --iso-mount to a directory containing the '
+                      'mounted Windows Installer ISO image.')
+            log.info('Refer to the documentation on mounting an .iso image.')
+            exit(1)
+
+        if not self.conf.serial_key or not valid_serial_key(self.conf.serial_key):
+            log.error('The provided --serial-key is not encoded correctly.')
+            log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
+            exit(1)
+
+        log.debug('Checking whether the keyboard layout is valid.')
+        if not valid_keyboard_layout(self.conf.keyboard_layout):
+            log.error('Invalid keyboard layout: %s', self.conf.keyboard_layout)
+            log.info('Please use one provided as described in the documentation.')
+            exit(1)
+
+        if not os.path.isdir(os.path.join(os.getenv('HOME'), '.vmcloak')):
+            path = os.path.join(os.getenv('HOME'), '.vmcloak')
+            if not self.simulate:
+                os.mkdir(path)
+            else:
+                log.debug("Simulated mkdir %s" % path)
+
+        if self.conf.lock_dirpath:
+            lock = lockfile.MkdirFileLock(self.conf.lock_dirpath)
+        else:
+            lock = DummyLock()
+
+        try:
+            log.debug('Awaiting the opportunity to obtain the vmcloak lock.')
+            lock.acquire(timeout=1)
+        except lockfile.LockTimeout:
+            log.warning('If no other instances of vmcloak are running then '
+                        'unlock the vmcloak lock by running the following '
+                        'command: vmcloak --unlock')
+
+            lock.acquire()
+
+        log.debug('Static Host IP: %s', self.conf.host_ip)
+        log.debug('Static Guest hostonly IP: %s', self.conf.hostonly_ip)
+        log.debug('Static Guest bridged IP: %s', self.conf.bridged_ip)
+
+        if not self.simulate:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.bind((self.conf.host_ip, 0))
+            self.sock.listen(1)
+            _, self.port = self.sock.getsockname()
+
+        log.debug('Configuring WINNT.SIF')
+        winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
+        buf = configure_winnt_sif(winnt_sif, self.conf)
+
+        # Write the WINNT.SIF file.
+        _, winntsif = tempfile.mkstemp(suffix='.sif', dir=self.conf.temp_dirpath)
+        open(winntsif, 'wb').write(buf)
+
+
+        bootstrap, vmcloak_dir = self._make_bootstrap()
+
+        os.mkdir(os.path.join(vmcloak_dir, 'deps'))
+
+        dm = DependencyManager(self.conf.deps_directory, self.conf.deps_repository)
+        deps = DependencyWriter(dm, vmcloak_dir)
+
+        if not deps.add('python27'):
+            lock.release()
+            exit(1)
+
+        for d in self.conf.dependencies.split():
+            if not d.strip():
+                continue
+
+            if not deps.add(d.strip()):
+                lock.release()
+                exit(1)
+
+        deps.write()
+
+        # Write the auxiliary files.
+        if self.conf.auxiliary:
+            aux_path = os.path.join(bootstrap, self.conf.auxiliary_local)
+            shutil.copytree(self.conf.auxiliary, aux_path)
+
+        # Create the ISO file.
+        log.debug('Creating ISO file.')
+        if not buildiso(self.conf.iso_mount, winntsif, m.iso_path, bootstrap,
+                        self.conf.temp_dirpath):
+            lock.release()
+            exit(1)
+
+        log.debug('Creating VM.')
+        log.debug(m.create_vm())
+
+        m.ramsize(self.conf.ramsize)
+        m.os_type(os='xp', sp=3)
+
+        log.debug('Creating Harddisk.')
+        m.create_hd(self.conf.hdsize)
+
+        log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
+        m.attach_iso(m.iso_path)
+
+        log.debug('Randomizing Hardware.')
+        m.init_vm(profile=self.conf.hwconfig_profile)
+
+        log.debug('Setting CPU count to %d', self.conf.cpu_count)
+        m.cpus(self.conf.cpu_count)
+
+        log.debug('Checking VirtualBox hostonly network.')
+        if m.hostonly(macaddr=self.conf.hostonly_macaddr) is False:
+            lock.release()
+            exit(1)
+
+        if self.conf.nat:
+            m.nat()
+
+        if self.conf.bridged:
+            m.bridged(self.conf.bridged, macaddr=self.conf.bridged_macaddr)
+
+        if self.conf.hwvirt is not None:
+            if self.conf.hwvirt:
+                log.debug('Enabling Hardware Virtualization.')
+            else:
+                log.debug('Disabling Hardware Virtualization.')
+            m.hwvirt(self.conf.hwvirt)
+
+        if self.args.vrde:
+            m.vrde(True)
+
+        log.info('Starting the Virtual Machine %r to install Windows.', self.conf.vmname)
+        log.debug(m.start_vm(visible=self.conf.vm_visible))
+
+        log.info('Waiting for the Virtual Machine %r to connect back, this may '
+                 'take up to 30 minutes.', self.conf.vmname)
+        t = time.time()
+
+        lock.release()
+
+        guest, _ = self.sock.accept()
+        log.debug('It took %d seconds to install Windows!', time.time() - t)
+
+        lock.acquire()
+
+        log.debug('Setting the resolution to %s', self.conf.resolution)
+        if ord(guest.recv(1)):
+            log.debug('Resolution was set successfully.')
+        else:
+            log.error('Error setting the resolution.')
+
+        log.debug('Detaching the Windows Installation disk.')
+        m.detach_iso()
+
+        log.debug('Removing Windows Installation ISO file.')
+        os.unlink(m.iso_path)
+
+        lock.release()
+
+        # Give the system a little bit of time to fully initialize.
+        time.sleep(self.init_time)
+
+        lock.acquire()
+
+        log.debug('Taking a snapshot of the current state.')
+        log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+
+        log.debug('Powering off the virtual machine.')
+        log.debug(m.stopvm())
+
+        if self.conf.register_cuckoo:
+            log.debug('Registering the Virtual Machine with Cuckoo.')
+            try:
+                machine_py = os.path.join(self.conf.cuckoo, 'utils', 'machine.py')
+                subprocess.check_call([machine_py, '--add',
+                                       '--ip', self.conf.hostonly_ip,
+                                       '--platform', 'windows',
+                                       '--tags', self.conf.tags,
+                                       '--snapshot', 'vmcloak',
+                                       self.conf.vmname],
+                                      cwd=self.conf.cuckoo)
+            except OSError as e:
+                log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
+                lock.release()
+                exit(1)
+            except subprocess.CalledProcessError as e:
+                log.error('Error registering the VM: %s.', e)
+                lock.release()
+                exit(1)
+
+        log.info('Virtual Machine %r created successfully.', self.conf.vmname)
+        lock.release()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -81,62 +446,9 @@ def main():
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
 
-    defaults = dict(
-        vm='virtualbox',
-        vboxrpc_url='http://localhost:9002/',
-        vboxrpc_auth='root:toor',
-        cuckoo='',
-        ramsize=1024,
-        resolution='1024x768',
-        hdsize=256*1024,
-        host_ip='192.168.56.1',
-        hostonly_ip='192.168.56.101',
-        hostonly_mask='255.255.255.0',
-        hostonly_gateway='192.168.56.1',
-        bridged_mask='255.255.255.0',
-        dns_server='8.8.8.8',
-        tags='',
-        vboxmanage='/usr/bin/VBoxManage',
-        vm_visible=False,
-        keyboard_layout='US',
-        cpu_count=1,
-        register_cuckoo=True,
-        dependencies='',
-        auxiliary_local='auxiliary',
-        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
-        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
-        vrde=False
-    )
 
-    types = dict(
-        ramsize=int,
-        hdsize=int,
-        cpu_count=int,
-    )
 
     args = parser.parse_args()
-
-    if args.debug:
-        log.setLevel(logging.DEBUG)
-
-    s = Configuration()
-
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    for settings in args.settings:
-        s.from_file(settings)
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-
-    for k, v in s.conf.items():
-        if k in types:
-            try:
-                s.conf[k] = types[k](v)
-            except ValueError:
-                log.critical('Flag %r should be an %r.', k, types[k].__name__)
-                exit(1)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
@@ -149,266 +461,8 @@ def main():
         print 'VMCloak version', version
         exit(0)
 
-    if args.unlock:
-        # Default lock dirpath.
-        default_lock_dirpath = os.path.join(os.getenv('HOME'),
-                                            '.vmcloak', 'lock')
-
-        path = '%s.lock' % (s.lock_dirpath or default_lock_dirpath)
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        exit(0)
-
-    if not s.vmname:
-        log.error('A name for the Virtual Machine is required.')
-        exit(1)
-
-    if s.register_cuckoo and not os.path.isdir(s.cuckoo):
-        log.error('To register the Virtual Machine with Cuckoo '
-                  'the Cuckoo directory has to be provided with --cuckoo.')
-        log.info('To disable registering please provide --no-register-cuckoo '
-                 'or specify register-cuckoo = false in the configuration.')
-        exit(1)
-
-    if s.vm.lower() == 'virtualbox':
-        vboxmanage = vboxmanage_path(s)
-        if not vboxmanage:
-            exit(1)
-
-        m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
-                       vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
-    elif s.vm.lower() == 'vboxrpc':
-        m = VBoxRPC(s.vmname, url=s.vboxrpc_url,
-                    auth=tuple(s.vboxrpc_auth.split(':')),
-                    temp_dir=s.temp_dirpath)
-    else:
-        log.error('Only the VirtualBox --vm is supported as of now.')
-        exit(1)
-
-    if not m.api_status():
-        exit(1)
-
-    if s.delete:
-        log.info('Unregistering and deleting the VM and its associated '
-                 'files.')
-        m.delete_vm()
-        exit(0)
-
-    if not s.iso_mount or not os.path.isdir(s.iso_mount):
-        log.error('Please specify --iso-mount to a directory containing the '
-                  'mounted Windows Installer ISO image.')
-        log.info('Refer to the documentation on mounting an .iso image.')
-        exit(1)
-
-    if not s.serial_key or not valid_serial_key(s.serial_key):
-        log.error('The provided --serial-key is not encoded correctly.')
-        log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
-        exit(1)
-
-    log.debug('Checking whether the keyboard layout is valid.')
-    if not valid_keyboard_layout(s.keyboard_layout):
-        log.error('Invalid keyboard layout: %s', s.keyboard_layout)
-        log.info('Please use one provided as described in the documentation.')
-        exit(1)
-
-    if not os.path.isdir(os.path.join(os.getenv('HOME'), '.vmcloak')):
-        os.mkdir(os.path.join(os.getenv('HOME'), '.vmcloak'))
-
-    if s.lock_dirpath:
-        lock = lockfile.MkdirFileLock(s.lock_dirpath)
-    else:
-        lock = DummyLock()
-
-    try:
-        log.debug('Awaiting the opportunity to obtain the vmcloak lock.')
-        lock.acquire(timeout=1)
-    except lockfile.LockTimeout:
-        log.warning('If no other instances of vmcloak are running then '
-                    'unlock the vmcloak lock by running the following '
-                    'command: vmcloak --unlock')
-
-        lock.acquire()
-
-    log.debug('Static Host IP: %s', s.host_ip)
-    log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
-    log.debug('Static Guest bridged IP: %s', s.bridged_ip)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.bind((s.host_ip, 0))
-    sock.listen(1)
-    _, port = sock.getsockname()
-
-    log.debug('Configuring WINNT.SIF')
-    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
-    buf = configure_winnt_sif(winnt_sif, s)
-
-    # Write the WINNT.SIF file.
-    _, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
-    open(winntsif, 'wb').write(buf)
-
-    settings_bat = dict(
-        HOSTONLYIP=s.hostonly_ip,
-        HOSTONLYMASK=s.hostonly_mask,
-        HOSTONLYGATEWAY=s.hostonly_gateway,
-        BRIDGED='yes' if s.bridged else 'no',
-        BRIDGEDIP=s.bridged_ip,
-        BRIDGEDMASK=s.bridged_mask,
-        BRIDGEDGATEWAY=s.bridged_gateway,
-        DNSSERVER=s.dns_server,
-    )
-
-    settings_py = dict(
-        HOST_IP=s.host_ip,
-        HOST_PORT=port,
-        RESOLUTION=s.resolution,
-    )
-
-    bootstrap = tempfile.mkdtemp(dir=s.temp_dirpath)
-
-    vmcloak_dir = os.path.join(bootstrap, 'vmcloak')
-    os.mkdir(vmcloak_dir)
-
-    # Write the configuration values for bootstrap.bat.
-    with open(os.path.join(vmcloak_dir, 'settings.bat'), 'wb') as f:
-        for key, value in settings_bat.items():
-            print>>f, 'set %s=%s' % (key, value)
-
-    # Write the configuration values for bootstrap.py.
-    with open(os.path.join(vmcloak_dir, 'settings.py'), 'wb') as f:
-        for key, value in settings_py.items():
-            print>>f, '%s = %r' % (key, value)
-
-    os.mkdir(os.path.join(vmcloak_dir, 'deps'))
-
-    dm = DependencyManager(s.deps_directory, s.deps_repository)
-    deps = DependencyWriter(dm, vmcloak_dir)
-
-    if not deps.add('python27'):
-        lock.release()
-        exit(1)
-
-    for d in s.dependencies.split():
-        if not d.strip():
-            continue
-
-        if not deps.add(d.strip()):
-            lock.release()
-            exit(1)
-
-    deps.write()
-
-    # Write the auxiliary files.
-    if s.auxiliary:
-        aux_path = os.path.join(bootstrap, s.auxiliary_local)
-        shutil.copytree(s.auxiliary, aux_path)
-
-    # Create the ISO file.
-    log.debug('Creating ISO file.')
-    if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap,
-                    s.temp_dirpath):
-        lock.release()
-        exit(1)
-
-    log.debug('Creating VM.')
-    log.debug(m.create_vm())
-
-    m.ramsize(s.ramsize)
-    m.os_type(os='xp', sp=3)
-
-    log.debug('Creating Harddisk.')
-    m.create_hd(s.hdsize)
-
-    log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
-    m.attach_iso(m.iso_path)
-
-    log.debug('Randomizing Hardware.')
-    m.init_vm(profile=s.hwconfig_profile)
-
-    log.debug('Setting CPU count to %d', s.cpu_count)
-    m.cpus(s.cpu_count)
-
-    log.debug('Checking VirtualBox hostonly network.')
-    if m.hostonly(macaddr=s.hostonly_macaddr) is False:
-        lock.release()
-        exit(1)
-
-    if s.nat:
-        m.nat()
-
-    if s.bridged:
-        m.bridged(s.bridged, macaddr=s.bridged_macaddr)
-
-    if s.hwvirt is not None:
-        if s.hwvirt:
-            log.debug('Enabling Hardware Virtualization.')
-        else:
-            log.debug('Disabling Hardware Virtualization.')
-        m.hwvirt(s.hwvirt)
-
-    if args.vrde:
-        m.vrde(True)
-
-    log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
-    log.debug(m.start_vm(visible=s.vm_visible))
-
-    log.info('Waiting for the Virtual Machine %r to connect back, this may '
-             'take up to 30 minutes.', s.vmname)
-    t = time.time()
-
-    lock.release()
-
-    guest, _ = sock.accept()
-    log.debug('It took %d seconds to install Windows!', time.time() - t)
-
-    lock.acquire()
-
-    log.debug('Setting the resolution to %s', s.resolution)
-    if ord(guest.recv(1)):
-        log.debug('Resolution was set successfully.')
-    else:
-        log.error('Error setting the resolution.')
-
-    log.debug('Detaching the Windows Installation disk.')
-    m.detach_iso()
-
-    log.debug('Removing Windows Installation ISO file.')
-    os.unlink(m.iso_path)
-
-    lock.release()
-
-    # Give the system a little bit of time to fully initialize.
-    time.sleep(10)
-
-    lock.acquire()
-
-    log.debug('Taking a snapshot of the current state.')
-    log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
-
-    log.debug('Powering off the virtual machine.')
-    log.debug(m.stopvm())
-
-    if s.register_cuckoo:
-        log.debug('Registering the Virtual Machine with Cuckoo.')
-        try:
-            machine_py = os.path.join(s.cuckoo, 'utils', 'machine.py')
-            subprocess.check_call([machine_py, '--add',
-                                   '--ip', s.hostonly_ip,
-                                   '--platform', 'windows',
-                                   '--tags', s.tags,
-                                   '--snapshot', 'vmcloak',
-                                   s.vmname],
-                                  cwd=s.cuckoo)
-        except OSError as e:
-            log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
-            lock.release()
-            exit(1)
-        except subprocess.CalledProcessError as e:
-            log.error('Error registering the VM: %s.', e)
-            lock.release()
-            exit(1)
-
-    log.info('Virtual Machine %r created successfully.', s.vmname)
-    lock.release()
+    vmg = VMGenesis(args)
+    vmg.generate()
 
 if __name__ == '__main__':
     main()
