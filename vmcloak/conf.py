@@ -47,7 +47,7 @@ class Configuration(object):
 
     def from_args(self, args):
         for key, value in args._get_kwargs():
-            if key not in self.conf or value:
+            if not value is None:
                 self.conf[key] = self._process_value(value)
 
     def from_file(self, path):
@@ -57,13 +57,19 @@ class Configuration(object):
             self.conf[key.replace('-', '_')] = \
                 self._process_value(p.get('vmcloak', key))
 
-    def from_defaults(self, defaults):
+    def from_dict(self, defaults):
         for key, value in defaults.items():
-            if self.conf[key] is None:
-                self.conf[key] = value
+            self.conf[key] = self._process_value(value)
 
     def __getattr__(self, key):
-        return self.conf[key]
+        try:
+            return self.conf[key]
+        except KeyError:
+            return None
+
+    def __str__(self):
+        res = str(self.conf)
+        return res
 
 
 def vboxmanage_path(s):

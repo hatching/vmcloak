@@ -15,6 +15,7 @@ import sys
 import tempfile
 import time
 
+from ConfigParser import ConfigParser
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyManager, DependencyWriter
@@ -22,6 +23,7 @@ from vmcloak.iso import buildiso
 from vmcloak.misc import DummyLock
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC
+from multiprocessing import Pool
 
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -80,9 +82,15 @@ class VMGenesis():
         self.sock = None
         self.port = None
 
-    def _process_config(self):
+    def _process_config(self, extra_config={}):
+        """
+
+        @param extra_config: an optional additional config dict
+        @return:
+        """
         self.conf = Configuration()
 
+        self.conf.from_dict(self.defaults)
         if self.args.recommended_settings:
             self.conf.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
 
@@ -90,7 +98,7 @@ class VMGenesis():
             self.conf.from_file(settings)
 
         self.conf.from_args(self.args)
-        self.conf.from_defaults(self.defaults)
+        self.conf.from_dict(extra_config)
 
         for k, v in self.conf.conf.items():
             if k in self.types:
@@ -150,7 +158,7 @@ class VMGenesis():
 
         return bootstrap, vmcloak_dir
 
-    def generate(self):
+    def generate(self, extra_config={}):
         """
 
         @return: 0 on success,
@@ -163,7 +171,7 @@ class VMGenesis():
             log.debug("Simulation mode")
 
 
-        self._process_config()
+        self._process_config(extra_config)
 
 
         if self.args.unlock:
@@ -396,6 +404,32 @@ class VMGenesis():
         log.info('Virtual Machine %r created successfully.', self.conf.vmname)
         lock.release()
 
+
+
+
+def worker(args, res):
+    print ("\tWorker for %s" % res["vmname"])
+    vmg = VMGenesis(args)
+    vmg.generate(res)
+
+def pool_master(args):
+    pool = Pool(processes=args.batch_workers)
+
+    cp = ConfigParser()
+    cp.readfp(open(args.batch_list))
+
+    for mname in cp.sections():
+        res={"vmname": mname}
+        for opt in cp.options(mname):
+            res[opt] = cp.get(mname,opt)
+        result = pool.apply_async(worker, [args, res])
+        time.sleep(20)  # Quick fix for the bootup IP collision issue. Can be removed when a dhcp is ready
+
+    result .get()
+
+
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
@@ -445,6 +479,8 @@ def main():
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
+    parser.add_argument('--batch_list', type=str, help='an ini file defining the machines to create for batch mode')
+    parser.add_argument('--batch_workers', type=int, help='Number of parallel workers for batch mode', default = 5)
 
 
 
@@ -461,8 +497,12 @@ def main():
         print 'VMCloak version', version
         exit(0)
 
-    vmg = VMGenesis(args)
-    vmg.generate()
+
+    if args.batch_list:
+        pool_master(args)
+    else:
+        vmg = VMGenesis(args)
+        vmg.generate()
 
 if __name__ == '__main__':
     main()
