@@ -1,12 +1,13 @@
+import os
+import random
+import shutil
+import socket
+import string
+import subprocess
+import tempfile
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
-import shutil
-import socket
-import subprocess
-import tempfile
-import random
-import string
 from _winreg import CreateKeyEx, SetValueEx
 from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
@@ -216,8 +217,9 @@ class SetupWindows(object):
                            'HARDWARE\\ACPI\\RSDT\\VBOX__', random_string())
 
         # Drop the agent and execute it.
-        _, path = tempfile.mkstemp(suffix='.py')
+        fd, path = tempfile.mkstemp(suffix='.py')
         open(path, 'wb').write(agent)
+        os.close(fd)
         self.log.info('Agent dropped')
 
         # Don't wait for this process to end. Also, the agent will remove the
