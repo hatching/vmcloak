@@ -135,12 +135,12 @@ class SetupWindows(object):
     def __init__(self, keep_evidence=False):
         self.log = logging.getLogger('Setup Windows')
         self.log.setLevel(logging.DEBUG)
-        ch = logging.FileHandler('c:\\vmcloak\\windows_setup.log')
-        ch.setLevel(logging.DEBUG)
+        self.log_fh = logging.FileHandler('c:\\vmcloak\\windows_setup.log')
+        self.log_fh.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s - %(name)s - '
                                       '%(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        self.log.addHandler(ch)
+        self.log_fh.setFormatter(formatter)
+        self.log.addHandler(self.log_fh)
         self.keep_evidence = keep_evidence
 
     def set_resolution(self, width, height):
@@ -230,11 +230,10 @@ class SetupWindows(object):
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.
         if not self.keep_evidence:
+            self.log_fh.close()
             shutil.rmtree('C:\\vmcloak')
         else:
             self.log.info('Keeping evidence')
-
-        self.log.info('System modifications done')
 
 
 if __name__ == '__main__':
