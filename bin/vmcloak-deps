@@ -21,7 +21,7 @@ def list_deps(dm):
 def write_batch_file(dm, args):
     dw = DependencyWriter(dm, tempfile.gettempdir())
 
-    for arg in args.split():
+    for arg in args:
         dw.add(arg)
 
     dw.write()
@@ -36,7 +36,7 @@ actions = {
     'fetch': lambda dm, arg: dm.fetch(arg),
     'add': lambda dm: None,
     'list-deps': lambda dm: list_deps(dm),
-    'write-batch': lambda dm, args: write_batch_file(dm, args),
+    'write-batch': lambda dm, *args: write_batch_file(dm, args),
 }
 
 action_args = {
@@ -48,14 +48,14 @@ action_args = {
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, choices=actions.keys(), help='Action to perform.')
-    parser.add_argument('argument', type=str, nargs='?', help='Arguments.')
+    parser.add_argument('arguments', type=str, nargs='*', help='Arguments.')
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
 
     args = parser.parse_args()
 
-    if args.action in action_args and args.argument is None:
-        print '[-] Action %r requires an argument: %r.' % (
+    if args.action in action_args and not args.arguments:
+        print '[-] Action %r requires one or more arguments: %r.' % (
             args.action, action_args[args.action])
         exit(1)
 
@@ -72,10 +72,7 @@ def main():
 
     dm = DependencyManager(deps_directory, deps_repository)
 
-    if args.argument is None:
-        actions[args.action](dm)
-    else:
-        actions[args.action](dm, args.argument)
+    actions[args.action](dm, *args.arguments)
 
 if __name__ == '__main__':
     main()
