@@ -36,9 +36,6 @@ setup(
         'vmcloak.data.bootstrap': ['*.*'],
     },
     install_requires=[
-        # Useful when running multiple instances of VMCloak at once.
-        'lockfile',
-
         # Libraries to build the documentation.
         'sphinx',
 
