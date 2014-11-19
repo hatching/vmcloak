@@ -3,17 +3,17 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 import os
-import sys
-import time
+import platform
+import random
 import socket
 import string
-import random
-import platform
+import sys
+import time
 import subprocess
-import ConfigParser
+from ConfigParser import RawConfigParser
+from SimpleXMLRPCServer import SimpleXMLRPCServer
 from StringIO import StringIO
 from zipfile import ZipFile
-from SimpleXMLRPCServer import SimpleXMLRPCServer
 
 BIND_IP = "0.0.0.0"
 BIND_PORT = 8000
@@ -112,7 +112,7 @@ class Agent:
         if type(options) != dict:
             return False
 
-        config = ConfigParser.RawConfigParser()
+        config = RawConfigParser()
         config.add_section("analysis")
 
         try:
