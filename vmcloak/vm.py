@@ -73,23 +73,20 @@ class VirtualBox(VM):
         return self._call('modifyvm', self.name, ostype=operating_systems[os])
 
     def create_hd(self, fsize):
-        ctlname = 'IDE Controller'
         self._call('createhd', filename=self.hdd_path, size=fsize)
-        self._call('storagectl', self.name, name=ctlname, add='ide')
-        self._call('storageattach', self.name, storagectl=ctlname,
+        self._call('storagectl', self.name, name='IDE', add='ide')
+        self._call('storageattach', self.name, storagectl='IDE',
                    type='hdd', device=0, port=0, medium=self.hdd_path)
 
     def cpus(self, count):
         self._call('modifyvm', self.name, cpus=count, ioapic='on')
 
     def attach_iso(self, iso):
-        ctlname = 'IDE Controller'
-        self._call('storageattach', self.name, storagectl=ctlname,
+        self._call('storageattach', self.name, storagectl='IDE',
                    type='dvddrive', port=1, device=0, medium=iso)
 
     def detach_iso(self):
-        ctlname = 'IDE Controller'
-        self._call('storageattach', self.name, storagectl=ctlname,
+        self._call('storageattach', self.name, storagectl='IDE',
                    type='dvddrive', port=1, device=0, medium='emptydrive')
 
     def set_field(self, key, value):
