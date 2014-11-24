@@ -39,7 +39,7 @@ class VirtualBox(VM):
             if v is None or v is True:
                 cmd += ['--' + k]
             else:
-                cmd += ['--' + k, str(v)]
+                cmd += ['--' + k.rstrip('_'), str(v)]
 
         try:
             ret = subprocess.check_output(cmd)
@@ -76,18 +76,18 @@ class VirtualBox(VM):
         self._call('createhd', filename=self.hdd_path, size=fsize)
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',
-                   type='hdd', device=0, port=0, medium=self.hdd_path)
+                   type_='hdd', device=0, port=0, medium=self.hdd_path)
 
     def cpus(self, count):
         self._call('modifyvm', self.name, cpus=count, ioapic='on')
 
     def attach_iso(self, iso):
         self._call('storageattach', self.name, storagectl='IDE',
-                   type='dvddrive', port=1, device=0, medium=iso)
+                   type_='dvddrive', port=1, device=0, medium=iso)
 
     def detach_iso(self):
         self._call('storageattach', self.name, storagectl='IDE',
-                   type='dvddrive', port=1, device=0, medium='emptydrive')
+                   type_='dvddrive', port=1, device=0, medium='emptydrive')
 
     def set_field(self, key, value):
         return self._call('setextradata', self.name, key, value)
@@ -155,7 +155,7 @@ class VirtualBox(VM):
 
     def start_vm(self, visible=False):
         return self._call('startvm', self.name,
-                          type='gui' if visible else 'headless')
+                          type_='gui' if visible else 'headless')
 
     def snapshot(self, label, description=''):
         return self._call('snapshot', self.name, 'take', label,
