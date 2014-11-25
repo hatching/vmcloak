@@ -6,6 +6,7 @@
 import argparse
 import logging
 import os.path
+import requests
 import socket
 import time
 
@@ -78,10 +79,20 @@ def main():
     # Send the hostonly IP address, mask, and gateway.
     guest.send('%s %s %s' % (s.hostonly_ip, s.hostonly_mask,
                              s.hostonly_gateway))
-    guest.recv(1024)
 
-    # Wait a little bit.
-    time.sleep(10)
+    # TODO Catch the correct exception.
+    try:
+        guest.close()
+    except:
+        pass
+
+    # Wait for the XMLRPC agent to come up.
+    while True:
+        try:
+            requests.get('http://%s:8000/' % s.hostonly_ip, timeout=1)
+            break
+        except requests.Timeout:
+            pass
 
     log.debug('Taking a snapshot of the current state.')
     log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))

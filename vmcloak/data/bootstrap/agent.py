@@ -232,15 +232,15 @@ if __name__ == "__main__":
 
         # Retrieve the static IP address that we're supposed to use.
         ip_address, ip_mask, ip_gateway = s.recv(256).split()
+
+        s.close()
+
         args = [
             "netsh", "interface", "ip", "set", "address",
             "name=Local Area Connection", "static",
             ip_address, ip_mask, ip_gateway, "1",
         ]
         subprocess.Popen(args).wait()
-
-        s.send("Hi")
-        s.close()
 
         # Remove the entry in Run from the registry.
         h = CreateKeyEx(HKEY_LOCAL_MACHINE,
