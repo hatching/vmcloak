@@ -325,3 +325,43 @@ class VBoxRPC(VM):
     def vrde(self, vrde):
         vrde = 'on' if vrde else 'off'
         return self._query('modifyvm', self.name, vrde=vrde)
+
+
+def initialize_vm(m, s):
+    log.debug('Creating VM %r.', s.vmname)
+    log.debug(m.create_vm())
+
+    m.ramsize(s.ramsize)
+    m.os_type(os='xp', sp=3)
+
+    log.debug('Creating Harddisk.')
+    m.create_hd(s.hdsize)
+
+    log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
+    m.attach_iso(m.iso_path)
+
+    log.debug('Randomizing Hardware.')
+    m.init_vm(profile=s.hwconfig_profile)
+
+    log.debug('Setting CPU count to %d', s.cpu_count)
+    m.cpus(s.cpu_count)
+
+    log.debug('Checking VirtualBox hostonly network.')
+    if not m.hostonly(macaddr=s.hostonly_macaddr):
+        exit(1)
+
+    if s.nat:
+        m.nat()
+
+    if s.bridged:
+        m.bridged(s.bridged, macaddr=s.bridged_macaddr)
+
+    if s.hwvirt is not None:
+        if s.hwvirt:
+            log.debug('Enabling Hardware Virtualization.')
+        else:
+            log.debug('Disabling Hardware Virtualization.')
+        m.hwvirt(s.hwvirt)
+
+    if s.vrde:
+        m.vrde(True)

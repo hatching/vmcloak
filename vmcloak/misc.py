@@ -47,7 +47,7 @@ def copytreeinto(srcdir, dstdir):
     """Copy one directory into another directory.
 
     Unlike shutil.copytree() this function doesn't require the destination
-    directory to be unexisting.
+    directory to be non-existing.
 
     """
     if os.path.isfile(dstdir):
@@ -170,3 +170,46 @@ def sha1_file(path):
         h.update(buf)
 
     return h.hexdigest()
+
+
+def shared_parameters(parser):
+    parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
+    parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
+    parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
+    parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
+    parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
+    parser.add_argument('--vboxrpc-url', type=str, help='URL to VBoxRPC instance.')
+    parser.add_argument('--vboxrpc-auth', type=str, help='Credentials to VBoxRPC instance.')
+    parser.add_argument('--ramsize', help='Available virtual memory (in MB) for this virtual machine.')
+    parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
+    parser.add_argument('--hdsize', help='Maximum size (in MB) of the dynamically allocated harddisk.')
+    parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
+    parser.add_argument('--host-port', type=str, help='Port to bind to on the Host.')
+    parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-mask', type=str, help='Static IP address mask to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
+    parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
+    parser.add_argument('--bridged', type=str, help='Network interface for the bridged network.')
+    parser.add_argument('--bridged-ip', type=str, help='Static IP address to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-mask', type=str, help='Static IP address mask to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
+    parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
+    parser.add_argument('--nat', action='store_true', help='Name of the NAT network to attach to.')
+    parser.add_argument('--dns-server', type=str, help='Address of DNS server to be used.')
+    parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
+    parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
+    parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
+    parser.add_argument('--no-register-cuckoo', action='store_false', default=None, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
+    parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
+    parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
+    parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
+    parser.add_argument('--cpu-count', help='Number of CPUs to use with this Virtual Machine.')
+    parser.add_argument('--vrde', action='store_true', help='Enable VRDE support in VirtualBox.')
+    parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
+    parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
+    parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
+    parser.add_argument('--temp-dirpath', type=str, help='Directory where to put temporary files.')
+    parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
+    parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
+    parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
+    parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
