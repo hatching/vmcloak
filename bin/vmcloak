@@ -9,7 +9,6 @@ import os.path
 import pkg_resources
 import shutil
 import socket
-import subprocess
 import sys
 import tempfile
 import time
@@ -18,7 +17,7 @@ from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.iso import buildiso
-from vmcloak.misc import shared_parameters
+from vmcloak.misc import shared_parameters, register_cuckoo
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 
@@ -274,22 +273,8 @@ def main():
     log.debug(m.stopvm())
 
     if s.register_cuckoo:
-        log.debug('Registering the Virtual Machine with Cuckoo.')
-        try:
-            machine_py = os.path.join(s.cuckoo, 'utils', 'machine.py')
-            subprocess.check_call([machine_py, '--add',
-                                   '--ip', s.hostonly_ip,
-                                   '--platform', 'windows',
-                                   '--tags', s.tags,
-                                   '--snapshot', 'vmcloak',
-                                   s.vmname],
-                                  cwd=s.cuckoo)
-        except OSError as e:
-            log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
-            exit(1)
-        except subprocess.CalledProcessError as e:
-            log.error('Error registering the VM: %s.', e)
-            exit(1)
+        register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
+                        vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
 
     log.info('Virtual Machine %r created successfully.', s.vmname)
 

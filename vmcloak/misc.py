@@ -8,6 +8,7 @@ import logging
 import os
 import shutil
 import stat
+import subprocess
 
 log = logging.getLogger(__name__)
 
@@ -213,3 +214,25 @@ def shared_parameters(parser):
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
+
+
+def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
+    log.debug('Registering the Virtual Machine with Cuckoo.')
+    try:
+        machine_py = os.path.join(cuckoo_dirpath, 'utils', 'machine.py')
+        args = [
+            machine_py, '--add',
+            '--ip', hostonly_ip,
+            '--platform', 'windows',
+            '--tags', tags,
+            '--snapshot', 'vmcloak',
+            vmname,
+        ]
+        subprocess.check_call(args, cwd=cuckoo_dirpath)
+        return True
+    except OSError as e:
+        log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
+        return False
+    except subprocess.CalledProcessError as e:
+        log.error('Error registering the VM: %s.', e)
+        return False
