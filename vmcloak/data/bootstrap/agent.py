@@ -13,7 +13,8 @@ import subprocess
 from ConfigParser import RawConfigParser
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from StringIO import StringIO
-from _winreg import CreateKeyEx, DeleteKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
+from _winreg import CreateKeyEx, DeleteValue
+from _winreg import HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from zipfile import ZipFile
 
 BIND_IP = "0.0.0.0"
@@ -246,7 +247,7 @@ if __name__ == "__main__":
         h = CreateKeyEx(HKEY_LOCAL_MACHINE,
                         "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
                         0, KEY_ALL_ACCESS)
-        DeleteKey(h, "Agent")
+        DeleteValue(h, "Agent")
         h.Close()
 
         if not BIND_IP:
