@@ -16,8 +16,9 @@ import time
 from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyManager, DependencyWriter
+from vmcloak.exceptions import CommandError
 from vmcloak.iso import buildiso
-from vmcloak.misc import shared_parameters, register_cuckoo
+from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 
@@ -38,6 +39,10 @@ def main():
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
+    parser.add_argument('--bird', action='store_true', default=None, help='Make an immutable harddisk rather than a Virtual Machine.')
+    parser.add_argument('--host-init-ip', type=str, help='Guest IP address to initialize initial connectivity.')
+    parser.add_argument('--host-init-mask', type=str, help='Guest IP address mask to initialize initial connectivity.')
+    parser.add_argument('--host-init-gateway', type=str, help='Guest IP address gateway to initialize initial connectivity.')
 
     defaults = dict(
         vm='virtualbox',
@@ -49,6 +54,9 @@ def main():
         hdsize=256*1024,
         host_ip='192.168.56.1',
         host_port=0x4141,
+        host_init_ip='192.168.56.2',
+        host_init_mask='255.255.255.0',
+        host_init_gateway='192.168.56.1',
         hostonly_ip='192.168.56.101',
         hostonly_mask='255.255.255.0',
         hostonly_gateway='192.168.56.1',
@@ -65,6 +73,7 @@ def main():
         deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
         deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
         vrde=False,
+        bird=False,
     )
 
     types = dict(
@@ -180,9 +189,6 @@ def main():
     open(winntsif, 'wb').write(buf)
 
     settings_bat = dict(
-        HOSTONLYIP=s.hostonly_ip,
-        HOSTONLYMASK=s.hostonly_mask,
-        HOSTONLYGATEWAY=s.hostonly_gateway,
         BRIDGED='yes' if s.bridged else 'no',
         BRIDGEDIP=s.bridged_ip,
         BRIDGEDMASK=s.bridged_mask,
@@ -194,6 +200,10 @@ def main():
         HOST_IP=s.host_ip,
         HOST_PORT=s.host_port,
         RESOLUTION=s.resolution,
+        HOST_INIT_IP=s.host_init_ip,
+        HOST_INIT_MASK=s.host_init_mask,
+        HOST_INIT_GATEWAY=s.host_init_gateway,
+        VMMODE='bird' if s.bird else 'normal',
     )
 
     bootstrap = tempfile.mkdtemp(dir=s.temp_dirpath)
@@ -239,23 +249,36 @@ def main():
                     s.temp_dirpath):
         exit(1)
 
-    initialize_vm(m, s)
+    initialize_vm(m, s, clone=False)
 
     log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
     log.debug(m.start_vm(visible=s.vm_visible))
+
+    log.debug('Setting the resolution to %s', s.resolution)
 
     log.info('Waiting for the Virtual Machine %r to connect back, this may '
              'take up to 30 minutes.', s.vmname)
     t = time.time()
 
-    guest, _ = sock.accept()
+    if not s.bird:
+        guest, _ = sock.accept()
+        guest.close()
+    else:
+        # Wait until the Virtual Machine is shutdown.
+        while True:
+            try:
+                if m.vminfo()['VMState'] == 'poweroff':
+                    break
+            except CommandError:
+                pass
+
+            time.sleep(1)
+
     log.debug('It took %d seconds to install Windows!', time.time() - t)
 
-    log.debug('Setting the resolution to %s', s.resolution)
-    if ord(guest.recv(1)):
-        log.debug('Resolution was set successfully.')
-    else:
-        log.error('Error setting the resolution.')
+    # Wait a couple of seconds to really ensure the Virtual Machine
+    # has shutdown.
+    time.sleep(5)
 
     log.debug('Detaching the Windows Installation disk.')
     m.detach_iso()
@@ -263,18 +286,31 @@ def main():
     log.debug('Removing Windows Installation ISO file.')
     os.unlink(m.iso_path)
 
-    # Give the system a little bit of time to fully initialize.
-    time.sleep(10)
+    if s.bird:
+        log.debug('Removing the harddisk from the VM.')
+        m.remove_hd()
 
-    log.debug('Taking a snapshot of the current state.')
-    log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+        log.debug('Deleting the temporary Virtual Machine.')
+        m.delete_vm()
 
-    log.debug('Powering off the virtual machine.')
-    log.debug(m.stopvm())
+        log.debug('Making the base harddisk immutable.')
+        m.immutable_hd()
 
-    if s.register_cuckoo:
-        register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
-                        vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
+        log.debug('Registering this bird with the local VMCloak database.')
+        add_bird(s.vmname, m.hdd_path)
+    else:
+        # Give the system a little bit of time to fully initialize.
+        time.sleep(10)
+
+        log.debug('Taking a snapshot of the current state.')
+        log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+
+        log.debug('Powering off the virtual machine.')
+        log.debug(m.stopvm())
+
+        if s.register_cuckoo:
+            register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
+                            vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
 
     log.info('Virtual Machine %r created successfully.', s.vmname)
 

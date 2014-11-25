@@ -45,6 +45,11 @@ class VM(object):
         else:
             _, self.iso_path = tempfile.mkstemp(suffix='.iso', dir=temp_dir)
 
+    def vminfo(self):
+        """Returns a dictionary with all available information for the
+        Virtual Machine."""
+        raise
+
     def create_vm(self):
         """Create a new Virtual Machine."""
         raise
@@ -63,6 +68,14 @@ class VM(object):
 
     def create_hd(self, fsize):
         """Create a harddisk."""
+        raise
+
+    def immutable_hd(self):
+        """Make a harddisk immutable or normal."""
+        raise
+
+    def remove_hd(self):
+        """Remove a harddisk."""
         raise
 
     def cpus(self, count):

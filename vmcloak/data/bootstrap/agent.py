@@ -13,6 +13,7 @@ import subprocess
 from ConfigParser import RawConfigParser
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from StringIO import StringIO
+from _winreg import CreateKeyEx, DeleteKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from zipfile import ZipFile
 
 BIND_IP = "0.0.0.0"
@@ -204,6 +205,50 @@ class Agent:
 
 if __name__ == "__main__":
     try:
+        # Retrieve the IP and Port of the host machine.
+        host_ip = sys.argv[1]
+        host_port = int(sys.argv[2])
+
+        init_ip = sys.argv[3]
+        init_mask = sys.argv[4]
+        init_gateway = sys.argv[5]
+
+        # Setup an initial IP to connect to the host server.
+        args = [
+            "netsh", "interface", "ip", "set", "address",
+            "name=Local Area Connection", "static",
+            init_ip, init_mask, init_gateway, "1",
+        ]
+        subprocess.Popen(args).wait()
+
+        # Attempt to connect to the host machine.
+        s = None
+        while not s:
+            try:
+                s = socket.create_connection((host_ip, host_port))
+            except (socket.timeout, socket.error):
+                time.sleep(1)
+                continue
+
+        # Retrieve the static IP address that we're supposed to use.
+        ip_address, ip_mask, ip_gateway = s.recv(256).split()
+        args = [
+            "netsh", "interface", "ip", "set", "address",
+            "name=Local Area Connection", "static",
+            ip_address, ip_mask, ip_gateway, "1",
+        ]
+        subprocess.Popen(args).wait()
+
+        s.send("Hi")
+        s.close()
+
+        # Remove the entry in Run from the registry.
+        h = CreateKeyEx(HKEY_LOCAL_MACHINE,
+                        "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                        0, KEY_ALL_ACCESS)
+        DeleteKey(h, "Agent")
+        h.Close()
+
         if not BIND_IP:
             BIND_IP = socket.gethostbyname(socket.gethostname())
 

@@ -1,10 +1,9 @@
-import os
+import logging
 import random
 import shutil
-import socket
 import string
 import subprocess
-import tempfile
+import time
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -13,7 +12,7 @@ from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
 from settings import HOST_IP, HOST_PORT, RESOLUTION
-import logging
+from settings import HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY
 
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
@@ -128,6 +127,9 @@ REGISTRY = [
 
     # Cloak SystemBios Version.
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
+
+    # Install agent.py to be ran on the next startup.
+    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s %s %s' % (HOST_IP, HOST_PORT, HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY)),
 ]
 
 
@@ -194,13 +196,9 @@ class SetupWindows(object):
         # Read the agent.py file so we can drop it again later on.
         agent = open('C:\\vmcloak\\agent.py', 'rb').read()
 
-        try:
-            s = socket.create_connection((HOST_IP, HOST_PORT))
-
-            width, height = [int(x) for x in RESOLUTION.split('x')]
-            s.send('\x01' if self.set_resolution(width, height) else '\x00')
-        except socket.error:
-            self.log.error('Error connecting to socket')
+        # Set the desired resolution.
+        width, height = [int(x) for x in RESOLUTION.split('x')]
+        self.set_resolution(width, height)
 
         # Set registry keys.
         for key, subkey, name, typ, value in REGISTRY:
@@ -216,16 +214,9 @@ class SetupWindows(object):
         self.rename_regkey(HKEY_LOCAL_MACHINE,
                            'HARDWARE\\ACPI\\RSDT\\VBOX__', random_string())
 
-        # Drop the agent and execute it.
-        fd, path = tempfile.mkstemp(suffix='.py')
-        open(path, 'wb').write(agent)
-        os.close(fd)
+        # Drop the agent where it'll be executed after restarting the system.
+        open('C:\\agent.py', 'wb').write(agent)
         self.log.info('Agent dropped')
-
-        # Don't wait for this process to end. Also, the agent will remove the
-        # temporary agent file itself.
-        subprocess.Popen(['C:\\Python27\\pythonw.exe', path])
-        self.log.info('Started agent')
 
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.
@@ -234,6 +225,14 @@ class SetupWindows(object):
             shutil.rmtree('C:\\vmcloak')
         else:
             self.log.info('Keeping evidence')
+
+        # Wait for Windows to somewhat boot the system up.
+        # TODO Instead fork into another process, kill this process, and
+        # shutdown from there. Now it's just hanging around.
+        time.sleep(60)
+
+        # Shutdown the Virtual Machine.
+        subprocess.check_call(['shutdown', '-s', '-t', '0'])
 
 
 if __name__ == '__main__':

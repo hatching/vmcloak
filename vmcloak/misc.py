@@ -2,13 +2,14 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from ConfigParser import ConfigParser
 import hashlib
+import json
 import logging
 import os
 import shutil
 import stat
 import subprocess
+from ConfigParser import ConfigParser
 
 log = logging.getLogger(__name__)
 
@@ -171,6 +172,29 @@ def sha1_file(path):
         h.update(buf)
 
     return h.hexdigest()
+
+
+def read_birds():
+    path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
+    birds = {}
+
+    if os.path.isfile(path):
+        birds = json.load(open(path, 'rb'))
+
+    return birds
+
+
+def read_bird(name):
+    return read_birds().get(name)
+
+
+def add_bird(name, hdd_path):
+    path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
+
+    birds = read_birds()
+    birds[name] = dict(hdd_path=hdd_path)
+
+    open(path, 'wb').write(json.dumps(birds))
 
 
 def shared_parameters(parser):

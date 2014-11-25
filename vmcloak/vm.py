@@ -18,6 +18,7 @@ except ImportError:
 
 from vmcloak.abstract import VM
 from vmcloak.data.config import VBOX_CONFIG
+from vmcloak.exceptions import CommandError
 from vmcloak.rand import random_mac
 
 log = logging.getLogger(__name__)
@@ -42,12 +43,27 @@ class VirtualBox(VM):
                 cmd += ['--' + k.rstrip('_'), str(v)]
 
         try:
+            log.critical('--> %s', cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
             log.error('[-] Error running command: %s', e)
-            exit(1)
+            raise CommandError
 
         return ret.strip()
+
+    def vminfo(self):
+        ret = {}
+        lines = self._call('showvminfo', self.name, machinereadable=True)
+        for line in lines.split('\n'):
+            key, value = line.split('=', 1)
+
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1]
+            elif value.isdigit():
+                value = int(value)
+
+            ret[key] = value
+        return ret
 
     def api_status(self):
         if not os.path.isfile(self.vboxmanage):
@@ -77,6 +93,18 @@ class VirtualBox(VM):
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=self.hdd_path)
+
+    def attach_hd(self, path):
+        self._call('storagectl', self.name, name='IDE', add='ide')
+        self._call('storageattach', self.name, storagectl='IDE',
+                   type_='hdd', device=0, port=0, medium=path)
+
+    def immutable_hd(self):
+        self._call('modifyhd', self.hdd_path, type_='immutable', compact=True)
+
+    def remove_hd(self):
+        self._call('storagectl', self.name, portcount=0,
+                   name='IDE', remove=True)
 
     def cpus(self, count):
         self._call('modifyvm', self.name, cpus=count, ioapic='on')
@@ -327,18 +355,19 @@ class VBoxRPC(VM):
         return self._query('modifyvm', self.name, vrde=vrde)
 
 
-def initialize_vm(m, s):
+def initialize_vm(m, s, clone=False):
     log.debug('Creating VM %r.', s.vmname)
     log.debug(m.create_vm())
 
     m.ramsize(s.ramsize)
     m.os_type(os='xp', sp=3)
 
-    log.debug('Creating Harddisk.')
-    m.create_hd(s.hdsize)
+    if not clone:
+        log.debug('Creating Harddisk.')
+        m.create_hd(s.hdsize)
 
-    log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
-    m.attach_iso(m.iso_path)
+        log.debug('Temporarily attaching DVD-Rom unit for the ISO installer.')
+        m.attach_iso(m.iso_path)
 
     log.debug('Randomizing Hardware.')
     m.init_vm(profile=s.hwconfig_profile)

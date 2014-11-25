@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+# Copyright (C) 2014 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+import argparse
+import logging
+import os.path
+import socket
+import time
+
+from vmcloak.conf import Configuration, vboxmanage_path
+from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
+from vmcloak.vm import VirtualBox, initialize_vm
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+log = logging.getLogger('vmcloak')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    shared_parameters(parser)
+    parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
+
+    defaults = dict(
+        host_ip='192.168.56.1',
+        host_port=0x4141,
+        ramsize=1024,
+        vboxmanage='/usr/bin/VBoxManage',
+        hdsize=256*1024,
+        cpu_count=1,
+        hostonly_ip='192.168.56.101',
+        hostonly_mask='255.255.255.0',
+        hostonly_gateway='192.168.56.1',
+        bridged_mask='255.255.255.0',
+    )
+
+    args = parser.parse_args()
+    s = Configuration()
+
+    if args.recommended_settings:
+        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
+
+    s.from_args(args)
+    s.from_defaults(defaults)
+
+    if not s.vmname:
+        log.error('A name for the Virtual Machine is required.')
+        exit(1)
+
+    vboxmanage = vboxmanage_path(s)
+
+    bird = read_bird(s.bird)
+    if not bird:
+        log.critical('Specified bird not found! Please verify its name.')
+        exit(1)
+
+    # Only VirtualBox support at the moment.
+    m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
+                   vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
+
+    initialize_vm(m, s, clone=True)
+
+    m.attach_hd(bird['hdd_path'])
+
+    log.debug('Starting Virtual Machine, waiting for connect back.')
+    m.start_vm(visible=s.vm_visible)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind((s.host_ip, s.host_port))
+    sock.listen(1)
+
+    guest, _ = sock.accept()
+
+    # Send the hostonly IP address, mask, and gateway.
+    guest.send('%s %s %s' % (s.hostonly_ip, s.hostonly_mask,
+                             s.hostonly_gateway))
+    guest.recv(1024)
+
+    # Wait a little bit.
+    time.sleep(10)
+
+    log.debug('Taking a snapshot of the current state.')
+    log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+
+    log.debug('Powering off the virtual machine.')
+    log.debug(m.stopvm())
+
+    if s.register_cuckoo:
+        register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
+                        vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
+
+if __name__ == '__main__':
+    main()
