@@ -129,7 +129,7 @@ REGISTRY = [
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
 
     # Install agent.py to be ran on the next startup.
-    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s %s %s' % (HOST_IP, HOST_PORT, HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY)),
+    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s' % (HOST_IP, HOST_PORT)),
 ]
 
 
@@ -217,6 +217,14 @@ class SetupWindows(object):
         # Drop the agent where it'll be executed after restarting the system.
         open('C:\\agent.py', 'wb').write(agent)
         self.log.info('Agent dropped')
+
+        # Setup the initial IP address through which we can reach the host.
+        args = [
+            "netsh", "interface", "ip", "set", "address",
+            "name=Local Area Connection", "static",
+            HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY, "1",
+        ]
+        subprocess.Popen(args).wait()
 
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.

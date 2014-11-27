@@ -210,18 +210,6 @@ if __name__ == "__main__":
         host_ip = sys.argv[1]
         host_port = int(sys.argv[2])
 
-        init_ip = sys.argv[3]
-        init_mask = sys.argv[4]
-        init_gateway = sys.argv[5]
-
-        # Setup an initial IP to connect to the host server.
-        args = [
-            "netsh", "interface", "ip", "set", "address",
-            "name=Local Area Connection", "static",
-            init_ip, init_mask, init_gateway, "1",
-        ]
-        subprocess.Popen(args).wait()
-
         # Attempt to connect to the host machine.
         s = None
         while not s:
