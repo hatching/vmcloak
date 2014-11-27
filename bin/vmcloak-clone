@@ -76,6 +76,8 @@ def main():
 
     guest, _ = sock.accept()
 
+    sock.close()
+
     # Send the hostonly IP address, mask, and gateway.
     guest.send('%s %s %s' % (s.hostonly_ip, s.hostonly_mask,
                              s.hostonly_gateway))
@@ -91,7 +93,7 @@ def main():
         try:
             requests.get('http://%s:8000/' % s.hostonly_ip, timeout=1)
             break
-        except requests.Timeout:
+        except (requests.Timeout, requests.ConnectionError):
             pass
 
     log.debug('Taking a snapshot of the current state.')
