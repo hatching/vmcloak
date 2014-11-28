@@ -189,11 +189,15 @@ def main():
     open(winntsif, 'wb').write(buf)
 
     settings_bat = dict(
+        HOSTONLYIP=s.hostonly_ip,
+        HOSTONLYMASK=s.hostonly_mask,
+        HOSTONLYGATEWAY=s.hostonly_gateway,
         BRIDGED='yes' if s.bridged else 'no',
         BRIDGEDIP=s.bridged_ip,
         BRIDGEDMASK=s.bridged_mask,
         BRIDGEDGATEWAY=s.bridged_gateway,
         DNSSERVER=s.dns_server,
+        VMMODE='bird' if s.bird else 'normal',
     )
 
     settings_py = dict(
