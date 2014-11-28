@@ -303,7 +303,7 @@ def main():
         time.sleep(10)
 
         log.debug('Taking a snapshot of the current state.')
-        log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+        log.debug(m.snapshot('vmcloak', 'Snapshot created by VMCloak.'))
 
         log.debug('Powering off the virtual machine.')
         log.debug(m.stopvm())

@@ -43,7 +43,6 @@ class VirtualBox(VM):
                 cmd += ['--' + k.rstrip('_'), str(v)]
 
         try:
-            log.critical('--> %s', cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
             log.error('[-] Error running command: %s', e)

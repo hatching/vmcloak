@@ -8,7 +8,6 @@ import logging
 import os.path
 import requests
 import socket
-import time
 
 from vmcloak.conf import Configuration, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
@@ -77,6 +76,9 @@ def main():
     guest, _ = sock.accept()
 
     sock.close()
+
+    log.info('Assigning IP address %s (mask %s, gateway %s)',
+             s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
 
     # Send the hostonly IP address, mask, and gateway.
     guest.send('%s %s %s' % (s.hostonly_ip, s.hostonly_mask,

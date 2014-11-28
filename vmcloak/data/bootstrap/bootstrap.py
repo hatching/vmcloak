@@ -3,7 +3,6 @@ import random
 import shutil
 import string
 import subprocess
-import time
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -237,7 +236,6 @@ class SetupWindows(object):
         # Wait for Windows to somewhat boot the system up.
         # TODO Instead fork into another process, kill this process, and
         # shutdown from there. Now it's just hanging around.
-        time.sleep(60)
 
         # Shutdown the Virtual Machine.
         subprocess.check_call(['shutdown', '-s', '-t', '0'])
