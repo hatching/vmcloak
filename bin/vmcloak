@@ -19,6 +19,7 @@ from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.exceptions import CommandError
 from vmcloak.iso import buildiso
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
+from vmcloak.misc import wait_for_host
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 
@@ -278,9 +279,13 @@ def main():
 
     log.debug('It took %d seconds to install Windows!', time.time() - t)
 
-    # Wait a couple of seconds to really ensure the Virtual Machine
-    # has shutdown.
-    time.sleep(5)
+    if s.bird:
+        # Wait a couple of seconds to really ensure the Virtual Machine
+        # has shutdown or initialized.
+        time.sleep(5)
+    else:
+        # Wait for the host to come up.
+        wait_for_host(s.hostonly_ip)
 
     log.debug('Detaching the Windows Installation disk.')
     m.detach_iso()

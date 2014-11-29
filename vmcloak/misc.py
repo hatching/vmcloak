@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import shutil
+import socket
 import stat
 import subprocess
 from ConfigParser import ConfigParser
@@ -260,3 +261,13 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
     except subprocess.CalledProcessError as e:
         log.error('Error registering the VM: %s.', e)
         return False
+
+
+def wait_for_host(ip):
+    # Wait for the XMLRPC agent to come up with a timeout of 1 second.
+    while True:
+        try:
+            socket.create_connection((ip, 8000), 1).close()
+            break
+        except socket.error:
+            pass

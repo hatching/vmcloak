@@ -12,6 +12,7 @@ import socket
 from vmcloak.conf import Configuration, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
+from vmcloak.misc import wait_for_host
 from vmcloak.vm import VirtualBox, initialize_vm
 
 logging.basicConfig(level=logging.INFO)
@@ -90,13 +91,8 @@ def main():
     except:
         pass
 
-    # Wait for the XMLRPC agent to come up.
-    while True:
-        try:
-            requests.get('http://%s:8000/' % s.hostonly_ip, timeout=1)
-            break
-        except (requests.Timeout, requests.ConnectionError):
-            pass
+    # Wait for the host to get up and running.
+    wait_for_host(s.hostonly_ip)
 
     log.debug('Taking a snapshot of the current state.')
     log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
