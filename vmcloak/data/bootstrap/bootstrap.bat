@@ -17,12 +17,3 @@ call C:\vmcloak\deps.bat
 
 echo Initiate VM hardening and start the guest.
 C:\Python27\Python.exe C:\vmcloak\bootstrap.py
-
-if "%VMMODE%" == "bird" (
-    echo In bird mode we shutdown the Virtual Machine.
-    shutdown -s -t 0
-)
-else (
-    echo In normal mode we reboot the Virtual Machine.
-    shutdown -r -t 0
-)

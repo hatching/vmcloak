@@ -2,6 +2,7 @@ import logging
 import random
 import shutil
 import string
+import subprocess
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -226,6 +227,13 @@ class SetupWindows(object):
         # Wait for Windows to somewhat boot the system up.
         # TODO Instead fork into another process, kill this process, and
         # shutdown from there. Now it's just hanging around.
+
+        if VMMODE == 'bird':
+            # In bird mode we shutdown the Virtual Machine.
+            subprocess.Popen(['shutdown', '-s', '-t', '0'])
+        else:
+            # In normal mode we reboot the Virtual Machine.
+            subprocess.Popen(['shutdown', '-r', '-t', '0'])
 
 
 if __name__ == '__main__':
