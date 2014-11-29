@@ -215,9 +215,8 @@ if __name__ == "__main__":
     s = None
     while not s:
         try:
-            s = socket.create_connection((host_ip, host_port))
-        except (socket.timeout, socket.error):
-            time.sleep(1)
+            s = socket.create_connection((host_ip, host_port), 1)
+        except socket.error:
             continue
 
     # Connect to the host machine. In case this is a bird, also receive the
