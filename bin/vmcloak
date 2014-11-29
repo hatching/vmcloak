@@ -26,8 +26,6 @@ from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger('requests').setLevel(logging.WARNING)
-logging.getLogger('urllib3').setLevel(logging.WARNING)
 log = logging.getLogger('vmcloak')
 
 

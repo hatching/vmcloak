@@ -6,7 +6,6 @@
 import argparse
 import logging
 import os.path
-import requests
 import socket
 
 from vmcloak.conf import Configuration, vboxmanage_path
@@ -16,9 +15,7 @@ from vmcloak.misc import wait_for_host
 from vmcloak.vm import VirtualBox, initialize_vm
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger('requests').setLevel(logging.WARNING)
-logging.getLogger('urllib3').setLevel(logging.WARNING)
-log = logging.getLogger('vmcloak')
+log = logging.getLogger('vmcloak-clone')
 
 
 def main():
