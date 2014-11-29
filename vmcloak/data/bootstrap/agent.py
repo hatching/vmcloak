@@ -205,10 +205,11 @@ class Agent:
         return True
 
 if __name__ == "__main__":
-    try:
+    vmmode = sys.argv[1]
+    if vmmode == 'bird':
         # Retrieve the IP and Port of the host machine.
-        host_ip = sys.argv[1]
-        host_port = int(sys.argv[2])
+        host_ip = sys.argv[2]
+        host_port = int(sys.argv[3])
 
         # Attempt to connect to the host machine.
         s = None
@@ -231,6 +232,7 @@ if __name__ == "__main__":
         ]
         subprocess.Popen(args).wait()
 
+    try:
         # Remove the entry in Run from the registry.
         h = CreateKeyEx(HKEY_LOCAL_MACHINE,
                         "Software\\Microsoft\\Windows\\CurrentVersion\\Run",

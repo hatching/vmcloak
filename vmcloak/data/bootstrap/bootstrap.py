@@ -2,7 +2,6 @@ import logging
 import random
 import shutil
 import string
-import subprocess
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -10,8 +9,7 @@ from _winreg import CreateKeyEx, SetValueEx
 from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
-from settings import HOST_IP, HOST_PORT, RESOLUTION
-from settings import HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY
+from settings import HOST_IP, HOST_PORT, RESOLUTION, VMMODE
 
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
@@ -128,7 +126,7 @@ REGISTRY = [
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
 
     # Install agent.py to be ran on the next startup.
-    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s' % (HOST_IP, HOST_PORT)),
+    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s' % (VMMODE, HOST_IP, HOST_PORT)),
 ]
 
 
@@ -217,14 +215,6 @@ class SetupWindows(object):
         open('C:\\agent.py', 'wb').write(agent)
         self.log.info('Agent dropped')
 
-        # Setup the initial IP address through which we can reach the host.
-        args = [
-            "netsh", "interface", "ip", "set", "address",
-            "name=Local Area Connection", "static",
-            HOST_INIT_IP, HOST_INIT_MASK, HOST_INIT_GATEWAY, "1",
-        ]
-        subprocess.Popen(args).wait()
-
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.
         if not self.keep_evidence:
@@ -236,9 +226,6 @@ class SetupWindows(object):
         # Wait for Windows to somewhat boot the system up.
         # TODO Instead fork into another process, kill this process, and
         # shutdown from there. Now it's just hanging around.
-
-        # Shutdown the Virtual Machine.
-        subprocess.check_call(['shutdown', '-s', '-t', '0'])
 
 
 if __name__ == '__main__':
