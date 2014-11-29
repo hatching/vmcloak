@@ -80,6 +80,7 @@ def main():
         ramsize=int,
         hdsize=int,
         cpu_count=int,
+        host_port=int,
     )
 
     args = parser.parse_args()
