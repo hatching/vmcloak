@@ -206,20 +206,23 @@ class Agent:
 
 if __name__ == "__main__":
     vmmode = sys.argv[1]
+
+    # Retrieve the IP and Port of the host machine.
+    host_ip = sys.argv[2]
+    host_port = int(sys.argv[3])
+
+    # Attempt to connect to the host machine.
+    s = None
+    while not s:
+        try:
+            s = socket.create_connection((host_ip, host_port))
+        except (socket.timeout, socket.error):
+            time.sleep(1)
+            continue
+
+    # Connect to the host machine. In case this is a bird, also receive the
+    # new IP address, mask, and gateway.
     if vmmode == 'bird':
-        # Retrieve the IP and Port of the host machine.
-        host_ip = sys.argv[2]
-        host_port = int(sys.argv[3])
-
-        # Attempt to connect to the host machine.
-        s = None
-        while not s:
-            try:
-                s = socket.create_connection((host_ip, host_port))
-            except (socket.timeout, socket.error):
-                time.sleep(1)
-                continue
-
         # Retrieve the static IP address that we're supposed to use.
         ip_address, ip_mask, ip_gateway = s.recv(256).split()
 
@@ -231,6 +234,8 @@ if __name__ == "__main__":
             ip_address, ip_mask, ip_gateway, "1",
         ]
         subprocess.Popen(args).wait()
+    else:
+        s.close()
 
     try:
         # Remove the entry in Run from the registry.
