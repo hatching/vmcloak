@@ -65,6 +65,17 @@ class Configuration(object):
     def __getattr__(self, key):
         return self.conf[key]
 
+    def apply_types(self, types):
+        for k, v in self.conf.items():
+            if k not in types:
+                continue
+
+            try:
+                self.conf[k] = types[k](v)
+            except ValueError:
+                log.critical('Flag %r should be an %r.', k, types[k].__name__)
+                exit(1)
+
 
 def vboxmanage_path(s):
     if os.path.isfile(s.vboxmanage):

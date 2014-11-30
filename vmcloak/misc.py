@@ -2,6 +2,7 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import argparse
 import hashlib
 import json
 import logging
@@ -199,6 +200,7 @@ def add_bird(name, hdd_path):
 
 
 def shared_parameters(parser):
+    parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
@@ -239,6 +241,46 @@ def shared_parameters(parser):
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
+
+    defaults = dict(
+        vm='virtualbox',
+        vboxrpc_url='http://localhost:9002/',
+        vboxrpc_auth='root:toor',
+        cuckoo='',
+        ramsize=1024,
+        resolution='1024x768',
+        hdsize=256*1024,
+        host_ip='192.168.56.1',
+        host_port=0x4141,
+        host_init_ip='192.168.56.2',
+        host_init_mask='255.255.255.0',
+        host_init_gateway='192.168.56.1',
+        hostonly_ip='192.168.56.101',
+        hostonly_mask='255.255.255.0',
+        hostonly_gateway='192.168.56.1',
+        bridged_mask='255.255.255.0',
+        dns_server='8.8.8.8',
+        tags='',
+        vboxmanage='/usr/bin/VBoxManage',
+        vm_visible=False,
+        keyboard_layout='US',
+        cpu_count=1,
+        register_cuckoo=True,
+        dependencies='',
+        auxiliary_local='auxiliary',
+        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
+        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
+        vrde=False,
+        bird=False,
+    )
+
+    types = dict(
+        ramsize=int,
+        hdsize=int,
+        cpu_count=int,
+        host_port=int,
+    )
+    return parser, defaults, types
 
 
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):

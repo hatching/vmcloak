@@ -3,7 +3,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import argparse
 import logging
 import os.path
 import pkg_resources
@@ -30,8 +29,7 @@ log = logging.getLogger('vmcloak')
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    shared_parameters(parser)
+    parser, defaults, types = shared_parameters()
     parser.add_argument('-d', '--debug', action='store_true', help='Display debug messages.')
     parser.add_argument('-v', '--version', action='store_true', help='Display the VMCloak version.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
@@ -43,44 +41,9 @@ def main():
     parser.add_argument('--host-init-mask', type=str, help='Guest IP address mask to initialize initial connectivity.')
     parser.add_argument('--host-init-gateway', type=str, help='Guest IP address gateway to initialize initial connectivity.')
 
-    defaults = dict(
-        vm='virtualbox',
-        vboxrpc_url='http://localhost:9002/',
-        vboxrpc_auth='root:toor',
-        cuckoo='',
-        ramsize=1024,
-        resolution='1024x768',
-        hdsize=256*1024,
-        host_ip='192.168.56.1',
-        host_port=0x4141,
-        host_init_ip='192.168.56.2',
-        host_init_mask='255.255.255.0',
-        host_init_gateway='192.168.56.1',
-        hostonly_ip='192.168.56.101',
-        hostonly_mask='255.255.255.0',
-        hostonly_gateway='192.168.56.1',
-        bridged_mask='255.255.255.0',
-        dns_server='8.8.8.8',
-        tags='',
-        vboxmanage='/usr/bin/VBoxManage',
-        vm_visible=False,
-        keyboard_layout='US',
-        cpu_count=1,
-        register_cuckoo=True,
-        dependencies='',
-        auxiliary_local='auxiliary',
-        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
-        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
-        vrde=False,
+    defaults.update(dict(
         bird=False,
-    )
-
-    types = dict(
-        ramsize=int,
-        hdsize=int,
-        cpu_count=int,
-        host_port=int,
-    )
+    ))
 
     args = parser.parse_args()
 
@@ -97,14 +60,7 @@ def main():
 
     s.from_args(args)
     s.from_defaults(defaults)
-
-    for k, v in s.conf.items():
-        if k in types:
-            try:
-                s.conf[k] = types[k](v)
-            except ValueError:
-                log.critical('Flag %r should be an %r.', k, types[k].__name__)
-                exit(1)
+    s.apply_types(types)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
