@@ -199,7 +199,7 @@ def add_bird(name, hdd_path):
     open(path, 'wb').write(json.dumps(birds))
 
 
-def shared_parameters(parser):
+def shared_parameters():
     parser = argparse.ArgumentParser()
     parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
     parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')

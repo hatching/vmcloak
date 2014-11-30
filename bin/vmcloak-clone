@@ -6,6 +6,7 @@
 import logging
 import os.path
 import socket
+import sys
 
 from vmcloak.conf import Configuration, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
@@ -30,6 +31,12 @@ def main():
     s.from_args(args)
     s.from_defaults(defaults)
     s.apply_types(types)
+
+    # Not really sure if this is possible in a cleaner way, but if no
+    # arguments have been given on the command line, then show the usage.
+    if len(sys.argv) == 1:
+        parser.print_help()
+        exit(0)
 
     if not s.vmname:
         log.error('A name for the Virtual Machine is required.')
