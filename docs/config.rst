@@ -20,13 +20,13 @@ a single one, VMCloak supports one or more configuration file(s) to be
 specified using the ``-s`` (short for ``--settings``) switch.
 
 Configuration entries in the INI files should be present in the ``vmcloak``
-section. E.g., ``vmcloak --basedir ~/vms`` would be equal to having the
+section. E.g., ``vmcloak --data-dir ~/vms`` would be equal to having the
 following INI file, *conf.ini*, with ``vmcloak -s conf.ini``.
 
 .. code-block:: ini
 
     [vmcloak]
-    basedir = ~/vms
+    data_dir = ~/vms
 
 Configuration order
 -------------------
@@ -59,7 +59,8 @@ Required configuration entries
 A few configuration entries are required.
 
 * :ref:`conf-mounted-iso`
-* :ref:`conf-basedir`
+* :ref:`conf-vm-dir`
+* :ref:`conf-data-dir`
 * :ref:`conf-serial-key`
 * :ref:`conf-vmname`
 
@@ -90,15 +91,22 @@ In order to mount an image under BSD the following commands might be required.
     vnconfig /dev/vnd0d winxp.iso
     mount -t cd9660 /dev/vnd0d /mnt/winxp
 
-.. _conf-basedir:
+.. _conf-vm-dir:
 
-Base Directory
-^^^^^^^^^^^^^^
+VM-dir Directory
+^^^^^^^^^^^^^^^^
 
-``--basedir`` specifies the path to the base directory where a directory will
+``--vm-dir`` specifies the path to the directory where a directory will
 be created for the Virtual Machine. The directory will contain files such as
-the machine information, snapshots, the ISO disk image, and the *harddrive*
-image.
+the machine information and snapshot files. You can load that in tmpfs to
+gain additional speed.
+
+.. _conf-data-dir:
+
+Data-dir Directory
+^^^^^^^^^^^^^^^^^^
+
+``--data-dir`` specifies the path to the directory where the hard disk images are stored.
 
 .. _conf-serial-key:
 
@@ -127,6 +135,10 @@ A few configuration entries are not required, but should in most cases be
 provided.
 
 * :ref:`conf-hostonly-ip`
+* :ref:`conf-hostonly-gateway`
+* :ref:`conf-hostonly-mask`
+* :ref:`conf-hostonly-macaddr`
+* :ref:`conf-host-ip`
 * :ref:`conf-dependencies`
 
 .. _conf-hostonly-ip:
@@ -134,11 +146,42 @@ provided.
 Guest hostonly IP address
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default Guest ``--hostonly-ip`` address defaults to ``192.168.56.101``,
-which is perfectly fine when one only intends to create one VM. However, if
-one wants to create multiple VMs, then the static IP addresses should be
-unique. Normally one would start counting at ``192.168.56.101`` to
-``192.168.56.102``, ``192.168.56.103``, etc.
+The IP address to assign to the Guest is set by ``--hostonly-ip``. It defaults
+to ``192.168.56.101``, which is perfectly fine when one only intends to
+create one VM. However, if one wants to create multiple VMs, then the static 
+IP addresses should be unique. Normally one would start counting at 
+``192.168.56.101`` to ``192.168.56.102``, ``192.168.56.103``, etc.
+
+.. _conf-hostonly-gateway:
+
+Guest hostonly Gateway
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The Gateway IP for the Guest to use. Set by ``--hostonly-gateway``
+
+.. _conf-hostonly-mask:
+
+Guest hostonly network mask
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Network mask for the Guest to use. Set by ``--hostonly-mask``
+
+.. _conf-hostonly-macaddr:
+
+Guest hostonly MAC address
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The MAC address for the guest to use. Set by ``--hostonly-macaddr``
+
+.. _conf-host-ip:
+
+Host host-ip
+^^^^^^^^^^^^
+
+The IP address of the vboxnet interface for communication between guest and host.
+The communication is relevant for the installation process to finish. 
+Set by ``--host-ip``
+
 
 .. _conf-dependencies:
 
@@ -206,7 +249,8 @@ Hardware Virtualization
 
 If one hasn't enabled **VT-x** in the BIOS then it is not possible to use
 hardware virtualization. If one gets such error, then provide ``--no-hwvirt``.
-To explicitly enable hardware virtualization provide ``--hwvirt``.
+To explicitly enable hardware virtualization provide ``--hwvirt``. In the config
+file disable it with ``hwvirt = false``.
 
 .. _conf-keyboard-layout:
 
