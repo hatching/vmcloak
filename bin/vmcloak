@@ -4,8 +4,9 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
-import os.path
+import os
 import pkg_resources
+import pwd
 import shutil
 import socket
 import sys
@@ -72,6 +73,19 @@ def main():
         version = pkg_resources.require('VMCloak')[0].version
         print 'VMCloak version', version
         exit(0)
+
+    if s.user:
+        try:
+            user = pwd.getpwnam(s.user)
+            os.setgroups((user.pw_gid,))
+            os.setgid(user.pw_gid)
+            os.setuid(user.pw_uid)
+            os.putenv("HOME", user.pw_dir)
+        except KeyError:
+            sys.exit("Invalid user specified to drop privileges to: %s" %
+                     s.user)
+        except OSError as e:
+            sys.exit("Failed to drop privileges: %s" % e)
 
     if not s.vmname:
         log.error('A name for the Virtual Machine is required.')
