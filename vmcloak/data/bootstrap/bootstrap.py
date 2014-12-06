@@ -1,3 +1,4 @@
+import json
 import logging
 import random
 import shutil
@@ -125,9 +126,6 @@ REGISTRY = [
 
     # Cloak SystemBios Version.
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
-
-    # Install agent.py to be ran on the next startup.
-    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s' % (s.vmmode, s.host_ip, s.host_port)),
 ]
 
 
@@ -201,6 +199,19 @@ class SetupWindows(object):
         # Set registry keys.
         for key, subkey, name, typ, value in REGISTRY:
             self.set_regkey(key, subkey, name, typ, value)
+
+        settings = dict(
+            vmmode=s.vmmode,
+            host_ip=s.host_ip,
+            host_port=s.host_port,
+        )
+
+        # Install agent.py to be ran on the next startup.
+        value = 'C:\\Python27\\Pythonw.exe C:\\agent.py %s' % \
+            json.dumps(settings).encode('base64')
+        self.set_regkey(HKEY_LOCAL_MACHINE,
+                        'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+                        'Agent', REG_SZ, value)
 
         # Rename registry keys.
         self.rename_regkey(HKEY_LOCAL_MACHINE,

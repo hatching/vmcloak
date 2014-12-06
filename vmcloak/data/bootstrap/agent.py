@@ -2,6 +2,7 @@
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
+import json
 import os
 import platform
 import random
@@ -29,6 +30,11 @@ CURRENT_STATUS = STATUS_INIT
 ERROR_MESSAGE = ""
 ANALYZER_FOLDER = ""
 RESULTS_FOLDER = ""
+
+class ObjectDict(object):
+    def __init__(self, d):
+        self.__dict__ = d
+
 
 class Agent:
     """Cuckoo agent, it runs inside guest."""
@@ -205,27 +211,24 @@ class Agent:
         return True
 
 if __name__ == "__main__":
-    vmmode = sys.argv[1]
-
-    # Retrieve the IP and Port of the host machine.
-    host_ip = sys.argv[2]
-    host_port = int(sys.argv[3])
+    # Load the configuration values.
+    s = ObjectDict(json.loads(sys.argv[1].decode('base64')))
 
     # Attempt to connect to the host machine.
-    s = None
-    while not s:
+    sock = None
+    while not sock:
         try:
-            s = socket.create_connection((host_ip, host_port), 1)
+            sock = socket.create_connection((s.host_ip, s.host_port), 1)
         except socket.error:
             continue
 
     # Connect to the host machine. In case this is a bird, also receive the
     # new IP address, mask, and gateway.
-    if vmmode == 'bird':
+    if s.vmmode == 'bird':
         # Retrieve the static IP address that we're supposed to use.
-        ip_address, ip_mask, ip_gateway = s.recv(256).split()
+        ip_address, ip_mask, ip_gateway = sock.recv(256).split()
 
-        s.close()
+        sock.close()
 
         args = [
             "netsh", "interface", "ip", "set", "address",
@@ -234,7 +237,7 @@ if __name__ == "__main__":
         ]
         subprocess.Popen(args).wait()
     else:
-        s.close()
+        sock.close()
 
     try:
         # Remove the entry in Run from the registry.
