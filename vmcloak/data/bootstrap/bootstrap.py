@@ -10,7 +10,7 @@ from _winreg import CreateKeyEx, SetValueEx
 from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
-from settings import HOST_IP, HOST_PORT, RESOLUTION, VMMODE
+import settings as s
 
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
@@ -127,7 +127,7 @@ REGISTRY = [
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
 
     # Install agent.py to be ran on the next startup.
-    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s' % (VMMODE, HOST_IP, HOST_PORT)),
+    (HKEY_LOCAL_MACHINE, 'Software\\Microsoft\\Windows\\CurrentVersion\\Run', 'Agent', REG_SZ, 'C:\\Python27\\Pythonw.exe C:\\agent.py %s %s %s' % (s.vmmode, s.host_ip, s.host_port)),
 ]
 
 
@@ -195,7 +195,7 @@ class SetupWindows(object):
         agent = open('C:\\vmcloak\\agent.py', 'rb').read()
 
         # Set the desired resolution.
-        width, height = [int(x) for x in RESOLUTION.split('x')]
+        width, height = [int(x) for x in s.resolution.split('x')]
         self.set_resolution(width, height)
 
         # Set registry keys.
@@ -228,7 +228,7 @@ class SetupWindows(object):
         # TODO Instead fork into another process, kill this process, and
         # shutdown from there. Now it's just hanging around.
 
-        if VMMODE == 'bird':
+        if s.vmmode == 'bird':
             # In bird mode we shutdown the Virtual Machine.
             subprocess.Popen(['shutdown', '-s', '-t', '0'])
         else:

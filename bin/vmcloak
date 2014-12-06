@@ -189,7 +189,7 @@ def main():
     # Write the configuration values for bootstrap.py.
     with open(os.path.join(vmcloak_dir, 'settings.py'), 'wb') as f:
         for key, value in settings_py.items():
-            print>>f, '%s = %r' % (key, value)
+            print>>f, '%s = %r' % (key.lower(), value)
 
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
