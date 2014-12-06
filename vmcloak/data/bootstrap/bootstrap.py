@@ -1,9 +1,11 @@
 import json
 import logging
+import os
 import random
 import shutil
 import string
 import subprocess
+import tempfile
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -206,9 +208,12 @@ class SetupWindows(object):
             host_port=s.host_port,
         )
 
+        fd, agent_path = tempfile.mkstemp()
+        os.close(fd)
+
         # Install agent.py to be ran on the next startup.
-        value = 'C:\\Python27\\Pythonw.exe C:\\agent.py %s' % \
-            json.dumps(settings).encode('base64')
+        value = 'C:\\Python27\\Pythonw.exe %s %s' % (
+            agent_path, json.dumps(settings).encode('base64'))
         self.set_regkey(HKEY_LOCAL_MACHINE,
                         'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
                         'Agent', REG_SZ, value)
@@ -224,7 +229,7 @@ class SetupWindows(object):
                            'HARDWARE\\ACPI\\RSDT\\VBOX__', random_string())
 
         # Drop the agent where it'll be executed after restarting the system.
-        open('C:\\agent.py', 'wb').write(agent)
+        open(agent_path, 'wb').write(agent)
         self.log.info('Agent dropped')
 
         # Remove all vmcloak files that are directly related. This does not
