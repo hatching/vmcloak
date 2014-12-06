@@ -242,6 +242,7 @@ def shared_parameters():
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
     parser.add_argument('-u', '--user', type=str, help='Drop user privileges to this user')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Display debug messages.')
 
     defaults = dict(
         vm='virtualbox',

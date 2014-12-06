@@ -26,6 +26,9 @@ def main():
     args = parser.parse_args()
     s = Configuration()
 
+    if args.verbose:
+        log.setLevel(logging.DEBUG)
+
     if args.recommended_settings:
         s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
 
