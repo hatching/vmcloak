@@ -69,8 +69,7 @@ def main():
         exit(0)
 
     if args.version:
-        version = pkg_resources.require('VMCloak')[0].version
-        print version
+        print pkg_resources.require('VMCloak')[0].version
         exit(0)
 
     if s.user:
