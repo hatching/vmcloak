@@ -32,6 +32,7 @@ log = logging.getLogger('vmcloak')
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--version', action='store_true', help='Display the VMCloak version.')
+    parser.add_argument('--version-int', action='store_true', help='Display the VMCloak version as integer.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -70,6 +71,11 @@ def main():
 
     if args.version:
         print pkg_resources.require('VMCloak')[0].version
+        exit(0)
+
+    if args.version_int:
+        version = pkg_resources.require('VMCloak')[0].version.split('.')
+        print 1000 * int(version[0]) + 100 * int(version[1]) + int(version[2])
         exit(0)
 
     if s.user:
