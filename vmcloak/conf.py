@@ -59,7 +59,7 @@ class Configuration(object):
 
     def from_defaults(self, defaults):
         for key, value in defaults.items():
-            if self.conf[key] is None:
+            if key in self.conf and self.conf[key] is None:
                 self.conf[key] = value
 
     def __getattr__(self, key):
