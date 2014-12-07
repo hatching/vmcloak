@@ -239,7 +239,7 @@ if __name__ == "__main__":
     else:
         sock.close()
 
-    try:
+    if s.vmmode == 'normal':
         # Remove the entry in Run from the registry.
         h = CreateKeyEx(HKEY_LOCAL_MACHINE,
                         "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
@@ -247,6 +247,7 @@ if __name__ == "__main__":
         DeleteValue(h, "Agent")
         h.Close()
 
+    try:
         if not BIND_IP:
             BIND_IP = socket.gethostbyname(socket.gethostname())
 
