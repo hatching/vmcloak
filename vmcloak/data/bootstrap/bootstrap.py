@@ -208,11 +208,12 @@ class SetupWindows(object):
             host_port=s.host_port,
         )
 
-        fd, agent_path = tempfile.mkstemp()
+        fd, agent_path = \
+            tempfile.mkstemp(dir=os.getenv('APPDATA'), suffix='.py')
         os.close(fd)
 
         # Install agent.py to be ran on the next startup.
-        value = 'C:\\Python27\\Pythonw.exe %s %s' % (
+        value = 'C:\\Python27\\Pythonw.exe "%s" %s' % (
             agent_path, json.dumps(settings).encode('base64'))
         self.set_regkey(HKEY_LOCAL_MACHINE,
                         'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
