@@ -98,8 +98,9 @@ class VirtualBox(VM):
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=path)
 
-    def immutable_hd(self):
-        self._call('modifyhd', self.hdd_path, type_='immutable', compact=True)
+    def immutable_hd(self, autoreset=True):
+        self._call('modifyhd', self.hdd_path, type_='immutable',
+                   compact=True, autoreset='on' if autoreset else 'off')
 
     def remove_hd(self):
         self._call('storagectl', self.name, portcount=0,

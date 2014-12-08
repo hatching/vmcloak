@@ -273,7 +273,7 @@ def main():
         m.delete_vm()
 
         log.debug('Making the base harddisk immutable.')
-        m.immutable_hd()
+        m.immutable_hd(autoreset=False)
 
         log.debug('Registering this bird with the local VMCloak database.')
         add_bird(s.vmname, m.hdd_path)
