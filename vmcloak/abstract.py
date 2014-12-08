@@ -70,7 +70,7 @@ class VM(object):
         """Create a harddisk."""
         raise
 
-    def immutable_hd(self, autoreset=True):
+    def immutable_hd(self):
         """Make a harddisk immutable or normal."""
         raise
 
