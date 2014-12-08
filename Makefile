@@ -12,7 +12,7 @@ deb:
 	python setup.py --command-packages=stdeb.command bdist_deb
 
 clean:
-	rm -rf $(DIST)
+	rm -r $(DIST)
 	rm -f $(shell find .|grep .pyc)
 	make -C docs/ clean
 	make -C utils/ clean
