@@ -14,8 +14,8 @@ import subprocess
 from ConfigParser import RawConfigParser
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from StringIO import StringIO
-from _winreg import CreateKeyEx, DeleteValue
-from _winreg import HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
+from _winreg import CreateKeyEx, DeleteValue, SetValueEx
+from _winreg import HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_SZ
 from zipfile import ZipFile
 
 BIND_IP = "0.0.0.0"
@@ -215,44 +215,56 @@ if __name__ == "__main__":
     s = ObjectDict(json.loads(sys.argv[1].decode('base64')))
 
     # Attempt to connect to the host machine.
-    sock = None
-    while not sock:
-        try:
-            sock = socket.create_connection((s.host_ip, s.host_port), 1)
-        except socket.error:
-            continue
+    if hasattr(s, 'host_ip') and hasattr(s, 'host_port'):
+        sock = None
+        while not sock:
+            try:
+                sock = socket.create_connection((s.host_ip, s.host_port), 1)
+            except socket.error:
+                continue
 
-    # Connect to the host machine. In case this is a bird, also receive the
-    # new IP address, mask, and gateway.
-    if s.vmmode == 'bird':
-        # Retrieve the static IP address that we're supposed to use.
-        ip_address, ip_mask, ip_gateway = sock.recv(256).split()
+        # Connect to the host machine. In case this is a bird, also
+        # receive the new IP address, mask, and gateway.
+        if s.vmmode == 'bird':
+            # Retrieve the static IP address that we're supposed to use.
+            ip_address, ip_mask, ip_gateway = sock.recv(256).split()
 
-        sock.close()
+            sock.close()
 
-        args = [
-            "netsh", "interface", "ip", "set", "address",
-            "name=Local Area Connection", "static",
-            ip_address, ip_mask, ip_gateway, "1",
-        ]
-        subprocess.Popen(args).wait()
-    else:
-        sock.close()
+            args = [
+                "netsh", "interface", "ip", "set", "address",
+                "name=Local Area Connection", "static",
+                ip_address, ip_mask, ip_gateway, "1",
+            ]
+            subprocess.Popen(args).wait()
+        else:
+            sock.close()
+
+    h = CreateKeyEx(HKEY_LOCAL_MACHINE,
+                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    0, KEY_ALL_ACCESS)
 
     if s.vmmode == 'normal':
-        # Remove the entry in Run from the registry.
-        h = CreateKeyEx(HKEY_LOCAL_MACHINE,
-                        "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
-                        0, KEY_ALL_ACCESS)
-        DeleteValue(h, "Agent")
-        h.Close()
+        # In normal mode we remove the entry in Run from the registry.
+        DeleteValue(h, 'Agent')
+    else:
+        # In bird mode we modify it so that the agent is aware that no new
+        # IP address has to be assigned and goes straight to listening for
+        # the host to connect.
+        settings = dict(vmmode=s.vmmode)
+        value = 'C:\\Python27\\Pythonw.exe "%s" %s' % (
+            os.path.abspath(__file__), json.dumps(settings).encode('base64'))
+        SetValueEx(h, 'Agent', 0, REG_SZ, value)
+
+    h.Close()
 
     try:
         if not BIND_IP:
             BIND_IP = socket.gethostbyname(socket.gethostname())
 
-        # Remove this file.
-        os.unlink(os.path.abspath(__file__))
+        # Remove this file if we're in normal mode.
+        if s.vmmode == 'normal':
+            os.unlink(os.path.abspath(__file__))
 
         print("[+] Starting agent on %s:%s ..." % (BIND_IP, BIND_PORT))
 
