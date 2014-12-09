@@ -1,3 +1,10 @@
+0.1.17, December 9th 2014
+
+    Bugfix: Allow the Agent to be started correctly after subsequent reboots
+        in a longterm analysis (this only works in bird mode).
+    Tweak: Renamed -d/--debug to -v/--verbose and -v/--version to --version.
+    New: Introduced --version-int for comparison when scripting.
+
 0.1.16, December 5th 2014
 
     Feature: Ability to drop privileges to another user.
