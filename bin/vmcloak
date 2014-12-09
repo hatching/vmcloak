@@ -242,7 +242,7 @@ def main():
         # Wait until the Virtual Machine is shutdown.
         while True:
             try:
-                if m.vminfo()['VMState'] == 'poweroff':
+                if m.vminfo('VMState') == 'poweroff':
                     break
             except CommandError:
                 pass

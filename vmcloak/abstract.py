@@ -45,7 +45,7 @@ class VM(object):
         else:
             _, self.iso_path = tempfile.mkstemp(suffix='.iso', dir=temp_dir)
 
-    def vminfo(self):
+    def vminfo(self, element=None):
         """Returns a dictionary with all available information for the
         Virtual Machine."""
         raise

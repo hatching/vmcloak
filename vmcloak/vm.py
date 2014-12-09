@@ -50,7 +50,7 @@ class VirtualBox(VM):
 
         return ret.strip()
 
-    def vminfo(self):
+    def vminfo(self, element=None):
         ret = {}
         lines = self._call('showvminfo', self.name, machinereadable=True)
         for line in lines.split('\n'):
@@ -61,8 +61,11 @@ class VirtualBox(VM):
             elif value.isdigit():
                 value = int(value)
 
+            if key.startswith('"') and key.endswith('"'):
+                key = key[1:-1]
+
             ret[key] = value
-        return ret
+        return ret if element is None else ret.get(element)
 
     def api_status(self):
         if not os.path.isfile(self.vboxmanage):
