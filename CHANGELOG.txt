@@ -1,3 +1,7 @@
+0.1.18, December 11th 2014
+
+    Bugfix: os.putenv() doesn't apply to the current process in Python.
+
 0.1.17, December 9th 2014
 
     Bugfix: Allow the Agent to be started correctly after subsequent reboots
