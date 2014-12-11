@@ -270,7 +270,7 @@ def shared_parameters():
         register_cuckoo=True,
         dependencies='',
         auxiliary_local='auxiliary',
-        deps_directory=os.path.join(os.getenv('HOME'), '.vmcloak', 'deps'),
+        deps_directory='~/.vmcloak/deps',
         deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
         vrde=False,
         bird=False,

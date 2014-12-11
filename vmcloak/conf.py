@@ -60,7 +60,7 @@ class Configuration(object):
     def from_defaults(self, defaults):
         for key, value in defaults.items():
             if key in self.conf and self.conf[key] is None:
-                self.conf[key] = value
+                self.conf[key] = self._process_value(value)
 
     def __getattr__(self, key):
         return self.conf[key]
