@@ -207,7 +207,7 @@ def main():
     initialize_vm(m, s, clone=False)
 
     log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
-    log.debug(m.start_vm(visible=s.vm_visible))
+    m.start_vm(visible=s.vm_visible)
 
     log.debug('Setting the resolution to %s', s.resolution)
 
@@ -262,10 +262,10 @@ def main():
         time.sleep(10)
 
         log.debug('Taking a snapshot of the current state.')
-        log.debug(m.snapshot('vmcloak', 'Snapshot created by VMCloak.'))
+        m.snapshot('vmcloak', 'Snapshot created by VMCloak.')
 
         log.debug('Powering off the virtual machine.')
-        log.debug(m.stopvm())
+        m.stopvm()
 
         if s.register_cuckoo:
             register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,

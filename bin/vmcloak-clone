@@ -84,10 +84,10 @@ def main():
     wait_for_host(s.hostonly_ip)
 
     log.debug('Taking a snapshot of the current state.')
-    log.debug(m.snapshot('vmcloak', 'Snapshot created by VM Cloak.'))
+    m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
 
     log.debug('Powering off the virtual machine.')
-    log.debug(m.stopvm())
+    m.stopvm()
 
     if s.register_cuckoo:
         register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
