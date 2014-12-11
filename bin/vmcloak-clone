@@ -69,19 +69,6 @@ def main():
         parser.print_help()
         exit(0)
 
-    if s.user:
-        try:
-            user = pwd.getpwnam(s.user)
-            os.setgroups((user.pw_gid,))
-            os.setgid(user.pw_gid)
-            os.setuid(user.pw_uid)
-            os.environ['HOME'] = user.pw_dir
-        except KeyError:
-            sys.exit('Invalid user specified to drop privileges to: %s' %
-                     args.user)
-        except OSError as e:
-            sys.exit('Failed to drop privileges: %s' % e)
-
     if not s.vmname:
         log.error('A name for the Virtual Machine is required.')
         exit(1)
