@@ -1,3 +1,8 @@
+0.1.19, December 11th 2014
+
+    Bugfix; Resolve parameters that use $PATH again after updating $PATH when
+        dropping privileges to another user.
+
 0.1.18, December 11th 2014
 
     Bugfix: os.putenv() doesn't apply to the current process in Python.
