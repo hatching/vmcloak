@@ -29,6 +29,40 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak')
 
 
+def resolve_parameters(args, defaults, types, drop_user=False):
+    s = Configuration()
+
+    if args.recommended_settings:
+        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
+
+    for settings in args.settings:
+        s.from_file(settings)
+
+    s.from_args(args)
+    s.from_defaults(defaults)
+    s.apply_types(types)
+
+    if s.user and not drop_user:
+        try:
+            user = pwd.getpwnam(s.user)
+            os.setgroups((user.pw_gid,))
+            os.setgid(user.pw_gid)
+            os.setuid(user.pw_uid)
+            os.environ['HOME'] = user.pw_dir
+        except KeyError:
+            sys.exit('Invalid user specified to drop privileges to: %s' %
+                     s.user)
+        except OSError as e:
+            sys.exit('Failed to drop privileges: %s' % e)
+
+        # Resolve the parameters again, but this time without applying the
+        # user argument. This way paths that use os.getenv('HOME') will be
+        # correct.
+        return resolve_parameters(args, defaults, types, drop_user=True)
+
+    return s
+
+
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--version', action='store_true', help='Display the VMCloak version.')
@@ -51,17 +85,7 @@ def main():
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
-    s = Configuration()
-
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    for settings in args.settings:
-        s.from_file(settings)
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-    s.apply_types(types)
+    s = resolve_parameters(args, defaults, types)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
@@ -77,19 +101,6 @@ def main():
         version = pkg_resources.require('VMCloak')[0].version.split('.')
         print 1000 * int(version[0]) + 100 * int(version[1]) + int(version[2])
         exit(0)
-
-    if s.user:
-        try:
-            user = pwd.getpwnam(s.user)
-            os.setgroups((user.pw_gid,))
-            os.setgid(user.pw_gid)
-            os.setuid(user.pw_uid)
-            os.environ['HOME'] = user.pw_dir
-        except KeyError:
-            sys.exit("Invalid user specified to drop privileges to: %s" %
-                     s.user)
-        except OSError as e:
-            sys.exit("Failed to drop privileges: %s" % e)
 
     if not s.vmname:
         log.error('A name for the Virtual Machine is required.')

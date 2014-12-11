@@ -18,23 +18,50 @@ from vmcloak.vm import VirtualBox, initialize_vm
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak-clone')
 
+def resolve_parameters(args, defaults, types, drop_user=False):
+    s = Configuration()
+
+    if args.recommended_settings:
+        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
+
+    for settings in args.settings:
+        s.from_file(settings)
+
+    s.from_args(args)
+    s.from_defaults(defaults)
+    s.apply_types(types)
+
+    if s.user and not drop_user:
+        try:
+            user = pwd.getpwnam(s.user)
+            os.setgroups((user.pw_gid,))
+            os.setgid(user.pw_gid)
+            os.setuid(user.pw_uid)
+            os.environ['HOME'] = user.pw_dir
+        except KeyError:
+            sys.exit('Invalid user specified to drop privileges to: %s' %
+                     s.user)
+        except OSError as e:
+            sys.exit('Failed to drop privileges: %s' % e)
+
+        # Resolve the parameters again, but this time without applying the
+        # user argument. This way paths that use os.getenv('HOME') will be
+        # correct.
+        return resolve_parameters(args, defaults, types, drop_user=True)
+
+    return s
+
 
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
 
     args = parser.parse_args()
-    s = Configuration()
 
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-    s.apply_types(types)
+    s = resolve_parameters(args, defaults, types)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
