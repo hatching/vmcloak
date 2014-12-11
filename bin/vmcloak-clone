@@ -4,52 +4,16 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
-import os
-import pwd
 import socket
 import sys
 
-from vmcloak.conf import Configuration, vboxmanage_path
-from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.conf import vboxmanage_path
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
-from vmcloak.misc import wait_for_host
+from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.vm import VirtualBox, initialize_vm
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak-clone')
-
-def resolve_parameters(args, defaults, types, drop_user=False):
-    s = Configuration()
-
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    for settings in args.settings:
-        s.from_file(settings)
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-    s.apply_types(types)
-
-    if s.user and not drop_user:
-        try:
-            user = pwd.getpwnam(s.user)
-            os.setgroups((user.pw_gid,))
-            os.setgid(user.pw_gid)
-            os.setuid(user.pw_uid)
-            os.environ['HOME'] = user.pw_dir
-        except KeyError:
-            sys.exit('Invalid user specified to drop privileges to: %s' %
-                     s.user)
-        except OSError as e:
-            sys.exit('Failed to drop privileges: %s' % e)
-
-        # Resolve the parameters again, but this time without applying the
-        # user argument. This way paths that use os.getenv('HOME') will be
-        # correct.
-        return resolve_parameters(args, defaults, types, drop_user=True)
-
-    return s
 
 
 def main():
@@ -61,7 +25,10 @@ def main():
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
-    s = resolve_parameters(args, defaults, types)
+    try:
+        s = resolve_parameters(args, defaults, types)
+    except Exception as e:
+        sys.exit(e.message)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.

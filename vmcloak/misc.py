@@ -7,11 +7,15 @@ import hashlib
 import json
 import logging
 import os
+import pwd
 import shutil
 import socket
 import stat
 import subprocess
 from ConfigParser import ConfigParser
+
+from vmcloak.conf import Configuration
+from vmcloak.constants import VMCLOAK_ROOT
 
 log = logging.getLogger(__name__)
 
@@ -315,3 +319,37 @@ def wait_for_host(ip):
             break
         except socket.error:
             pass
+
+
+def resolve_parameters(args, defaults, types, drop_user=False):
+    s = Configuration()
+
+    if args.recommended_settings:
+        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
+
+    for settings in args.settings:
+        s.from_file(settings)
+
+    s.from_args(args)
+    s.from_defaults(defaults)
+    s.apply_types(types)
+
+    if s.user and not drop_user:
+        try:
+            user = pwd.getpwnam(s.user)
+            os.setgroups((user.pw_gid,))
+            os.setgid(user.pw_gid)
+            os.setuid(user.pw_uid)
+            os.environ['HOME'] = user.pw_dir
+        except KeyError:
+            raise Exception('Invalid user specified to drop '
+                            'privileges to: %s' % s.user)
+        except OSError as e:
+            raise Exception('Failed to drop privileges: %s' % e)
+
+        # Resolve the parameters again, but this time without applying the
+        # user argument. This way paths that use os.getenv('HOME') will be
+        # correct.
+        return resolve_parameters(args, defaults, types, drop_user=True)
+
+    return s

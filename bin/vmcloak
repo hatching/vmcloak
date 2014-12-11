@@ -6,20 +6,19 @@
 import logging
 import os
 import pkg_resources
-import pwd
 import shutil
 import socket
 import sys
 import tempfile
 import time
 
-from vmcloak.conf import Configuration, configure_winnt_sif, vboxmanage_path
+from vmcloak.conf import configure_winnt_sif, vboxmanage_path
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.exceptions import CommandError
 from vmcloak.iso import buildiso
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
-from vmcloak.misc import wait_for_host
+from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.verify import valid_serial_key, valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 
@@ -27,40 +26,6 @@ BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak')
-
-
-def resolve_parameters(args, defaults, types, drop_user=False):
-    s = Configuration()
-
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    for settings in args.settings:
-        s.from_file(settings)
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-    s.apply_types(types)
-
-    if s.user and not drop_user:
-        try:
-            user = pwd.getpwnam(s.user)
-            os.setgroups((user.pw_gid,))
-            os.setgid(user.pw_gid)
-            os.setuid(user.pw_uid)
-            os.environ['HOME'] = user.pw_dir
-        except KeyError:
-            sys.exit('Invalid user specified to drop privileges to: %s' %
-                     s.user)
-        except OSError as e:
-            sys.exit('Failed to drop privileges: %s' % e)
-
-        # Resolve the parameters again, but this time without applying the
-        # user argument. This way paths that use os.getenv('HOME') will be
-        # correct.
-        return resolve_parameters(args, defaults, types, drop_user=True)
-
-    return s
 
 
 def main():
@@ -85,7 +50,10 @@ def main():
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
-    s = resolve_parameters(args, defaults, types)
+    try:
+        s = resolve_parameters(args, defaults, types)
+    except Exception as e:
+        sys.exit(e.message)
 
     # Not really sure if this is possible in a cleaner way, but if no
     # arguments have been given on the command line, then show the usage.
