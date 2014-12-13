@@ -16,7 +16,6 @@ NoWaitAfterGUIMode=1
 DriverSigningPolicy=Ignore
 NonDriverSigningPolicy=Ignore
 Repartition="Yes"
-KeyboardLayout="@KBLAYOUT@"
 
 [SystemRestore]
 DisableSR=1
