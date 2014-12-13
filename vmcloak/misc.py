@@ -266,7 +266,7 @@ def shared_parameters():
         hostonly_gateway='192.168.56.1',
         bridged_mask='255.255.255.0',
         dns_server='8.8.8.8',
-        tags='',
+        tags='tag0',
         vboxmanage='/usr/bin/VBoxManage',
         vm_visible=False,
         keyboard_layout='US',
