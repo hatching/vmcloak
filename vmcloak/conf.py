@@ -23,7 +23,7 @@ def configure_winnt_sif(path, args):
         'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
         'ORGANIZATION': '',
         'WORKGROUP': random_string(4, 8),
-        'KBLAYOUT': args.keyboard_layout,
+    #    'KBLAYOUT': args.keyboard_layout,
     }
 
     buf = open(path, 'rb').read()
