@@ -19,6 +19,7 @@ setup(
     ],
     scripts=[
         'bin/vmcloak',
+        'bin/vmcloak-bird',
         'bin/vmcloak-clone',
         'bin/vmcloak-deps',
         'bin/vmcloak-gethwconf',
