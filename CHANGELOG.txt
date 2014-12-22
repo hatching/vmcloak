@@ -1,3 +1,10 @@
+0.1.21, December 11th 2014
+
+    Bugfix: Removed duplicate privilege dropping code.
+    Feature: Use SO_REUSEADDR in vmcloak and vmcloak-clone to avoid exceptions
+        when listening on a port.
+    New: Introduce vmcloak-bird for basic management of Virtual Machine birds.
+
 0.1.20, December 11th 2014
 
     Bugfix: --deps-directory still used the old $HOME value.
