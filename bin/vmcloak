@@ -129,11 +129,6 @@ def main():
     log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
     log.debug('Static Guest bridged IP: %s', s.bridged_ip)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind((s.host_ip, s.host_port))
-    sock.listen(1)
-
     log.debug('Configuring WINNT.SIF')
     winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
     buf = configure_winnt_sif(winnt_sif, s)
@@ -216,6 +211,11 @@ def main():
     t = time.time()
 
     if not s.bird:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((s.host_ip, s.host_port))
+        sock.listen(1)
+
         guest, _ = sock.accept()
         guest.close()
     else:
