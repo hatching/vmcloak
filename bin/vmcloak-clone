@@ -63,9 +63,16 @@ def main():
     sock.bind((s.host_ip, s.host_port))
     sock.listen(1)
 
-    guest, _ = sock.accept()
+    # Wait at most five minutes, otherwise something is wrong.
+    sock.settimeout(5.0 * 60)
 
-    sock.close()
+    try:
+        guest, _ = sock.accept()
+        sock.close()
+    except socket.timeout:
+        log.error('The Virtual Machine hasn\'t replied yet after five '
+                  'minutes.. something is going wrong.')
+        exit(1)
 
     log.info('Assigning IP address %s (mask %s, gateway %s)',
              s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
