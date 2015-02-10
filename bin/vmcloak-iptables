@@ -1,17 +1,34 @@
-#!/bin/sh
+#!/bin/bash
 
-# Credits to Mark Schloesser, https://github.com/rep/cuckoo-contrib
+if [ $# -ne 0 ]; then
+   if [[ $1 == '-h' ]]; then
+       echo "Usage:"
+       echo "    $0 ip_range/CIDR"
+       echo "    $0 ip_range/CIDR interfaces"
+       echo "    $0 192.168.56.0/24 eth0 wlan0"
+       echo ""
+       echo "By default will be:"
+       echo "    $0 192.168.56.0/24 eth0 wlan0"
+       echo ""
+   fi
+fi
+    
 
+# Credits to Mark Schloesser, Andriy Brukhovetskyy, https://github.com/rep/cuckoo-contrib
 if [ "$#" -ne 0 ]; then
-    INTERFACES="$*"
+    VBOXNET=$1
+else
+   VBOXNET="192.168.56.0/24"
+fi
+
+if [ "$#" -ne 1 ]; then
+    INTERFACES="${@:2}"
 else
     INTERFACES="eth0 wlan0"
 fi
 
 iptables -F
 iptables -t nat -F
-
-VBOXNET="192.168.56.0/24"
 
 for i in $INTERFACES; do
     iptables -t nat -A POSTROUTING -o $i -s $VBOXNET -j MASQUERADE
@@ -27,7 +44,7 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -s $VBOXNET -j ACCEPT
 
 # Internal traffic.
-iptables -A FORWARD -s 192.168.56.0/24 -d 192.168.56.0/24 -j ACCEPT
+iptables -A FORWARD -s $VBOXNET -d $VBOXNET -j ACCEPT
 
 # Log stuff that reaches this point, could be noisy though.
 iptables -A FORWARD -j LOG
