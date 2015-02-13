@@ -27,7 +27,7 @@ iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -s $VBOXNET -j ACCEPT
 
 # Internal traffic.
-iptables -A FORWARD -s 192.168.56.0/24 -d 192.168.56.0/24 -j ACCEPT
+iptables -A FORWARD -s $VBOXNET -d $VBOXNET -j ACCEPT
 
 # Log stuff that reaches this point, could be noisy though.
 iptables -A FORWARD -j LOG
