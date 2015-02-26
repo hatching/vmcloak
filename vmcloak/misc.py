@@ -221,6 +221,7 @@ def shared_parameters():
     parser.add_argument('--hostonly-mask', type=str, help='Static IP address mask to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
+    parser.add_argument('--hostonly-adapter', type=str, help='Hostonly interface to use.')
     parser.add_argument('--bridged', type=str, help='Network interface for the bridged network.')
     parser.add_argument('--bridged-ip', type=str, help='Static IP address to use on the Guest for the bridged network.')
     parser.add_argument('--bridged-mask', type=str, help='Static IP address mask to use on the Guest for the bridged network.')
@@ -264,6 +265,7 @@ def shared_parameters():
         hostonly_ip='192.168.56.101',
         hostonly_mask='255.255.255.0',
         hostonly_gateway='192.168.56.1',
+        hostonly_adapter=None,
         bridged_mask='255.255.255.0',
         dns_server='8.8.8.8',
         tags='',
