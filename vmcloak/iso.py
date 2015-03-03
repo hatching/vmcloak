@@ -25,7 +25,8 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap, tmp_dir=None):
     copytreelower(mount, tempdir)
 
     # Copy the boot image.
-    shutil.copy(os.path.join(VMCLOAK_ROOT, 'data', 'boot.img'), tempdir)
+    boot_img = os.path.join(VMCLOAK_ROOT, 'data', 'winxp', 'boot.img')
+    shutil.copy(boot_img, tempdir)
 
     dst_winnt = os.path.join(tempdir, 'i386', 'winnt.sif')
 
@@ -35,7 +36,8 @@ def buildiso(mount, winnt_sif, iso_out, bootstrap, tmp_dir=None):
 
     # There are a couple of optional values that should be set if they have
     # not already been set.
-    winnt_opt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt-opt.sif')
+    winnt_opt_sif = os.path.join(VMCLOAK_ROOT, 'data',
+                                 'winxp', 'winnt-opt.sif')
     ini_merge(winnt, winnt_opt_sif, overwrite=False)
 
     ini_write(dst_winnt, mode, winnt)

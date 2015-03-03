@@ -1,3 +1,9 @@
+0.1.22, December 24th 2014
+
+    Feature: Have vmcloak-clone wait at most 5 minutes per Virtual Machine.
+        If the machine has not pinged back in that time, something's wrong.
+    Tweak: Move Windows XP related files to vmcloak/data/winxp.
+
 0.1.21, December 11th 2014
 
     Bugfix: Removed duplicate privilege dropping code.

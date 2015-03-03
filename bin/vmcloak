@@ -130,7 +130,7 @@ def main():
     log.debug('Static Guest bridged IP: %s', s.bridged_ip)
 
     log.debug('Configuring WINNT.SIF')
-    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
+    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winxp', 'winnt.sif')
     buf = configure_winnt_sif(winnt_sif, s)
 
     # Write the WINNT.SIF file.
