@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'VMCloak'
-copyright = u'2014, Jurriaan Bremer'
+copyright = u'2014-2015, Jurriaan Bremer'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
