@@ -214,19 +214,19 @@ class OperatingSystem(object):
 
     def buildiso(self, mount, newiso, bootstrap, tmp_dir=None):
         """Builds an ISO file containing all our modifications."""
-        tempdir = tempfile.mkdtemp(dir=tmp_dir)
+        outdir = tempfile.mkdtemp(dir=tmp_dir)
 
         # Copy all files to our temporary directory as mounted iso files are
         # read-only and we need lowercase (aka case-insensitive) filepaths.
-        copytreelower(mount, tempdir)
+        copytreelower(mount, outdir)
 
         # Copy the boot image.
-        shutil.copy(os.path.join(self.path, 'boot.img'), tempdir)
+        shutil.copy(os.path.join(self.path, 'boot.img'), outdir)
 
         # Allow the OS handler to write additional files.
-        self.isofiles(tempdir, tmp_dir)
+        self.isofiles(outdir, tmp_dir)
 
-        osdir = os.path.join(tempdir, '$oem$', '$1')
+        osdir = os.path.join(outdir, '$oem$', '$1')
         os.makedirs(os.path.join(osdir, 'vmcloak'))
 
         data_bootstrap = os.path.join(self.data_path, 'bootstrap')
@@ -239,20 +239,20 @@ class OperatingSystem(object):
         isocreate = get_path('genisoimage')
         if not isocreate:
             log.error('Either genisoimage or mkisofs is required!')
-            shutil.rmtree(tempdir)
+            shutil.rmtree(outdir)
             return False
 
         args = [
             isocreate, '-quiet', '-b', 'boot.img', '-o', newiso,
-        ] + self.genisoargs + [tempdir]
+        ] + self.genisoargs + [outdir]
 
         try:
             # TODO Properly suppress the ISO-9660 warning.
             subprocess.check_call(args)
         except subprocess.CalledProcessError as e:
             log.error('Error creating ISO file: %s', e)
-            shutil.rmtree(tempdir)
+            shutil.rmtree(outdir)
             return False
 
-        shutil.rmtree(tempdir)
+        shutil.rmtree(outdir)
         return True

@@ -4,9 +4,9 @@
 
 import logging
 import os.path
-import shutil
 
 from vmcloak.abstract import OperatingSystem
+from vmcloak.rand import random_string
 from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
@@ -20,12 +20,21 @@ class Windows7(OperatingSystem):
         '-joliet-long', '-relaxed-filenames',
     ]
 
-    def configure(self, s):
-        pass
+    def _autounattend_xml(self):
+        values = {
+            'PRODUCTKEY': self.serial_key,
+            'COMPUTERNAME': random_string(8, 16),
+        }
+
+        buf = open(os.path.join(self.path, 'autounattend.xml'), 'rb').read()
+        for key, value in values.items():
+            buf = buf.replace('@%s@' % key, value)
+
+        return buf
 
     def isofiles(self, outdir, tmp_dir=None):
-        dst_unattend = os.path.join(outdir, 'autounattend.xml')
-        shutil.copy(os.path.join(self.path, 'autounattend.xml'), dst_unattend)
+        with open(os.path.join(outdir, 'autounattend.xml'), 'wb') as f:
+            f.write(self._autounattend_xml())
 
     def set_serial_key(self, serial_key):
         if serial_key and not valid_serial_key(serial_key):

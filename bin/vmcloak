@@ -95,14 +95,6 @@ def main():
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
 
-    if not s.winxp and not s.win7:
-        log.error('Please provided either --winxp or --win7.')
-        exit(1)
-
-    if s.winxp and s.win7:
-        log.error('Please provide just --winxp or --win7, not both.')
-        exit(1)
-
     if not m.api_status():
         exit(1)
 
@@ -112,10 +104,17 @@ def main():
         m.delete_vm()
         exit(0)
 
+    if s.winxp and s.win7:
+        log.error('Please provide just --winxp or --win7, not both.')
+        exit(1)
+
     if s.winxp:
         h = WindowsXP()
-    else:
+    elif s.win7:
         h = Windows7()
+    else:
+        log.error('Please provided either --winxp or --win7.')
+        exit(1)
 
     if not os.path.isdir(s.iso_mount or h.mount):
         log.error('Please specify --iso-mount to a directory containing the '

@@ -41,7 +41,9 @@ class WindowsXP(OperatingSystem):
         fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
         os.close(fd)
 
-        open(winntsif, 'wb').write(buf)
+        with open(winntsif, 'wb') as f:
+            f.write(buf)
+
         return winntsif
 
     def isofiles(self, outdir, tmp_dir=None):
