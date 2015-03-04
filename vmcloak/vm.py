@@ -16,7 +16,7 @@ except ImportError:
     HAVE_REQUESTS = False
 
 
-from vmcloak.abstract import VM
+from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.exceptions import CommandError
 from vmcloak.rand import random_mac
@@ -24,12 +24,12 @@ from vmcloak.rand import random_mac
 log = logging.getLogger(__name__)
 
 
-class VirtualBox(VM):
+class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
 
     def __init__(self, *args, **kwargs):
         self.vboxmanage = kwargs.pop('vboxmanage')
-        VM.__init__(self, *args, **kwargs)
+        Machinery.__init__(self, *args, **kwargs)
 
         self.hdd_path = os.path.join(self.data_dir, '%s.vdi' % self.name)
 
@@ -202,7 +202,7 @@ class VirtualBox(VM):
         return self._call('modifyvm', self.name, vrde=vrde)
 
 
-class VBoxRPC(VM):
+class VBoxRPC(Machinery):
     FIELDS = VBOX_CONFIG
     vm_dir_required = False
     data_dir_required = False
@@ -211,7 +211,7 @@ class VBoxRPC(VM):
         self.url = kwargs.pop('url')
         self.auth = kwargs.pop('auth')
 
-        VM.__init__(self, *args, **kwargs)
+        Machinery.__init__(self, *args, **kwargs)
 
         if not HAVE_REQUESTS:
             sys.exit('Please install requests and requests-toolbelt: '

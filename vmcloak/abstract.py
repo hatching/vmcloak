@@ -14,7 +14,7 @@ from vmcloak.rand import random_serial, random_uuid
 log = logging.getLogger()
 
 
-class VM(object):
+class Machinery(object):
     FIELDS = {}
     vm_dir_required = True
     data_dir_required = True
