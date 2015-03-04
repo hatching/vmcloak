@@ -12,14 +12,13 @@ import sys
 import tempfile
 import time
 
-from vmcloak.conf import configure_winnt_sif, vboxmanage_path
-from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.conf import vboxmanage_path
 from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.exceptions import CommandError
-from vmcloak.iso import buildiso
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
-from vmcloak.verify import valid_serial_key, valid_keyboard_layout
+from vmcloak.os import WindowsXP, Windows7
+from vmcloak.verify import valid_keyboard_layout
 from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
 
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -96,6 +95,14 @@ def main():
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
 
+    if not s.winxp and not s.win7:
+        log.error('Please provided either --winxp or --win7.')
+        exit(1)
+
+    if s.winxp and s.win7:
+        log.error('Please provide just --winxp or --win7, not both.')
+        exit(1)
+
     if not m.api_status():
         exit(1)
 
@@ -105,15 +112,18 @@ def main():
         m.delete_vm()
         exit(0)
 
-    if not s.iso_mount or not os.path.isdir(s.iso_mount):
+    if s.winxp:
+        h = WindowsXP()
+    else:
+        h = Windows7()
+
+    if not os.path.isdir(s.iso_mount or h.mount):
         log.error('Please specify --iso-mount to a directory containing the '
                   'mounted Windows Installer ISO image.')
         log.info('Refer to the documentation on mounting an .iso image.')
         exit(1)
 
-    if not s.serial_key or not valid_serial_key(s.serial_key):
-        log.error('The provided --serial-key is not encoded correctly.')
-        log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
+    if not h.set_serial_key(s.serial_key):
         exit(1)
 
     log.debug('Checking whether the keyboard layout is valid.')
@@ -129,13 +139,7 @@ def main():
     log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
     log.debug('Static Guest bridged IP: %s', s.bridged_ip)
 
-    log.debug('Configuring WINNT.SIF')
-    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winxp', 'winnt.sif')
-    buf = configure_winnt_sif(winnt_sif, s)
-
-    # Write the WINNT.SIF file.
-    _, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
-    open(winntsif, 'wb').write(buf)
+    h.configure(s)
 
     settings_bat = dict(
         BRIDGED='yes' if s.bridged else 'no',
@@ -195,8 +199,8 @@ def main():
 
     # Create the ISO file.
     log.debug('Creating ISO file.')
-    if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap,
-                    s.temp_dirpath):
+    if not h.buildiso(s.iso_mount or h.mount, m.iso_path, bootstrap,
+                      s.temp_dirpath):
         exit(1)
 
     initialize_vm(m, s, clone=False)
