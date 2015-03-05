@@ -68,8 +68,9 @@ class DependencyManager(object):
         args = get_path('wget'), '-O', path, url, '--no-check-certificate'
         subprocess.check_call(args)
 
-    def init(self):
+    def init(self, bitsize_64):
         """Initializes the dependency repository."""
+        self.bitsize_64 = bitsize_64
         if not os.path.isdir(self.deps_directory):
             os.mkdir(self.deps_directory)
             try:
@@ -107,7 +108,11 @@ class DependencyManager(object):
             log.info('No such dependency: %s.', dependency)
             return False
 
-        fname = self.repo[dependency]['filename']
+        if self.bitsize_64 and 'filename64' in self.repo[dependency]:
+            fname = self.repo[dependency]['filename64']
+        else:
+            fname = self.repo[dependency]['filename']
+
         filepath = os.path.join(self.deps_directory, 'files', fname)
 
         if not os.path.exists(filepath):
@@ -135,17 +140,22 @@ class DependencyManager(object):
 
         info = self.repo[dependency]
 
+        if self.bitsize_64 and 'filename64' in self.repo[dependency]:
+            fname = self.repo[dependency]['filename64']
+        else:
+            fname = self.repo[dependency]['filename']
+
         if self.available(dependency):
             log.info('Dependency %r has already been fetched.', dependency)
             return True
 
-        if info['filename'] in self.urls:
-            url = self.urls[info['filename']]
+        if fname in self.urls:
+            url = self.urls[fname]
 
             try:
                 log.debug('Fetching dependency %r: %r from %r.',
-                          dependency, info['filename'], url)
-                self._wget(info['filename'], url=url, subdir='files')
+                          dependency, fname, url)
+                self._wget(fname, url=url, subdir='files')
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
@@ -154,8 +164,8 @@ class DependencyManager(object):
 
             try:
                 log.debug('Fetching dependency %r: %s.',
-                          dependency, info['filename'])
-                self._wget(info['filename'], url=url, subdir='files')
+                          dependency, fname)
+                self._wget(fname, url=url, subdir='files')
             except subprocess.CalledProcessError as e:
                 log.warning('Error downloading %s: %s.', info['filename'], e)
                 return False
@@ -176,8 +186,9 @@ class DependencyManager(object):
 
 
 class DependencyWriter(object):
-    def __init__(self, dm, bootstrap_path):
+    def __init__(self, dm, bootstrap_path, bitsize_64):
         self.bootstrap = bootstrap_path
+        self.bitsize_64 = bitsize_64
 
         self.installed = []
         self.f = open(os.path.join(bootstrap_path, 'deps.bat'), 'wb')
@@ -185,7 +196,7 @@ class DependencyWriter(object):
         self.dm = dm
 
         # Make sure the dependency repository is available.
-        self.dm.init()
+        self.dm.init(self.bitsize_64)
 
         # Copy the repository information from the dependency manager.
         self.repo = self.dm.repo
@@ -224,8 +235,12 @@ class DependencyWriter(object):
         # Not used by us.
         kw.pop('description', None)
 
-        # Will be used at some point.
-        kw.pop('filename64', None)
+        # If this is a 64-bit OS and there's a 64-bit installer available,
+        # then use it.
+        if self.bitsize_64 and kw.get('filename64'):
+            fname = kw.pop('filename64')
+        else:
+            kw.pop('filename64', None)
 
         if kw:
             log.error('Found one or more remaining value(s) in the '

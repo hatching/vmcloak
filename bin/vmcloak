@@ -33,6 +33,7 @@ def main():
     parser.add_argument('--version-int', action='store_true', help='Display the VMCloak version as integer.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
+    parser.add_argument('--64', action='store_true', default=None, help='Mounted ISO Windows installer image.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--bird', action='store_true', default=None, help='Make an immutable harddisk rather than a Virtual Machine.')
@@ -177,7 +178,7 @@ def main():
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
     dm = DependencyManager(s.deps_directory, s.deps_repository)
-    deps = DependencyWriter(dm, vmcloak_dir)
+    deps = DependencyWriter(dm, vmcloak_dir, bitsize_64=s.conf['64'])
 
     if not deps.add('python27'):
         exit(1)
