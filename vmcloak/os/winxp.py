@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 class WindowsXP(OperatingSystem):
     name = 'winxp'
     mount = '/mnt/winxp'
+    osdir = os.path.join('$oem$', '$1')
     genisoargs = [
         '-no-emul-boot', '-boot-load-seg', '1984', '-boot-load-size', '4',
         '-iso-level', '2', '-J', '-l', '-D', '-N', '-joliet-long',

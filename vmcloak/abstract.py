@@ -186,11 +186,14 @@ class OperatingSystem(object):
     # Short name for this OS.
     name = None
 
-    # Additional arguments for genisoimage.
-    genisoargs = []
-
     # Default directory where the original ISO is mounted.
     mount = None
+
+    # Directory where to store the vmcloak bootstrap files.
+    osdir = None
+
+    # Additional arguments for genisoimage.
+    genisoargs = []
 
     def __init__(self):
         self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
@@ -199,6 +202,9 @@ class OperatingSystem(object):
 
         if self.name is None:
             raise Exception('Name has to be provided for OS handler')
+
+        if self.osdir is None:
+            raise Exception('OSDir has to be provided for OS handler')
 
     def configure(self, s):
         """Configure the setup with settings provided by the user."""
@@ -226,15 +232,14 @@ class OperatingSystem(object):
         # Allow the OS handler to write additional files.
         self.isofiles(outdir, tmp_dir)
 
-        osdir = os.path.join(outdir, '$oem$', '$1')
-        os.makedirs(os.path.join(osdir, 'vmcloak'))
+        os.makedirs(os.path.join(outdir, self.osdir, 'vmcloak'))
 
         data_bootstrap = os.path.join(self.data_path, 'bootstrap')
         for fname in os.listdir(data_bootstrap):
             shutil.copy(os.path.join(data_bootstrap, fname),
-                        os.path.join(osdir, 'vmcloak', fname))
+                        os.path.join(outdir, self.osdir, 'vmcloak', fname))
 
-        copytreeinto(bootstrap, osdir)
+        copytreeinto(bootstrap, os.path.join(outdir, self.osdir))
 
         isocreate = get_path('genisoimage')
         if not isocreate:
