@@ -229,7 +229,13 @@ class DependencyWriter(object):
 
         idx = 0
         while 'cmd%d' % idx in kw:
-            cmds.append(kw.pop('cmd%d' % idx))
+            if self.bitsize_64 and 'cmd%d_64' % idx in kw:
+                cmds.append(kw.pop('cmd%d_64' % idx))
+            else:
+                cmds.append(kw.pop('cmd%d' % idx))
+
+            kw.pop('cmd%d' % idx, None)
+            kw.pop('cmd%d_64' % idx, None)
             idx += 1
 
         # Not used by us.
