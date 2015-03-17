@@ -78,7 +78,8 @@ class VirtualBox(Machinery):
 
     def os_type(self, os, sp):
         operating_systems = {
-            'xp': 'WindowsXP',
+            'winxp': 'WindowsXP',
+            'win7': 'Windows7',
         }
         return self._call('modifyvm', self.name, ostype=operating_systems[os])
 
@@ -199,7 +200,10 @@ def initialize_vm(m, s, clone=False):
     log.debug(m.create_vm())
 
     m.ramsize(s.ramsize)
-    m.os_type(os='xp', sp=3)
+    if s.winxp:
+        m.os_type(os='winxp', sp=3)
+    elif s.win7:
+        m.os_type(os='win7', sp=2)
 
     if not clone:
         log.debug('Creating Harddisk.')

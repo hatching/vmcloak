@@ -211,8 +211,6 @@ def shared_parameters():
     parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
     parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
-    parser.add_argument('--winxp', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
-    parser.add_argument('--win7', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--ramsize', help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', help='Maximum size (in MB) of the dynamically allocated harddisk.')
@@ -251,8 +249,6 @@ def shared_parameters():
 
     defaults = dict(
         vm='virtualbox',
-        winxp=False,
-        win7=False,
         cuckoo='',
         ramsize=1024,
         resolution='1024x768',

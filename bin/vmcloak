@@ -32,6 +32,8 @@ def main():
     parser.add_argument('--version', action='store_true', help='Display the VMCloak version.')
     parser.add_argument('--version-int', action='store_true', help='Display the VMCloak version as integer.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
+    parser.add_argument('--winxp', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
+    parser.add_argument('--win7', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
     parser.add_argument('--64', action='store_true', default=None, help='Mounted ISO Windows installer image.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
@@ -42,6 +44,8 @@ def main():
     parser.add_argument('--host-init-gateway', type=str, help='Guest IP address gateway to initialize initial connectivity.')
 
     defaults.update(dict(
+        winxp=False,
+        win7=False,
         bird=False,
     ))
 
