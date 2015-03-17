@@ -126,7 +126,7 @@ class VirtualBox(Machinery):
         self._call('modifyvm', self.name, **mac)
         return macaddr
 
-    def hostonly(self, macaddr=None):
+    def hostonly(self, nictype, macaddr=None):
         index = self.network_index() + 1
 
         if os.name == 'posix':
@@ -142,31 +142,31 @@ class VirtualBox(Machinery):
 
         nic = {
             'nic%d' % index: 'hostonly',
-            'nictype%d' % index: 'Am79C973',
+            'nictype%d' % index: nictype,
             'nicpromisc%d' % index: 'allow-all',
             'hostonlyadapter%d' % index: adapter,
         }
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
-    def bridged(self, interface, macaddr=None):
+    def bridged(self, interface, nictype, macaddr=None):
         index = self.network_index() + 1
 
         nic = {
             'nic%d' % index: 'bridged',
-            'nictype%d' % index: 'Am79C973',
+            'nictype%d' % index: nictype,
             'nicpromisc%d' % index: 'allow-all',
             'bridgeadapter%d' % index: interface,
         }
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
-    def nat(self, macaddr=None):
+    def nat(self, nictype, macaddr=None):
         index = self.network_index() + 1
 
         nic = {
             'nic%d' % index: 'nat',
-            'nictype%d' % index: 'Am79C973',
+            'nictype%d' % index: nictype,
             'nicpromisc%d' % index: 'allow-all',
         }
         self._call('modifyvm', self.name, **nic)
@@ -202,8 +202,10 @@ def initialize_vm(m, s, clone=False):
     m.ramsize(s.ramsize)
     if s.winxp:
         m.os_type(os='winxp', sp=3)
+        nictype = 'Am79C973'
     elif s.win7:
         m.os_type(os='win7', sp=2)
+        nictype = '82540EM'
 
     if not clone:
         log.debug('Creating Harddisk.')
@@ -219,14 +221,14 @@ def initialize_vm(m, s, clone=False):
     m.cpus(s.cpu_count)
 
     log.debug('Checking VirtualBox hostonly network.')
-    if not m.hostonly(macaddr=s.hostonly_macaddr):
+    if not m.hostonly(nictype, macaddr=s.hostonly_macaddr):
         exit(1)
 
     if s.nat:
-        m.nat()
+        m.nat(nictype)
 
     if s.bridged:
-        m.bridged(s.bridged, macaddr=s.bridged_macaddr)
+        m.bridged(s.bridged, nictype, macaddr=s.bridged_macaddr)
 
     if s.hwvirt is not None:
         if s.hwvirt:
