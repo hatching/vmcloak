@@ -1,4 +1,12 @@
-0.1.22, December 24th 2014
+0.1.23, March 17th 2015
+
+    Tweak: Refactoring of the internals for improved Windows 7 support.
+    New: 64-bit flag to install 64-bit software where available.
+    Removed: Unused VirtualBox RPC support.
+    Bugfix: Remove temporary bootstrap directory after usage.
+    New: Experimental Windows 7 support.
+
+0.1.22, March 3rd 2015
 
     Feature: Have vmcloak-clone wait at most 5 minutes per Virtual Machine.
         If the machine has not pinged back in that time, something's wrong.
@@ -17,7 +25,7 @@
 
 0.1.19, December 11th 2014
 
-    Bugfix; Resolve parameters that use $PATH again after updating $PATH when
+    Bugfix: Resolve parameters that use $PATH again after updating $PATH when
         dropping privileges to another user.
 
 0.1.18, December 11th 2014

@@ -35,7 +35,7 @@ def main():
     parser.add_argument('--winxp', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--win7', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
-    parser.add_argument('--64', action='store_true', default=None, help='Mounted ISO Windows installer image.')
+    parser.add_argument('--64', action='store_true', default=None, help='Install 64-bit software in the Virtual Machine.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--bird', action='store_true', default=None, help='Make an immutable harddisk rather than a Virtual Machine.')
