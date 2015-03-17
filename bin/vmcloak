@@ -201,7 +201,10 @@ def main():
     log.debug('Creating ISO file.')
     if not h.buildiso(s.iso_mount or h.mount, m.iso_path, bootstrap,
                       s.temp_dirpath):
+        shutil.rmtree(bootstrap)
         exit(1)
+
+    shutil.rmtree(bootstrap)
 
     initialize_vm(m, s, clone=False)
 
