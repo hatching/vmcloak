@@ -19,7 +19,7 @@ from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.os import WindowsXP, Windows7
 from vmcloak.verify import valid_keyboard_layout
-from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
+from vmcloak.vm import VirtualBox, initialize_vm
 
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -88,10 +88,6 @@ def main():
 
         m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
                        vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
-    elif s.vm.lower() == 'vboxrpc':
-        m = VBoxRPC(s.vmname, url=s.vboxrpc_url,
-                    auth=tuple(s.vboxrpc_auth.split(':', 1)),
-                    temp_dir=s.temp_dirpath)
     else:
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)

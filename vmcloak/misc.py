@@ -213,8 +213,6 @@ def shared_parameters():
     parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--winxp', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
     parser.add_argument('--win7', action='store_true', default=None, help='Virtual Machine Software (VirtualBox.)')
-    parser.add_argument('--vboxrpc-url', type=str, help='URL to VBoxRPC instance.')
-    parser.add_argument('--vboxrpc-auth', type=str, help='Credentials to VBoxRPC instance.')
     parser.add_argument('--ramsize', help='Available virtual memory (in MB) for this virtual machine.')
     parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
     parser.add_argument('--hdsize', help='Maximum size (in MB) of the dynamically allocated harddisk.')
@@ -255,8 +253,6 @@ def shared_parameters():
         vm='virtualbox',
         winxp=False,
         win7=False,
-        vboxrpc_url='http://localhost:9002/',
-        vboxrpc_auth='root:toor',
         cuckoo='',
         ramsize=1024,
         resolution='1024x768',
