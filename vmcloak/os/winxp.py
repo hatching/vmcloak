@@ -42,10 +42,8 @@ class WindowsXP(OperatingSystem):
             buf = buf.replace('@%s@' % key, value)
 
         fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
+        os.write(fd, buf)
         os.close(fd)
-
-        with open(winntsif, 'wb') as f:
-            f.write(buf)
 
         return winntsif
 
