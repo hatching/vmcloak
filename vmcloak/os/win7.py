@@ -14,7 +14,9 @@ log = logging.getLogger(__name__)
 
 class Windows7(OperatingSystem):
     name = 'win7'
+    service_pack = 2
     mount = '/mnt/win7'
+    nictype = '82540EM'
     osdir = os.path.join('sources', '$oem$', '$1')
     genisoargs = [
         '-no-emul-boot', '-iso-level', '2', '-udf', '-J', '-l', '-D', '-N',

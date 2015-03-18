@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 
 class WindowsXP(OperatingSystem):
     name = 'winxp'
+    service_pack = 3
     mount = '/mnt/winxp'
+    nictype = 'Am79C973'
     osdir = os.path.join('$oem$', '$1')
     genisoargs = [
         '-no-emul-boot', '-boot-load-seg', '1984', '-boot-load-size', '4',

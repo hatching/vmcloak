@@ -186,8 +186,14 @@ class OperatingSystem(object):
     # Short name for this OS.
     name = None
 
+    # Service Pack that is likely being used.
+    service_pack = None
+
     # Default directory where the original ISO is mounted.
     mount = None
+
+    # The Network Interface Card Type.
+    nictype = None
 
     # Directory where to store the vmcloak bootstrap files.
     osdir = None

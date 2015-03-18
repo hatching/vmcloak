@@ -206,7 +206,7 @@ def main():
 
     shutil.rmtree(bootstrap)
 
-    initialize_vm(m, s, clone=False)
+    initialize_vm(m, s, h, clone=False)
 
     log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
     m.start_vm(visible=s.vm_visible)

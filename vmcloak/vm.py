@@ -195,17 +195,12 @@ class VirtualBox(Machinery):
         return self._call('modifyvm', self.name, vrde=vrde)
 
 
-def initialize_vm(m, s, clone=False):
+def initialize_vm(m, s, h, clone=False):
     log.debug('Creating VM %r.', s.vmname)
     log.debug(m.create_vm())
 
     m.ramsize(s.ramsize)
-    if s.winxp:
-        m.os_type(os='winxp', sp=3)
-        nictype = 'Am79C973'
-    elif s.win7:
-        m.os_type(os='win7', sp=2)
-        nictype = '82540EM'
+    m.os_type(os=h.name, sp=h.service_pack)
 
     if not clone:
         log.debug('Creating Harddisk.')
@@ -221,14 +216,14 @@ def initialize_vm(m, s, clone=False):
     m.cpus(s.cpu_count)
 
     log.debug('Checking VirtualBox hostonly network.')
-    if not m.hostonly(nictype, macaddr=s.hostonly_macaddr):
+    if not m.hostonly(nictype=h.nictype, macaddr=s.hostonly_macaddr):
         exit(1)
 
     if s.nat:
-        m.nat(nictype)
+        m.nat(nictype=h.nictype)
 
     if s.bridged:
-        m.bridged(s.bridged, nictype, macaddr=s.bridged_macaddr)
+        m.bridged(s.bridged, nictype=h.nictype, macaddr=s.bridged_macaddr)
 
     if s.hwvirt is not None:
         if s.hwvirt:
