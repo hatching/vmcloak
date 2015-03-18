@@ -13,7 +13,7 @@ import urlparse
 from vmcloak.misc import ini_read_dict, sha1_file
 from vmcloak.paths import get_path
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class DependencyManager(object):
@@ -257,6 +257,8 @@ class DependencyWriter(object):
         for dep in depends.split():
             if dep.strip():
                 self.add(dep.strip())
+
+        log.debug("Added dependency %r (filename %r).", dependency, fname)
 
         self.installed.append(dependency)
 

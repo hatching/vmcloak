@@ -17,7 +17,7 @@ from vmcloak.misc import copytreelower, copytreeinto
 from vmcloak.paths import get_path
 from vmcloak.rand import random_serial, random_uuid
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class Machinery(object):
