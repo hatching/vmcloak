@@ -36,6 +36,8 @@ setup(
     package_data={
         'vmcloak.data': ['*.*'],
         'vmcloak.data.bootstrap': ['*.*'],
+        'vmcloak.data.winxp': ['*.*'],
+        'vmcloak.data.win7': ['*.*'],
     },
     install_requires=[
         # Libraries to build the documentation.
