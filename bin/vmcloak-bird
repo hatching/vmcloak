@@ -29,7 +29,7 @@ def main():
 
     if args.action == 'list':
         for key, value in obj.items():
-            print '%-10s %s' % (key, value['hdd_path'])
+            print '%-10s %-10s %s' % (key, value['vmtype'], value['hdd_path'])
 
 
 if __name__ == '__main__':

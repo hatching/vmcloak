@@ -195,11 +195,11 @@ def read_bird(name):
     return read_birds().get(name)
 
 
-def add_bird(name, hdd_path):
+def add_bird(name, vmtype, hdd_path):
     path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
 
     birds = read_birds()
-    birds[name] = dict(hdd_path=hdd_path)
+    birds[name] = dict(vmtype=vmtype, hdd_path=hdd_path)
 
     open(path, 'wb').write(json.dumps(birds))
 
