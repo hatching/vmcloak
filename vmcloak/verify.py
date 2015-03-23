@@ -1,8 +1,8 @@
-#!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from __future__ import absolute_import
 import os.path
 import re
 
@@ -23,7 +23,8 @@ def valid_serial_key(serial_key):
 
 
 def valid_keyboard_layout(kblayout):
-    kblayout_txt = os.path.join(VMCLOAK_ROOT, 'data', 'keyboard_layout_values.txt')
+    kblayout_txt = os.path.join(VMCLOAK_ROOT, 'data', 'winxp',
+                                'keyboard_layout_values.txt')
     for layout in open(kblayout_txt, 'rb'):
         if layout.strip() == kblayout:
             return True

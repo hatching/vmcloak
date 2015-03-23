@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -12,15 +12,14 @@ import sys
 import tempfile
 import time
 
-from vmcloak.conf import configure_winnt_sif, vboxmanage_path
-from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.conf import vboxmanage_path
 from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.exceptions import CommandError
-from vmcloak.iso import buildiso
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
-from vmcloak.verify import valid_serial_key, valid_keyboard_layout
-from vmcloak.vm import VirtualBox, VBoxRPC, initialize_vm
+from vmcloak.os import WindowsXP, Windows7
+from vmcloak.verify import valid_keyboard_layout
+from vmcloak.vm import VirtualBox, initialize_vm
 
 BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -33,7 +32,11 @@ def main():
     parser.add_argument('--version', action='store_true', help='Display the VMCloak version.')
     parser.add_argument('--version-int', action='store_true', help='Display the VMCloak version as integer.')
     parser.add_argument('--delete', action='store_true', help='Completely delete a Virtual Machine and its associated files.')
+    parser.add_argument('--winxp', action='store_true', default=None, help='Create a Windows XP Virtual Machine.')
+    parser.add_argument('--win7', action='store_true', default=None, help='Create a Windows 7 Virtual Machine.')
+    parser.add_argument('--win7x64', action='store_true', default=None, help='Shorthand for --win7 --x64.')
     parser.add_argument('--iso-mount', type=str, help='Mounted ISO Windows installer image.')
+    parser.add_argument('--x64', action='store_true', default=None, help='Install 64-bit software in the Virtual Machine.')
     parser.add_argument('--serial-key', type=str, help='Windows Serial Key.')
     parser.add_argument('--dependencies', type=str, help='Comma-separated list of all dependencies in the Virtual Machine.')
     parser.add_argument('--bird', action='store_true', default=None, help='Make an immutable harddisk rather than a Virtual Machine.')
@@ -42,6 +45,9 @@ def main():
     parser.add_argument('--host-init-gateway', type=str, help='Guest IP address gateway to initialize initial connectivity.')
 
     defaults.update(dict(
+        winxp=False,
+        win7=False,
+        win7x64=False,
         bird=False,
     ))
 
@@ -88,10 +94,6 @@ def main():
 
         m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
                        vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
-    elif s.vm.lower() == 'vboxrpc':
-        m = VBoxRPC(s.vmname, url=s.vboxrpc_url,
-                    auth=tuple(s.vboxrpc_auth.split(':', 1)),
-                    temp_dir=s.temp_dirpath)
     else:
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
@@ -105,15 +107,29 @@ def main():
         m.delete_vm()
         exit(0)
 
-    if not s.iso_mount or not os.path.isdir(s.iso_mount):
+    if s.win7x64:
+        s.win7 = True
+        s.x64 = True
+
+    if s.winxp and s.win7:
+        log.error('Please provide just --winxp or --win7, not both.')
+        exit(1)
+
+    if s.winxp:
+        h = WindowsXP()
+    elif s.win7:
+        h = Windows7()
+    else:
+        log.error('Please provided either --winxp or --win7.')
+        exit(1)
+
+    if not os.path.isdir(s.iso_mount or h.mount):
         log.error('Please specify --iso-mount to a directory containing the '
                   'mounted Windows Installer ISO image.')
         log.info('Refer to the documentation on mounting an .iso image.')
         exit(1)
 
-    if not s.serial_key or not valid_serial_key(s.serial_key):
-        log.error('The provided --serial-key is not encoded correctly.')
-        log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
+    if not h.set_serial_key(s.serial_key):
         exit(1)
 
     log.debug('Checking whether the keyboard layout is valid.')
@@ -129,13 +145,7 @@ def main():
     log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
     log.debug('Static Guest bridged IP: %s', s.bridged_ip)
 
-    log.debug('Configuring WINNT.SIF')
-    winnt_sif = os.path.join(VMCLOAK_ROOT, 'data', 'winnt.sif')
-    buf = configure_winnt_sif(winnt_sif, s)
-
-    # Write the WINNT.SIF file.
-    _, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
-    open(winntsif, 'wb').write(buf)
+    h.configure(s)
 
     settings_bat = dict(
         BRIDGED='yes' if s.bridged else 'no',
@@ -174,7 +184,7 @@ def main():
     os.mkdir(os.path.join(vmcloak_dir, 'deps'))
 
     dm = DependencyManager(s.deps_directory, s.deps_repository)
-    deps = DependencyWriter(dm, vmcloak_dir)
+    deps = DependencyWriter(dm, vmcloak_dir, bitsize_64=s.x64)
 
     if not deps.add('python27'):
         exit(1)
@@ -195,11 +205,14 @@ def main():
 
     # Create the ISO file.
     log.debug('Creating ISO file.')
-    if not buildiso(s.iso_mount, winntsif, m.iso_path, bootstrap,
-                    s.temp_dirpath):
+    if not h.buildiso(s.iso_mount or h.mount, m.iso_path, bootstrap,
+                      s.temp_dirpath):
+        shutil.rmtree(bootstrap)
         exit(1)
 
-    initialize_vm(m, s, clone=False)
+    shutil.rmtree(bootstrap)
+
+    initialize_vm(m, s, h, clone=False)
 
     log.info('Starting the Virtual Machine %r to install Windows.', s.vmname)
     m.start_vm(visible=s.vm_visible)
@@ -256,7 +269,7 @@ def main():
         m.immutable_hd()
 
         log.debug('Registering this bird with the local VMCloak database.')
-        add_bird(s.vmname, m.hdd_path)
+        add_bird(s.vmname, vmtype=h.name, hdd_path=m.hdd_path)
     else:
         # Give the system a little bit of time to fully initialize.
         time.sleep(10)

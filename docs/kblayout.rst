@@ -3,4 +3,6 @@
 Keyboard Layout possibilities
 -----------------------------
 
-.. literalinclude:: ../vmcloak/data/keyboard_layout_values.txt
+For Windows XP:
+
+.. literalinclude:: ../vmcloak/data/winxp/keyboard_layout_values.txt

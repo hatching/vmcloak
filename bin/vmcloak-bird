@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -29,7 +29,7 @@ def main():
 
     if args.action == 'list':
         for key, value in obj.items():
-            print '%-10s %s' % (key, value['hdd_path'])
+            print '%-10s %-10s %s' % (key, value['vmtype'], value['hdd_path'])
 
 
 if __name__ == '__main__':

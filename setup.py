@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version='0.1.21',
+    version='0.2',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
@@ -36,6 +36,8 @@ setup(
     package_data={
         'vmcloak.data': ['*.*'],
         'vmcloak.data.bootstrap': ['*.*'],
+        'vmcloak.data.winxp': ['*.*'],
+        'vmcloak.data.win7': ['*.*'],
     },
     install_requires=[
         # Libraries to build the documentation.

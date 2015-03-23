@@ -1,8 +1,13 @@
+# Copyright (C) 2014-2015 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
 import json
 import logging
 import os
 import random
 import shutil
+import stat
 import string
 import subprocess
 import tempfile
@@ -232,6 +237,12 @@ class SetupWindows(object):
         # Drop the agent where it'll be executed after restarting the system.
         open(agent_path, 'wb').write(agent)
         self.log.info('Agent dropped')
+
+        # Ensure that there are no read-only flags as this would raise
+        # exceptions when removing the files.
+        for dirpath, _, filenames in os.walk('C:\\vmcloak'):
+            for filename in filenames:
+                os.chmod(os.path.join(dirpath, filename), stat.S_IWRITE)
 
         # Remove all vmcloak files that are directly related. This does not
         # include the auxiliary directory or any of its contents.

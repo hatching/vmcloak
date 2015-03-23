@@ -1,35 +1,18 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from ConfigParser import ConfigParser
+from __future__ import absolute_import
+import ConfigParser
 import json
 import logging
 import os
 
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.rand import random_string
-
 
 log = logging.getLogger(__name__)
 HWCONF_PATH = os.path.join(VMCLOAK_ROOT, 'data', 'hwconf')
-
-
-def configure_winnt_sif(path, args):
-    values = {
-        'PRODUCTKEY': args.serial_key,
-        'COMPUTERNAME': random_string(8, 16),
-        'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
-        'ORGANIZATION': '',
-        'WORKGROUP': random_string(4, 8),
-        'KBLAYOUT': args.keyboard_layout,
-    }
-
-    buf = open(path, 'rb').read()
-    for key, value in values.items():
-        buf = buf.replace('@%s@' % key, value)
-    return buf
 
 
 class Configuration(object):
@@ -51,7 +34,7 @@ class Configuration(object):
                 self.conf[key] = self._process_value(value)
 
     def from_file(self, path):
-        p = ConfigParser()
+        p = ConfigParser.ConfigParser()
         p.read(path)
         for key in p.options('vmcloak'):
             self.conf[key.replace('-', '_')] = \

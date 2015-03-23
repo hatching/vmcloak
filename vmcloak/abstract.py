@@ -1,20 +1,26 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from __future__ import absolute_import
 import logging
 import os.path
 import random
+import shutil
+import subprocess
 import tempfile
 
 from vmcloak.conf import load_hwconf
+from vmcloak.constants import VMCLOAK_ROOT
+from vmcloak.misc import copytreelower, copytreeinto
+from vmcloak.paths import get_path
 from vmcloak.rand import random_serial, random_uuid
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
-class VM(object):
+class Machinery(object):
     FIELDS = {}
     vm_dir_required = True
     data_dir_required = True
@@ -174,3 +180,90 @@ class VM(object):
 
         config = {}
         _init_vm('', self.FIELDS)
+
+
+class OperatingSystem(object):
+    # Short name for this OS.
+    name = None
+
+    # Service Pack that is likely being used.
+    service_pack = None
+
+    # Default directory where the original ISO is mounted.
+    mount = None
+
+    # The Network Interface Card Type.
+    nictype = None
+
+    # Directory where to store the vmcloak bootstrap files.
+    osdir = None
+
+    # Additional arguments for genisoimage.
+    genisoargs = []
+
+    def __init__(self):
+        self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
+        self.path = os.path.join(self.data_path, self.name)
+        self.serial_key = None
+
+        if self.name is None:
+            raise Exception('Name has to be provided for OS handler')
+
+        if self.osdir is None:
+            raise Exception('OSDir has to be provided for OS handler')
+
+    def configure(self, s):
+        """Configure the setup with settings provided by the user."""
+        self.s = s
+
+    def isofiles(self, outdir, tmp_dir=None):
+        """Abstract method for writing additional files to the newly created
+        ISO file."""
+
+    def set_serial_key(self, serial_key):
+        """Abstract method for checking a serial key if provided and otherwise
+        use a default serial key if available."""
+
+    def buildiso(self, mount, newiso, bootstrap, tmp_dir=None):
+        """Builds an ISO file containing all our modifications."""
+        outdir = tempfile.mkdtemp(dir=tmp_dir)
+
+        # Copy all files to our temporary directory as mounted iso files are
+        # read-only and we need lowercase (aka case-insensitive) filepaths.
+        copytreelower(mount, outdir)
+
+        # Copy the boot image.
+        shutil.copy(os.path.join(self.path, 'boot.img'), outdir)
+
+        # Allow the OS handler to write additional files.
+        self.isofiles(outdir, tmp_dir)
+
+        os.makedirs(os.path.join(outdir, self.osdir, 'vmcloak'))
+
+        data_bootstrap = os.path.join(self.data_path, 'bootstrap')
+        for fname in os.listdir(data_bootstrap):
+            shutil.copy(os.path.join(data_bootstrap, fname),
+                        os.path.join(outdir, self.osdir, 'vmcloak', fname))
+
+        copytreeinto(bootstrap, os.path.join(outdir, self.osdir))
+
+        isocreate = get_path('genisoimage')
+        if not isocreate:
+            log.error('Either genisoimage or mkisofs is required!')
+            shutil.rmtree(outdir)
+            return False
+
+        args = [
+            isocreate, '-quiet', '-b', 'boot.img', '-o', newiso,
+        ] + self.genisoargs + [outdir]
+
+        try:
+            # TODO Properly suppress the ISO-9660 warning.
+            subprocess.check_call(args)
+        except subprocess.CalledProcessError as e:
+            log.error('Error creating ISO file: %s', e)
+            shutil.rmtree(outdir)
+            return False
+
+        shutil.rmtree(outdir)
+        return True

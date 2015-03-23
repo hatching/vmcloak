@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Jurriaan Bremer.
+# Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -10,6 +10,7 @@ import sys
 from vmcloak.conf import vboxmanage_path
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
+from vmcloak.os import WindowsXP, Windows7
 from vmcloak.vm import VirtualBox, initialize_vm
 
 logging.basicConfig(level=logging.INFO)
@@ -51,7 +52,15 @@ def main():
     m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
                    vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
 
-    initialize_vm(m, s, clone=True)
+    if bird['vmtype'] == 'winxp':
+        h = WindowsXP()
+    elif bird['vmtype'] == 'win7':
+        h = Windows7()
+    else:
+        log.error('Invalid Virtual Machine Type detected: %s', bird['vmtype'])
+        exit(1)
+
+    initialize_vm(m, s, h, clone=True)
 
     m.attach_hd(bird['hdd_path'])
 
