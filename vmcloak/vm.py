@@ -126,13 +126,13 @@ class VirtualBox(Machinery):
         self._call('modifyvm', self.name, **mac)
         return macaddr
 
-    def hostonly(self, nictype, macaddr=None):
+    def hostonly(self, nictype, macaddr=None, adapter=None):
         index = self.network_index() + 1
-
-        if os.name == 'posix':
-            adapter = 'vboxnet0'
-        else:
-            adapter = 'VirtualBox Host-Only Ethernet Adapter'
+        if not adapter:
+            if os.name == 'posix':
+                adapter = 'vboxnet0'
+            else:
+                adapter = 'VirtualBox Host-Only Ethernet Adapter'
 
         # Ensure our hostonly interface is actually up and running.
         if adapter not in self._call('list', 'hostonlyifs'):
@@ -216,7 +216,7 @@ def initialize_vm(m, s, h, clone=False):
     m.cpus(s.cpu_count)
 
     log.debug('Checking VirtualBox hostonly network.')
-    if not m.hostonly(nictype=h.nictype, macaddr=s.hostonly_macaddr):
+    if not m.hostonly(nictype=h.nictype, macaddr=s.hostonly_macaddr,adapter=s.hostonly_adapter):
         exit(1)
 
     if s.nat:
