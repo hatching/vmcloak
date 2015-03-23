@@ -216,7 +216,8 @@ def initialize_vm(m, s, h, clone=False):
     m.cpus(s.cpu_count)
 
     log.debug('Checking VirtualBox hostonly network.')
-    if not m.hostonly(nictype=h.nictype, macaddr=s.hostonly_macaddr,adapter=s.hostonly_adapter):
+    if not m.hostonly(nictype=h.nictype, macaddr=s.hostonly_macaddr,
+                      adapter=s.hostonly_adapter):
         exit(1)
 
     if s.nat:
