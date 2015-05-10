@@ -1,6 +1,7 @@
-0.2.1, TBD
+0.2.1, May 10th 2015
 
     Tweak: Allow the IP range and CIDR to be specified in vmcloak-iptables.
+    Tweak: Install Firefox 3.6, Java 7, and Silverlight 5 in recommended mode.
 
 0.2, March 18th 2015
 
