@@ -1,3 +1,8 @@
+0.2.3, May 26th 2015
+
+    Release as I forgot to properly update setup.py with the latest
+    version number.
+
 0.2.2, May 26th 2015
 
     Tweak: Include PIL (required for screenshots) in recommended mode.
