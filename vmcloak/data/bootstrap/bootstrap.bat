@@ -15,5 +15,9 @@ if "%BRIDGED%" == "yes" (
 echo Installing 3rd party software.
 call C:\vmcloak\deps.bat
 
+if "%RUNEXEC%" neq "" (
+    call C:\vmcloak\%RUNEXEC%
+)
+
 echo Initiate VM hardening and start the guest.
 C:\Python27\Python.exe C:\vmcloak\bootstrap.py

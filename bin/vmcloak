@@ -166,6 +166,11 @@ def main():
         VMMODE='bird' if s.bird else 'normal',
     )
 
+    if s.run_executable:
+        settings_bat['RUNEXEC'] = os.path.basename(s.run_executable)
+    else:
+        settings_bat['RUNEXEC'] = ''
+
     bootstrap = tempfile.mkdtemp(dir=s.temp_dirpath)
 
     vmcloak_dir = os.path.join(bootstrap, 'vmcloak')
@@ -202,6 +207,12 @@ def main():
     if s.auxiliary:
         aux_path = os.path.join(bootstrap, s.auxiliary_local)
         shutil.copytree(s.auxiliary, aux_path)
+
+    # Write the run executable file.
+    if s.run_executable:
+        exec_fname = os.path.basename(s.run_executable)
+        exec_path = os.path.join(vmcloak_dir, exec_fname)
+        shutil.copy(s.run_executable, exec_path)
 
     # Create the ISO file.
     log.debug('Creating ISO file.')
