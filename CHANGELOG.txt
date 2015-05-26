@@ -1,6 +1,7 @@
-0.2.2, TBD
+0.2.2, May 26th 2015
 
     Tweak: Include PIL (required for screenshots) in recommended mode.
+    New: Supply an extra executable to be ran after all's done.
 
 0.2.1, May 10th 2015
 

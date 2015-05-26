@@ -243,6 +243,7 @@ def shared_parameters():
     parser.add_argument('--temp-dirpath', type=str, help='Directory where to put temporary files.')
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
+    parser.add_argument('--run-executable', type=str, help='Extra executable to be ran after full initialization of the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
     parser.add_argument('-u', '--user', type=str, help='Drop user privileges to this user')
