@@ -17,12 +17,11 @@ log = logging.getLogger(__name__)
 
 
 class DependencyManager(object):
-    FILES = 'conf.ini', 'repo.ini', 'urls.txt', 'hashes.txt'
+    FILES = 'conf.ini', 'repo.ini', 'hashes.txt'
 
     def __init__(self, deps_directory=None, deps_repository=None):
         self.conf = {}
         self.repo = {}
-        self.urls = {}
 
         self.deps_directory = deps_directory
         self.deps_repository = deps_repository
@@ -47,8 +46,6 @@ class DependencyManager(object):
             self.repo = \
                 ini_read_dict(os.path.join(self.deps_directory, 'repo.ini'))
 
-            self.urls = self._read_conf_file(
-                os.path.join(self.deps_directory, 'urls.txt'))
             self.hashes = self._read_conf_file(
                 os.path.join(self.deps_directory, 'hashes.txt'))
 
@@ -149,26 +146,14 @@ class DependencyManager(object):
             log.info('Dependency %r has already been fetched.', dependency)
             return True
 
-        if fname in self.urls:
-            url = self.urls[fname]
+        url = self.conf['vmcloak-files']['raw'] % info['filename']
 
-            try:
-                log.debug('Fetching dependency %r: %r from %r.',
-                          dependency, fname, url)
-                self._wget(fname, url=url, subdir='files')
-            except subprocess.CalledProcessError as e:
-                log.warning('Error downloading %s: %s.', info['filename'], e)
-                return False
-        else:
-            url = self.conf['vmcloak-files']['raw'] % info['filename']
-
-            try:
-                log.debug('Fetching dependency %r: %s.',
-                          dependency, fname)
-                self._wget(fname, url=url, subdir='files')
-            except subprocess.CalledProcessError as e:
-                log.warning('Error downloading %s: %s.', info['filename'], e)
-                return False
+        try:
+            log.debug('Fetching dependency %r: %s.', dependency, fname)
+            self._wget(fname, url=url, subdir='files')
+        except subprocess.CalledProcessError as e:
+            log.warning('Error downloading %s: %s.', info['filename'], e)
+            return False
 
         if not self.available(dependency):
             return False
