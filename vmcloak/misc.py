@@ -237,6 +237,8 @@ def shared_parameters():
     parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
     parser.add_argument('--cpu-count', help='Number of CPUs to use with this Virtual Machine.')
     parser.add_argument('--vrde', action='store_true', help='Enable VRDE support in VirtualBox.')
+    parser.add_argument('--vrde-port', type=int, help='Port for the VRDE server.')
+    parser.add_argument('--vrde-password', type=str, help='Password for the VRDE server.')
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
     parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
@@ -277,6 +279,8 @@ def shared_parameters():
         deps_directory='~/.vmcloak/deps',
         deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
         vrde=False,
+        vrde_port=3389,
+        vrde_password='vmcloak',
         bird=False,
     )
 
