@@ -9,7 +9,6 @@ import tempfile
 
 from vmcloak.deps import DependencyManager, DependencyWriter
 
-
 def list_deps(dm):
     print '%-16s: %s' % ('dependency', 'description')
     print '-----------------------------'
@@ -17,18 +16,16 @@ def list_deps(dm):
     for dep, info in sorted(dm.repo.items()):
         print '%-16s: %s' % (dep, info['description'])
 
+def write_batch_file(dm, arguments):
+    dw = DependencyWriter(dm, tempfile.gettempdir(), getattr(args, '64bit'))
 
-def write_batch_file(dm, args):
-    dw = DependencyWriter(dm, tempfile.gettempdir())
-
-    for arg in args:
+    for arg in arguments:
         dw.add(arg)
 
     dw.write()
 
     batch_path = os.path.join(tempfile.gettempdir(), 'deps.bat')
     print open(batch_path, 'rb').read()
-
 
 actions = {
     'init': lambda dm: dm.init(),
@@ -44,13 +41,13 @@ action_args = {
     'write-batch': 'dependencies',
 }
 
-
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, choices=actions.keys(), help='Action to perform.')
     parser.add_argument('arguments', type=str, nargs='*', help='Arguments.')
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
+    parser.add_argument('--64bit', action='store_true', help='64-bit mode.')
 
     args = parser.parse_args()
 
@@ -73,6 +70,3 @@ def main():
     dm = DependencyManager(deps_directory, deps_repository)
 
     actions[args.action](dm, *args.arguments)
-
-if __name__ == '__main__':
-    main()
