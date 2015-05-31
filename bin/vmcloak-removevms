@@ -32,3 +32,6 @@ done
 
 # Remove broken VMs and whatnot.
 rm -rf ~/.config/VirtualBox/ ~/.VirtualBox/
+
+# Remove information on VMCloak birds.
+rm -f ~/.vmcloak/birds.json
