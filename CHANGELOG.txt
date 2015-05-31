@@ -1,3 +1,10 @@
+0.2.5, May 31th 2015
+
+    Fixed: It seems I was uploading my development versions to pypi instead
+        of the actual version. This should be fixed now.
+    Tweak: Allow one to actually use the VRDE stream by providing a known
+        default password.
+
 0.2.4, May 30th 2015
 
     Tweak: Get rid of vmcloak-deps' urls.txt in favor of our self-hosted
