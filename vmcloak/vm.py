@@ -190,6 +190,9 @@ class VirtualBox(Machinery):
     def list_settings(self):
         return self._call('getextradata', self.name, 'enumerate')
 
+    def mouse(self, type):
+        return self._call('modifyvm', self.name, mouse=type)
+
     def vrde(self, port, password):
         return self._call('modifyvm', self.name, vrde='on', vrdeport=port,
                           vrdeproperty='VNCPassword=%s' % password)
@@ -234,4 +237,5 @@ def initialize_vm(m, s, h, clone=False):
         m.hwvirt(s.hwvirt)
 
     if s.vrde:
+        m.mouse('usbtablet') #Sets the "Absolute Pointing Device" for better vrde support
         m.vrde(s.vrde_port, s.vrde_password)
