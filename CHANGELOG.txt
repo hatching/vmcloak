@@ -1,3 +1,7 @@
+0.2.6, TBD
+
+    New: Disable Windows updates.
+
 0.2.5, May 31th 2015
 
     Fixed: It seems I was uploading my development versions to pypi instead
