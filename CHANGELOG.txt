@@ -1,6 +1,8 @@
 0.2.6, TBD
 
     New: Disable Windows updates.
+    New: Allow manual modification of Virtual Machines by removing the
+        Cuckoo Agent (and its associated registry key) at a later time.
 
 0.2.5, May 31th 2015
 

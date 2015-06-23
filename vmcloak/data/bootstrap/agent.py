@@ -32,10 +32,22 @@ ERROR_MESSAGE = ""
 ANALYZER_FOLDER = ""
 RESULTS_FOLDER = ""
 
+def delete_key(rootkey, subkey, key):
+    h = CreateKeyEx(rootkey, subkey, 0, KEY_ALL_ACCESS)
+    DeleteValue(h, key)
+    h.Close()
+
+def update_key(rootkey, subkey, key, value):
+    h = CreateKeyEx(rootkey, subkey, 0, KEY_ALL_ACCESS)
+    SetValueEx(h, key, 0, REG_SZ, value)
+    h.Close()
+
 class ObjectDict(object):
     def __init__(self, d):
-        self.__dict__ = d
+        self.items = d
 
+    def __getattr__(self, key):
+        return self.items[key]
 
 class Agent:
     """Cuckoo agent, it runs inside guest."""
@@ -178,6 +190,13 @@ class Agent:
         if not self.analyzer_path or not os.path.exists(self.analyzer_path):
             return False
 
+        # Remove this file and its associated registry key as we're about
+        # to execute a sample.
+        os.unlink(os.path.abspath(__file__))
+        delete_key(HKEY_LOCAL_MACHINE,
+                   'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+                   'Agent')
+
         try:
             proc = subprocess.Popen([sys.executable, self.analyzer_path],
                                     cwd=os.path.dirname(self.analyzer_path))
@@ -241,31 +260,21 @@ if __name__ == "__main__":
         else:
             sock.close()
 
-    h = CreateKeyEx(HKEY_LOCAL_MACHINE,
-                    "Software\\Microsoft\\Windows\\CurrentVersion\\Run",
-                    0, KEY_ALL_ACCESS)
+        s.items.pop('host_ip')
+        s.items.pop('host_port')
 
-    if s.vmmode == 'normal':
-        # In normal mode we remove the entry in Run from the registry.
-        DeleteValue(h, 'Agent')
-    else:
-        # In bird mode we modify it so that the agent is aware that no new
-        # IP address has to be assigned and goes straight to listening for
-        # the host to connect.
-        settings = dict(vmmode=s.vmmode)
-        value = 'C:\\Python27\\Pythonw.exe "%s" %s' % (
-            os.path.abspath(__file__), json.dumps(settings).encode('base64'))
-        SetValueEx(h, 'Agent', 0, REG_SZ, value)
-
-    h.Close()
+    # Update the registry to reflect any changes to IP addresses, i.e., the
+    # Virtual Machine connected to the host.
+    value = '"%s" "%s" %s' % (sys.executable,
+                              os.path.abspath(__file__),
+                              json.dumps(s.items).encode('base64'))
+    update_key(HKEY_LOCAL_MACHINE,
+               'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+               'Agent', value)
 
     try:
         if not BIND_IP:
             BIND_IP = socket.gethostbyname(socket.gethostname())
-
-        # Remove this file if we're in normal mode.
-        if s.vmmode == 'normal':
-            os.unlink(os.path.abspath(__file__))
 
         print("[+] Starting agent on %s:%s ..." % (BIND_IP, BIND_PORT))
 
