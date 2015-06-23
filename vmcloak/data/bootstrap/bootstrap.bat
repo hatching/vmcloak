@@ -25,4 +25,8 @@ sc config wuauserv start= disabled
 net stop wuauserv
 
 echo Initiate VM hardening and start the guest.
-C:\Python27\Python.exe C:\vmcloak\bootstrap.py
+if "%DEBUG%" == "yes" (
+    C:\Python27\Python.exe C:\vmcloak\bootstrap.py
+) else (
+    C:\Python27\Pythonw.exe C:\vmcloak\bootstrap.py
+)

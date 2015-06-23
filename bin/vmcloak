@@ -43,6 +43,7 @@ def main():
     parser.add_argument('--host-init-ip', type=str, help='Guest IP address to initialize initial connectivity.')
     parser.add_argument('--host-init-mask', type=str, help='Guest IP address mask to initialize initial connectivity.')
     parser.add_argument('--host-init-gateway', type=str, help='Guest IP address gateway to initialize initial connectivity.')
+    parser.add_argument('--debug', action='store_true', default=None, help='Install Virtual Machine in debug mode.')
 
     defaults.update(dict(
         winxp=False,
@@ -157,6 +158,7 @@ def main():
         GUEST_MASK=s.host_init_mask if s.bird else s.hostonly_mask,
         GUEST_GATEWAY=s.host_init_gateway if s.bird else s.hostonly_gateway,
         VMMODE='bird' if s.bird else 'normal',
+        DEBUG='yes' if s.debug else 'no',
     )
 
     settings_py = dict(

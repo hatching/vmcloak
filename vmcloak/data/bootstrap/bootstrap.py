@@ -10,6 +10,7 @@ import shutil
 import stat
 import string
 import subprocess
+import sys
 import tempfile
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
@@ -218,8 +219,8 @@ class SetupWindows(object):
         os.close(fd)
 
         # Install agent.py to be ran on the next startup.
-        value = 'C:\\Python27\\Pythonw.exe "%s" %s' % (
-            agent_path, json.dumps(settings).encode('base64'))
+        value = '"%s" "%s" %s' % (sys.executable, agent_path,
+                                  json.dumps(settings).encode('base64'))
         self.set_regkey(HKEY_LOCAL_MACHINE,
                         'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
                         'Agent', REG_SZ, value)
