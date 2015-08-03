@@ -1,3 +1,10 @@
+0.2.7, August 3rd 2015
+
+    Tweak: Do not require --cuckoo when creating a bird image.
+    New: Introduce --vmmode longterm to vmcloak-clone.
+    Feature: Do not delete the Agent in longterm mode.
+    Feature: Allow specification of a netmask in vmcloak-vboxnet0.
+
 0.2.6, June 25th 2015
 
     New: Disable Windows updates.
