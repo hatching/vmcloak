@@ -12,6 +12,7 @@ import string
 import subprocess
 import sys
 import tempfile
+
 from ctypes import c_char, c_ushort, c_uint, c_char_p, c_wchar_p
 from ctypes import windll, Structure, POINTER, sizeof, byref, pointer
 from ctypes.wintypes import HANDLE, DWORD, LPCWSTR, ULONG, LONG
@@ -20,7 +21,6 @@ from _winreg import HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS
 from _winreg import KEY_SET_VALUE, REG_DWORD, REG_SZ, REG_MULTI_SZ
 
 import settings as s
-
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2010/07/07/hey-scripting-guy-how-can-i-change-my-desktop-monitor-resolution-via-windows-powershell.aspx
 # http://msdn.microsoft.com/en-us/library/windows/desktop/dd183565(v=vs.85).aspx
@@ -88,31 +88,25 @@ VGA_BIOS_NAMES = [
     'Sapphire', 'Alienware', 'Gainward', 'Asus',
 ]
 
-
 def random_string(length=6):
     """Create silly char combinations."""
     return ''.join(random.sample(string.letters, 6))
-
 
 def generate_hd():
     """Generates a random harddisk name."""
     return ' '.join(random.sample(HARDDISK_NAMES, 3))
 
-
 def generate_cd():
     """Generates a random CD name."""
     return ' '.join(random.sample(CD_NAMES, 3))
-
 
 def generate_bios():
     """Generates a random BIOS name."""
     return ' '.join(random.sample(BIOS_NAMES, 3))
 
-
 def generate_vga_bios():
     """Generates a random VGA BIOS name."""
     return ' '.join(random.sample(VGA_BIOS_NAMES, 3))
-
 
 REGISTRY = [
     # Disable "Windows XP Tour" prompt.
@@ -135,7 +129,6 @@ REGISTRY = [
     # Cloak SystemBios Version.
     (HKEY_LOCAL_MACHINE, 'HARDWARE\\Description\\System', 'VideoBiosVersion', REG_MULTI_SZ, [generate_vga_bios(), generate_vga_bios()]),
 ]
-
 
 class SetupWindows(object):
     def __init__(self, keep_evidence=False):
@@ -216,6 +209,7 @@ class SetupWindows(object):
 
         fd, agent_path = \
             tempfile.mkstemp(dir=os.getenv('APPDATA'), suffix='.py')
+        os.write(fd, agent)
         os.close(fd)
 
         # Install agent.py to be ran on the next startup.
@@ -234,10 +228,6 @@ class SetupWindows(object):
 
         self.rename_regkey(HKEY_LOCAL_MACHINE,
                            'HARDWARE\\ACPI\\RSDT\\VBOX__', random_string())
-
-        # Drop the agent where it'll be executed after restarting the system.
-        open(agent_path, 'wb').write(agent)
-        self.log.info('Agent dropped')
 
         # Ensure that there are no read-only flags as this would raise
         # exceptions when removing the files.

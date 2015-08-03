@@ -81,7 +81,7 @@ def main():
         log.error('A name for the Virtual Machine is required.')
         exit(1)
 
-    if s.register_cuckoo and not os.path.isdir(s.cuckoo):
+    if s.register_cuckoo and not os.path.isdir(s.cuckoo) and not s.bird:
         log.error('To register the Virtual Machine with Cuckoo '
                   'the Cuckoo directory has to be provided with --cuckoo.')
         log.info('To disable registering please provide --no-register-cuckoo '
