@@ -115,6 +115,10 @@ def main():
     m.stopvm()
 
     if s.register_cuckoo:
+        # A longterm vmmode also implies the longterm tag.
+        if s.vmmode == 'longterm' and 'longterm' not in s.tags:
+            s.tags += ', longterm'
+
         register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
                         vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
 
