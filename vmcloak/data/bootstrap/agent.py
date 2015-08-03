@@ -192,10 +192,11 @@ class Agent:
 
         # Remove this file and its associated registry key as we're about
         # to execute a sample.
-        os.unlink(os.path.abspath(__file__))
-        delete_key(HKEY_LOCAL_MACHINE,
-                   'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-                   'Agent')
+        if s.vmmode != 'longterm':
+            os.unlink(os.path.abspath(__file__))
+            delete_key(HKEY_LOCAL_MACHINE,
+                       'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
+                       'Agent')
 
         try:
             proc = subprocess.Popen([sys.executable, self.analyzer_path],
@@ -246,8 +247,13 @@ if __name__ == "__main__":
         # Connect to the host machine. In case this is a bird, also
         # receive the new IP address, mask, and gateway.
         if s.vmmode == 'bird':
-            # Retrieve the static IP address that we're supposed to use.
-            ip_address, ip_mask, ip_gateway = sock.recv(256).split()
+            # Retrieve the static IP address that we're supposed to use. Also
+            # update the vmmode to whatever vmcloak instructs us.
+            ip_address, ip_mask, ip_gateway, vmmode = sock.recv(256).split()
+
+            # Overloading the setter is a bit annoying with the items thing so
+            # we just assign the items member right away.
+            s.items['vmmode'] = vmmode
 
             sock.close()
 

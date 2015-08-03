@@ -20,6 +20,11 @@ log = logging.getLogger('vmcloak-clone')
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
+    parser.add_argument('--vmmode', type=str, required=False, help='Virtual Machine mode - normal/longterm.')
+
+    defaults.update(dict(
+        vmmode='normal',
+    ))
 
     args = parser.parse_args()
 
@@ -46,6 +51,10 @@ def main():
     bird = read_bird(s.bird)
     if not bird:
         log.critical('Specified bird not found! Please verify its name.')
+        exit(1)
+
+    if s.vmmode not in ('normal', 'longterm'):
+        log.error('Incorrect Virtual Machine mode: %s', s.vmmode)
         exit(1)
 
     # Only VirtualBox support at the moment.
@@ -87,8 +96,8 @@ def main():
              s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
 
     # Send the hostonly IP address, mask, and gateway.
-    guest.send('%s %s %s' % (s.hostonly_ip, s.hostonly_mask,
-                             s.hostonly_gateway))
+    guest.send('%s %s %s %s' % (s.hostonly_ip, s.hostonly_mask,
+                                s.hostonly_gateway, s.vmmode))
 
     # TODO Catch the correct exception.
     try:
