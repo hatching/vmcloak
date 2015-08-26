@@ -237,5 +237,6 @@ def initialize_vm(m, s, h, clone=False):
         m.hwvirt(s.hwvirt)
 
     if s.vrde:
-        m.mouse('usbtablet') #Sets the "Absolute Pointing Device" for better vrde support
+        # Sets the "Absolute Pointing Device" for better vrde support.
+        m.mouse('usbtablet')
         m.vrde(s.vrde_port, s.vrde_password)
