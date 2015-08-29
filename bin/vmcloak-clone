@@ -85,17 +85,18 @@ def main():
     sock.settimeout(5.0 * 60)
 
     try:
-        guest, _ = sock.accept()
+        guest, (ip, port) = sock.accept()
         sock.close()
     except socket.timeout:
         log.error('The Virtual Machine hasn\'t replied yet after five '
                   'minutes.. something is going wrong.')
         exit(1)
 
+    log.info('Incoming connection from %s:%s', ip, port)
     log.info('Assigning IP address %s (mask %s, gateway %s)',
              s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
 
-    # Send the hostonly IP address, mask, and gateway.
+    # Send the hostonly IP address, mask, gateway, and VM mode.
     guest.send('%s %s %s %s' % (s.hostonly_ip, s.hostonly_mask,
                                 s.hostonly_gateway, s.vmmode))
 
