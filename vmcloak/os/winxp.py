@@ -13,7 +13,6 @@ from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
 
-
 class WindowsXP(OperatingSystem):
     name = 'winxp'
     service_pack = 3

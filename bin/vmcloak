@@ -26,7 +26,6 @@ BIN_ROOT = os.path.abspath(os.path.dirname(__file__))
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak')
 
-
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--version', action='store_true', help='Display the VMCloak version.')

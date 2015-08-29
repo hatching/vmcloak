@@ -6,14 +6,12 @@
 import random
 import string
 
-
 def random_string(minimum, maximum=None):
     if maximum is None:
         maximum = minimum
 
     count = random.randint(minimum, maximum)
     return ''.join(random.choice(string.ascii_letters) for x in xrange(count))
-
 
 def random_mac():
     """Generates a random MAC address."""
@@ -26,14 +24,12 @@ def random_mac():
 
     return '%x%x:%x%x:%x%x:%x%x:%x%x:%x%x' % tuple(values)
 
-
 def random_serial(length=None):
     if length is None:
         length = random.randint(8, 20)
 
     return ''.join(random.choice(string.uppercase + string.digits)
                    for _ in xrange(length))
-
 
 def random_uuid():
     value = random_serial(32)

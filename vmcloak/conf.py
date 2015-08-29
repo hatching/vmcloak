@@ -14,7 +14,6 @@ from vmcloak.constants import VMCLOAK_ROOT
 log = logging.getLogger(__name__)
 HWCONF_PATH = os.path.join(VMCLOAK_ROOT, 'data', 'hwconf')
 
-
 class Configuration(object):
     def __init__(self):
         self.conf = {}
@@ -59,7 +58,6 @@ class Configuration(object):
                 log.critical('Flag %r should be an %r.', k, types[k].__name__)
                 exit(1)
 
-
 def vboxmanage_path(s):
     if os.path.isfile(s.vboxmanage):
         return s.vboxmanage
@@ -86,7 +84,6 @@ def vboxmanage_path(s):
         exit(1)
 
     return vboxmanage
-
 
 def load_hwconf(profile, dirpath=HWCONF_PATH):
     ret = {}

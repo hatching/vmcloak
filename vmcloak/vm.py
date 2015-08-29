@@ -15,7 +15,6 @@ from vmcloak.rand import random_mac
 
 log = logging.getLogger(__name__)
 
-
 class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
 
@@ -196,7 +195,6 @@ class VirtualBox(Machinery):
     def vrde(self, port, password):
         return self._call('modifyvm', self.name, vrde='on', vrdeport=port,
                           vrdeproperty='VNCPassword=%s' % password)
-
 
 def initialize_vm(m, s, h, clone=False):
     log.debug('Creating VM %r.', s.vmname)

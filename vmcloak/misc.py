@@ -20,7 +20,6 @@ from vmcloak.constants import VMCLOAK_ROOT
 
 log = logging.getLogger(__name__)
 
-
 def copytreelower(srcdir, dstdir):
     """Copies the source directory as lowercase to the destination directory.
 
@@ -51,7 +50,6 @@ def copytreelower(srcdir, dstdir):
             os.chmod(os.path.join(dstdir, path.lower()),
                      stat.S_IRUSR | stat.S_IWUSR)
 
-
 def copytreeinto(srcdir, dstdir):
     """Copy one directory into another directory.
 
@@ -74,7 +72,6 @@ def copytreeinto(srcdir, dstdir):
             shutil.copy(path_in, path_out)
         else:
             copytreeinto(path_in, path_out)
-
 
 def ini_read(path):
     ret, section = {}, None
@@ -105,7 +102,6 @@ def ini_read(path):
             ret[section].append('%s=%s' % (a.strip(), b.strip()))
     return mode, ret
 
-
 def ini_write(path, mode, data):
     lines = ['']
     for key in sorted(data.keys()):
@@ -115,14 +111,12 @@ def ini_write(path, mode, data):
         lines.append('')
     open(path, 'wb').write('\r\n'.join(lines).encode(mode))
 
-
 def ini_add(data, section, value):
     if section not in data:
         data[section] = []
 
     if value not in data[section]:
         data[section].append(value)
-
 
 def ini_delete(data, section, value):
     if section not in data:
@@ -131,7 +125,6 @@ def ini_delete(data, section, value):
     for idx, row in enumerate(data[section]):
         if row == value:
             del data[section][idx]
-
 
 def ini_merge(data, ini2, overwrite=True):
     mode, data2 = ini_read(ini2)
@@ -155,7 +148,6 @@ def ini_merge(data, ini2, overwrite=True):
             else:
                 data[section].append(value)
 
-
 def ini_read_dict(path):
     c = ConfigParser()
     c.read(path)
@@ -164,7 +156,6 @@ def ini_read_dict(path):
     for section in c.sections():
         ret[section] = dict(c.items(section))
     return ret
-
 
 def sha1_file(path):
     """Calculate the sha1 hash of a file."""
@@ -180,7 +171,6 @@ def sha1_file(path):
 
     return h.hexdigest()
 
-
 def read_birds():
     path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
     birds = {}
@@ -190,10 +180,8 @@ def read_birds():
 
     return birds
 
-
 def read_bird(name):
     return read_birds().get(name)
-
 
 def add_bird(name, vmtype, hdd_path):
     path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
@@ -202,7 +190,6 @@ def add_bird(name, vmtype, hdd_path):
     birds[name] = dict(vmtype=vmtype, hdd_path=hdd_path)
 
     open(path, 'wb').write(json.dumps(birds))
-
 
 def shared_parameters():
     parser = argparse.ArgumentParser()
@@ -292,7 +279,6 @@ def shared_parameters():
     )
     return parser, defaults, types
 
-
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
     log.debug('Registering the Virtual Machine with Cuckoo.')
     try:
@@ -314,7 +300,6 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
         log.error('Error registering the VM: %s.', e)
         return False
 
-
 def wait_for_host(ip):
     # Wait for the XMLRPC agent to come up with a timeout of 1 second.
     while True:
@@ -323,7 +308,6 @@ def wait_for_host(ip):
             break
         except socket.error:
             pass
-
 
 def resolve_parameters(args, defaults, types, drop_user=False):
     s = Configuration()

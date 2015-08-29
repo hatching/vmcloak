@@ -35,7 +35,6 @@ INSTALL = {
     },
 }
 
-
 def get_path(app):
     """Returns the path to an application."""
     for path in PATHS[app]:

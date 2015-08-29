@@ -15,7 +15,6 @@ from vmcloak.paths import get_path
 
 log = logging.getLogger(__name__)
 
-
 class DependencyManager(object):
     FILES = 'conf.ini', 'repo.ini', 'hashes.txt'
 
@@ -168,7 +167,6 @@ class DependencyManager(object):
             return False
 
         return True
-
 
 class DependencyWriter(object):
     def __init__(self, dm, bootstrap_path, bitsize_64):

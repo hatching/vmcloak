@@ -8,7 +8,6 @@ import re
 
 from vmcloak.constants import VMCLOAK_ROOT
 
-
 def valid_serial_key(serial_key):
     """Determines whether `serial_key` has a valid encoding."""
     parts = serial_key.split('-')
@@ -20,7 +19,6 @@ def valid_serial_key(serial_key):
             return False
 
     return True
-
 
 def valid_keyboard_layout(kblayout):
     kblayout_txt = os.path.join(VMCLOAK_ROOT, 'data', 'winxp',

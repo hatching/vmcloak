@@ -16,7 +16,6 @@ from vmcloak.vm import VirtualBox, initialize_vm
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('vmcloak-clone')
 
-
 def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')

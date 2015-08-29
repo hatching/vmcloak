@@ -12,7 +12,6 @@ SUDO = '/usr/bin/sudo'
 DMIDECODE = '/usr/sbin/dmidecode'
 LSHW = '/usr/bin/lshw'
 
-
 def get_dmi(t):
     ret = {}
 
@@ -32,7 +31,6 @@ def get_dmi(t):
         key, value = line.split(':', 1)
         ret[key.strip()] = value.strip()
     return ret
-
 
 def get_lshw(c):
     try:

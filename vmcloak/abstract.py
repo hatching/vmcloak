@@ -19,7 +19,6 @@ from vmcloak.rand import random_serial, random_uuid
 
 log = logging.getLogger(__name__)
 
-
 class Machinery(object):
     FIELDS = {}
     vm_dir_required = True
@@ -180,7 +179,6 @@ class Machinery(object):
 
         config = {}
         _init_vm('', self.FIELDS)
-
 
 class OperatingSystem(object):
     # Short name for this OS.

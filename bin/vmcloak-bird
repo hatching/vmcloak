@@ -8,7 +8,6 @@ import json
 import os
 import sys
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, help='Action to perform.')
@@ -30,7 +29,6 @@ def main():
     if args.action == 'list':
         for key, value in obj.items():
             print '%-10s %-10s %s' % (key, value['vmtype'], value['hdd_path'])
-
 
 if __name__ == '__main__':
     main()
