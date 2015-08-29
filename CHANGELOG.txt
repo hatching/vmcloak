@@ -1,3 +1,11 @@
+0.2.8, August 29th 2015
+
+    Tweak: Use "USB Tablet" to set Absolute Pointing Device which improves
+        VRDE support (thanks to kuza for this feature).
+    Tweak: When connecting to the host fails (in the Agent), wait a little bit
+        before trying again, this resulted in 99% CPU usage.
+    Tweak: Log the source IP and port when a clone connects back.
+
 0.2.7, August 3rd 2015
 
     Tweak: Do not require --cuckoo when creating a bird image.
