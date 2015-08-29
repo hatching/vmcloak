@@ -242,6 +242,7 @@ if __name__ == "__main__":
             try:
                 sock = socket.create_connection((s.host_ip, s.host_port), 1)
             except socket.error:
+                time.sleep(0.1)
                 continue
 
         # Connect to the host machine. In case this is a bird, also
