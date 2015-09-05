@@ -262,7 +262,6 @@ def shared_parameters():
         vrde=False,
         vrde_port=3389,
         vrde_password='vmcloak',
-        bird=False,
     )
 
     types = dict(
