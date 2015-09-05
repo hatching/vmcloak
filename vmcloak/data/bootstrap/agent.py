@@ -42,13 +42,6 @@ def update_key(rootkey, subkey, key, value):
     SetValueEx(h, key, 0, REG_SZ, value)
     h.Close()
 
-class ObjectDict(object):
-    def __init__(self, d):
-        self.items = d
-
-    def __getattr__(self, key):
-        return self.items[key]
-
 class Agent:
     """Cuckoo agent, it runs inside guest."""
 
@@ -192,7 +185,7 @@ class Agent:
 
         # Remove this file and its associated registry key as we're about
         # to execute a sample.
-        if s.vmmode != 'longterm':
+        if s['vmmode'] != 'longterm':
             os.unlink(os.path.abspath(__file__))
             delete_key(HKEY_LOCAL_MACHINE,
                        'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
@@ -233,28 +226,29 @@ class Agent:
 
 if __name__ == "__main__":
     # Load the configuration values.
-    s = ObjectDict(json.loads(sys.argv[1].decode('base64')))
+    s = json.loads(sys.argv[1].decode('base64'))
 
     # Attempt to connect to the host machine.
-    if hasattr(s, 'host_ip') and hasattr(s, 'host_port'):
+    if 'host_ip' in s and 'host_port' in s:
         sock = None
         while not sock:
             try:
-                sock = socket.create_connection((s.host_ip, s.host_port), 1)
+                addr = s['host_ip'], s['host_port']
+                sock = socket.create_connection(addr, 1)
             except socket.error:
                 time.sleep(0.1)
                 continue
 
         # Connect to the host machine. In case this is a bird, also
         # receive the new IP address, mask, and gateway.
-        if s.vmmode == 'bird':
+        if s['vmmode'] == 'bird':
             # Retrieve the static IP address that we're supposed to use. Also
             # update the vmmode to whatever vmcloak instructs us.
             ip_address, ip_mask, ip_gateway, vmmode = sock.recv(256).split()
 
             # Overloading the setter is a bit annoying with the items thing so
             # we just assign the items member right away.
-            s.items['vmmode'] = vmmode
+            s['vmmode'] = vmmode
 
             sock.close()
 
@@ -267,14 +261,14 @@ if __name__ == "__main__":
         else:
             sock.close()
 
-        s.items.pop('host_ip')
-        s.items.pop('host_port')
+        del s['host_ip']
+        del s['host_port']
 
     # Update the registry to reflect any changes to IP addresses, i.e., the
     # Virtual Machine connected to the host.
     value = '"%s" "%s" %s' % (sys.executable,
                               os.path.abspath(__file__),
-                              json.dumps(s.items).encode('base64'))
+                              json.dumps(s).encode('base64'))
     update_key(HKEY_LOCAL_MACHINE,
                'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
                'Agent', value)
