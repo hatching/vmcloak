@@ -91,10 +91,16 @@ class VirtualBox(Machinery):
     def attach_hd(self, path):
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',
-                   type_='hdd', device=0, port=0, medium=path)
+                   type_='hdd', mtype='multiattach',
+                   device=0, port=0, medium=path)
 
     def immutable_hd(self):
-        self._call('modifyhd', self.hdd_path, type_='immutable', compact=True)
+        # We first make the HDD "more" compact - this should be basically
+        # defragmenting it. Only after doing so we make it multiattach. (Even
+        # though it may not be technically required, the --compact switch and
+        # immutable type gave problems earlier, so we're just being careful).
+        self._call('modifyhd', self.hdd_path, compact=True)
+        self._call('modifyhd', self.hdd_path, type_='multiattach')
 
     def remove_hd(self):
         self._call('storagectl', self.name, portcount=0,
