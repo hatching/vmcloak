@@ -1,3 +1,14 @@
+0.2.9, September 5th 2015
+
+    Important: Fixed issue with immutable disks - apparently they're not as
+        immutable as one would hope. Using multiattach disks and attaching
+        them to new Virtual Machines as multiattach they are truly immutable.
+        As a side-effect the bird image would take parts of the first created
+        clone, introducing odd issues with IP addresses and all that.
+    Remove: Outdated and probably nonfunctional bridged networking support.
+    Feature: When creating a bird image VRDE is automatically enabled.
+    Feature: Pass along RDP ports to longcuckoo.
+
 0.2.8, August 29th 2015
 
     Tweak: Use "USB Tablet" to set Absolute Pointing Device which improves
