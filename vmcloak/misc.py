@@ -208,11 +208,6 @@ def shared_parameters():
     parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
     parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
     parser.add_argument('--hostonly-adapter', type=str, help='Hostonly interface to use.')
-    parser.add_argument('--bridged', type=str, help='Network interface for the bridged network.')
-    parser.add_argument('--bridged-ip', type=str, help='Static IP address to use on the Guest for the bridged network.')
-    parser.add_argument('--bridged-mask', type=str, help='Static IP address mask to use on the Guest for the bridged network.')
-    parser.add_argument('--bridged-gateway', type=str, help='Static IP address gateway to use on the Guest for the bridged network.')
-    parser.add_argument('--bridged-macaddr', type=str, help='Mac address for the bridged interface.')
     parser.add_argument('--nat', action='store_true', help='Name of the NAT network to attach to.')
     parser.add_argument('--dns-server', type=str, help='Address of DNS server to be used.')
     parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
@@ -253,7 +248,6 @@ def shared_parameters():
         hostonly_mask='255.255.255.0',
         hostonly_gateway='192.168.56.1',
         hostonly_adapter=None,
-        bridged_mask='255.255.255.0',
         dns_server='8.8.8.8',
         tags='',
         vboxmanage='/usr/bin/VBoxManage',

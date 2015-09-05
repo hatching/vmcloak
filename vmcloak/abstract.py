@@ -113,10 +113,6 @@ class Machinery(object):
         """Configure a hostonly adapter for the Virtual Machine."""
         raise
 
-    def bridged(self, interface, macaddr=None, index=1):
-        """Configure a bridged adapter for the Virtual Machine."""
-        raise
-
     def nat(self, macaddr=None, index=1):
         """Configure NAT for the Virtual Machine."""
         raise

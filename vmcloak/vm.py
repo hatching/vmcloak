@@ -148,18 +148,6 @@ class VirtualBox(Machinery):
         self._call('modifyvm', self.name, **nic)
         return self.modify_mac(macaddr, index)
 
-    def bridged(self, interface, nictype, macaddr=None):
-        index = self.network_index() + 1
-
-        nic = {
-            'nic%d' % index: 'bridged',
-            'nictype%d' % index: nictype,
-            'nicpromisc%d' % index: 'allow-all',
-            'bridgeadapter%d' % index: interface,
-        }
-        self._call('modifyvm', self.name, **nic)
-        return self.modify_mac(macaddr, index)
-
     def nat(self, nictype, macaddr=None):
         index = self.network_index() + 1
 
@@ -223,9 +211,6 @@ def initialize_vm(m, s, h, clone=False):
 
     if s.nat:
         m.nat(nictype=h.nictype)
-
-    if s.bridged:
-        m.bridged(s.bridged, nictype=h.nictype, macaddr=s.bridged_macaddr)
 
     if s.hwvirt is not None:
         if s.hwvirt:

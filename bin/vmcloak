@@ -143,15 +143,10 @@ def main():
 
     log.debug('Static Host IP: %s, Port %s', s.host_ip, s.host_port)
     log.debug('Static Guest hostonly IP: %s', s.hostonly_ip)
-    log.debug('Static Guest bridged IP: %s', s.bridged_ip)
 
     h.configure(s)
 
     settings_bat = dict(
-        BRIDGED='yes' if s.bridged else 'no',
-        BRIDGEDIP=s.bridged_ip,
-        BRIDGEDMASK=s.bridged_mask,
-        BRIDGEDGATEWAY=s.bridged_gateway,
         DNSSERVER=s.dns_server,
         GUEST_IP=s.host_init_ip if s.bird else s.hostonly_ip,
         GUEST_MASK=s.host_init_mask if s.bird else s.hostonly_mask,
