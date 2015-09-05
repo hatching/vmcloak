@@ -123,6 +123,10 @@ def main():
         log.error('Please provided either --winxp or --win7.')
         exit(1)
 
+    if s.bird and not s.vrde:
+        s.vrde = True
+        log.debug('In bird mode VRDE is automatically enabled.')
+
     if not os.path.isdir(s.iso_mount or h.mount):
         log.error('Please specify --iso-mount to a directory containing the '
                   'mounted Windows Installer ISO image.')
