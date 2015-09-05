@@ -115,12 +115,19 @@ def main():
     m.stopvm()
 
     if s.register_cuckoo:
+        rdp_port = None
+
         # A longterm vmmode also implies the longterm tag.
-        if s.vmmode == 'longterm' and 'longterm' not in s.tags:
-            s.tags += ', longterm'
+        if s.vmmode == 'longterm':
+            if 'longterm' not in s.tags:
+                s.tags += ', longterm'
+
+            if s.vrde:
+                rdp_port = s.vrde_port
 
         register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
-                        vmname=s.vmname, cuckoo_dirpath=s.cuckoo)
+                        vmname=s.vmname, rdp_port=rdp_port,
+                        cuckoo_dirpath=s.cuckoo)
 
 if __name__ == '__main__':
     main()

@@ -272,7 +272,7 @@ def shared_parameters():
     )
     return parser, defaults, types
 
-def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
+def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
     log.debug('Registering the Virtual Machine with Cuckoo.')
     try:
         machine_py = os.path.join(cuckoo_dirpath, 'utils', 'machine.py')
@@ -284,6 +284,10 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath):
             '--snapshot', 'vmcloak',
             vmname,
         ]
+
+        if rdp_port:
+            args += ['--rdp_port', '%s' % rdp_port]
+
         subprocess.check_call(args, cwd=cuckoo_dirpath)
         return True
     except OSError as e:
