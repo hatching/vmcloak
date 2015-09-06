@@ -4,6 +4,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
+import json
 import socket
 import sys
 
@@ -95,9 +96,13 @@ def main():
     log.info('Assigning IP address %s (mask %s, gateway %s)',
              s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
 
-    # Send the hostonly IP address, mask, gateway, and VM mode.
-    guest.send('%s %s %s %s' % (s.hostonly_ip, s.hostonly_mask,
-                                s.hostonly_gateway, s.vmmode))
+    # Send various variables to the clone.
+    guest.send(json.dumps({
+        'ip': s.hostonly_ip,
+        'netmask': s.hostonly_mask,
+        'gateway': s.hostonly_gateway,
+        'vmmode': s.vmmode,
+    }))
 
     # TODO Catch the correct exception.
     try:

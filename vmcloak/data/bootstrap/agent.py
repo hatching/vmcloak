@@ -242,20 +242,18 @@ if __name__ == "__main__":
         # Connect to the host machine. In case this is a bird, also
         # receive the new IP address, mask, and gateway.
         if s['vmmode'] == 'bird':
-            # Retrieve the static IP address that we're supposed to use. Also
-            # update the vmmode to whatever vmcloak instructs us.
-            ip_address, ip_mask, ip_gateway, vmmode = sock.recv(256).split()
+            # Retrieve the configuration for this clone.
+            conf = json.loads(sock.recv(0x10000))
 
-            # Overloading the setter is a bit annoying with the items thing so
-            # we just assign the items member right away.
-            s['vmmode'] = vmmode
+            # Update the VM mode to whatever vmcloak informs us to.
+            s['vmmode'] = conf['vmmode']
 
             sock.close()
 
             args = [
                 "netsh", "interface", "ip", "set", "address",
                 "name=Local Area Connection", "static",
-                ip_address, ip_mask, ip_gateway, "1",
+                conf["ip"], conf["netmask"], conf["gateway"], "1",
             ]
             subprocess.Popen(args).wait()
         else:
