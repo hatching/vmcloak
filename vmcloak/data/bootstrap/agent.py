@@ -228,6 +228,8 @@ if __name__ == "__main__":
     # Load the configuration values.
     s = json.loads(sys.argv[1].decode('base64'))
 
+    require_reboot = False
+
     # Attempt to connect to the host machine.
     if 'host_ip' in s and 'host_port' in s:
         sock = None
@@ -256,6 +258,19 @@ if __name__ == "__main__":
                 conf["ip"], conf["netmask"], conf["gateway"], "1",
             ]
             subprocess.Popen(args).wait()
+
+            if "hostname" in conf:
+                # For excellent reasons (?) this only works when passed along
+                # as shell command, so here we go.
+                subprocess.call(
+                    'wmic computersystem where name="%s" '
+                    'call rename name="%s"' % (
+                        os.getenv("COMPUTERNAME"), conf["hostname"]
+                    ),
+                    shell=True
+                )
+
+                require_reboot = True
         else:
             sock.close()
 
@@ -270,6 +285,11 @@ if __name__ == "__main__":
     update_key(HKEY_LOCAL_MACHINE,
                'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
                'Agent', value)
+
+    # This should be further improved. Namely, per-instance changes to the
+    # registry etc (although it would be easier to do that as a kernel driver).
+    if require_reboot:
+        subprocess.Popen(['shutdown', '-r', '-t', '0']).wait()
 
     try:
         if not BIND_IP:

@@ -249,10 +249,10 @@ class SetupWindows(object):
 
         if s.vmmode == 'bird':
             # In bird mode we shutdown the Virtual Machine.
-            subprocess.Popen(['shutdown', '-s', '-t', '0'])
+            subprocess.Popen(['shutdown', '-s', '-t', '0']).wait()
         else:
             # In normal mode we reboot the Virtual Machine.
-            subprocess.Popen(['shutdown', '-r', '-t', '0'])
+            subprocess.Popen(['shutdown', '-r', '-t', '0']).wait()
 
 
 if __name__ == '__main__':

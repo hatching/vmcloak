@@ -12,6 +12,7 @@ from vmcloak.conf import vboxmanage_path
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.os import WindowsXP, Windows7
+from vmcloak.rand import random_string
 from vmcloak.vm import VirtualBox, initialize_vm
 
 logging.basicConfig(level=logging.INFO)
@@ -21,9 +22,11 @@ def main():
     parser, defaults, types = shared_parameters()
     parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
     parser.add_argument('--vmmode', type=str, required=False, help='Virtual Machine mode - normal/longterm.')
+    parser.add_argument('--hostname', type=str, required=False, help='Hostname of the Virtual Machine.')
 
     defaults.update(dict(
         vmmode='normal',
+        hostname=random_string(10, 16),
     ))
 
     args = parser.parse_args()
@@ -95,6 +98,7 @@ def main():
     log.info('Incoming connection from %s:%s', ip, port)
     log.info('Assigning IP address %s (mask %s, gateway %s)',
              s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
+    log.info('Assigning hostname: %s', s.hostname)
 
     # Send various variables to the clone.
     guest.send(json.dumps({
@@ -102,6 +106,7 @@ def main():
         'netmask': s.hostonly_mask,
         'gateway': s.hostonly_gateway,
         'vmmode': s.vmmode,
+        'hostname': s.hostname,
     }))
 
     # TODO Catch the correct exception.
