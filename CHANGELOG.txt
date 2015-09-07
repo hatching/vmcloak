@@ -1,3 +1,11 @@
+0.2.10, September 6th 2015
+
+    Feature: Update hostname for each clone to avoid duplicate hostname errors.
+    Feature: Add clonehd feature for cloning (multiattach) harddisks in
+        situations where this is required - namely, when Virtual Machines
+        using this bird image are already running.
+    Tweak: Moved default data-dir from ~/vm-data/ to ~/vms/.
+
 0.2.9, September 5th 2015
 
     Important: Fixed issue with immutable disks - apparently they're not as

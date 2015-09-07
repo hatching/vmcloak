@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version='0.2.9',
+    version='0.2.10',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
