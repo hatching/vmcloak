@@ -23,6 +23,7 @@ def main():
     parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
     parser.add_argument('--vmmode', type=str, required=False, help='Virtual Machine mode - normal/longterm.')
     parser.add_argument('--hostname', type=str, required=False, help='Hostname of the Virtual Machine.')
+    parser.add_argument('--clonehd', action='store_true', help='Clone the harddisk.')
 
     defaults.update(dict(
         vmmode='normal',
@@ -74,7 +75,14 @@ def main():
 
     initialize_vm(m, s, h, clone=True)
 
-    m.attach_hd(bird['hdd_path'])
+    # Clone the harddisk. This is required when it is requested that new VMs
+    # are created on-the-fly while other VMs are running. (As this is not
+    # supported natively by VirtualBox..)
+    if s.clonehd:
+        m.clone_hd(bird['hdd_path'], m.hdd_path)
+        m.attach_hd(m.hdd_path, mtype='normal')
+    else:
+        m.attach_hd(bird['hdd_path'])
 
     log.debug('Starting Virtual Machine, waiting for connect back.')
     m.start_vm(visible=s.vm_visible)
