@@ -88,10 +88,10 @@ class VirtualBox(Machinery):
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=self.hdd_path)
 
-    def attach_hd(self, path, mtype='multiattach'):
+    def attach_hd(self, path):
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',
-                   type_='hdd', mtype=mtype, device=0, port=0, medium=path)
+                   type_='hdd', device=0, port=0, medium=path)
 
     def immutable_hd(self):
         # We first make the HDD "more" compact - this should be basically

@@ -75,12 +75,11 @@ def main():
 
     initialize_vm(m, s, h, clone=True)
 
-    # Clone the harddisk. This is required when it is requested that new VMs
-    # are created on-the-fly while other VMs are running. (As this is not
-    # supported natively by VirtualBox..)
+    # Clone the harddisk. This is not required per se but perhaps somebody
+    # has a use for it, so we'll just keep it in there for now.
     if s.clonehd:
         m.clone_hd(bird['hdd_path'], m.hdd_path)
-        m.attach_hd(m.hdd_path, mtype='normal')
+        m.attach_hd(m.hdd_path)
     else:
         m.attach_hd(bird['hdd_path'])
 
