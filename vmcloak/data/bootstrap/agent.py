@@ -3,6 +3,7 @@
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
+import ctypes
 import json
 import os
 import platform
@@ -285,6 +286,14 @@ if __name__ == "__main__":
     update_key(HKEY_LOCAL_MACHINE,
                'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
                'Agent', value)
+
+    # On some systems a "System Settings Change" message box pops up after
+    # having installed everything. It requires us to reboot, so here goes.
+    # (Notably the Cuckoo human.py will click it for us otherwise which
+    # results in rebooting before the sample is able to achieve persistence,
+    # generally speaking).
+    if ctypes.windll.user32.FindWindowA(None, 'System Settings Change'):
+        require_reboot = True
 
     # This should be further improved. Namely, per-instance changes to the
     # registry etc (although it would be easier to do that as a kernel driver).
