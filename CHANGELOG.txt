@@ -1,3 +1,7 @@
+0.2.12, September 8th 2015
+
+    Tweak: Handle an unwanted message boxes from Windows.
+
 0.2.11, September 7th 2015
 
     Tweak: The --clonehd feature is now obsolete. It turns out multiattach
