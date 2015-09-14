@@ -1,3 +1,9 @@
+0.2.13, September 14th 2015
+
+    Tweak: The multiattach flag of a harddisk is only preserved a couple of
+        seconds if the disk is not attached to a Virtual Machine. We hope this
+        fix is "good enough".
+
 0.2.12, September 8th 2015
 
     Tweak: Handle an unwanted message boxes from Windows.
