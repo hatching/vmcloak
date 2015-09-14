@@ -89,17 +89,21 @@ class VirtualBox(Machinery):
                    type_='hdd', device=0, port=0, medium=self.hdd_path)
 
     def attach_hd(self, path):
+        # When a harddisk is not attached to a Virtual Machine it will quickly
+        # be forgotten. This seems to be within a couple of seconds. When this
+        # happens, its "type" (multiattach in our case) is also forgotten,
+        # resulting in issues when cloning. Therefore we quickly set its state
+        # before attaching it to a Virtual Machine, hoping this approach
+        # is "good enough".
         self._call('storagectl', self.name, name='IDE', add='ide')
+        self._call('modifyhd', path, type_='multiattach')
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=path)
 
-    def immutable_hd(self):
+    def compact_hd(self):
         # We first make the HDD "more" compact - this should be basically
-        # defragmenting it. Only after doing so we make it multiattach. (Even
-        # though it may not be technically required, the --compact switch and
-        # immutable type gave problems earlier, so we're just being careful).
+        # defragmenting it.
         self._call('modifyhd', self.hdd_path, compact=True)
-        self._call('modifyhd', self.hdd_path, type_='multiattach')
 
     def clone_hd(self, hdd_inpath, hdd_outpath):
         self._call('clonehd', hdd_inpath, hdd_outpath)

@@ -276,8 +276,8 @@ def main():
         log.debug('Deleting the temporary Virtual Machine.')
         m.delete_vm()
 
-        log.debug('Making the base harddisk immutable.')
-        m.immutable_hd()
+        log.debug('Making the base harddisk more compact.')
+        m.compact_hd()
 
         log.debug('Registering this bird with the local VMCloak database.')
         add_bird(s.vmname, vmtype=h.name, hdd_path=m.hdd_path)
