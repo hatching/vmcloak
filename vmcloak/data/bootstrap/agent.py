@@ -1,318 +1,194 @@
-# Copyright (C) 2010-2014 Cuckoo Foundation.
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+#!/usr/bin/env python
+# Copyright (C) 2010-2015 Cuckoo Foundation.
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
-import ctypes
-import json
+import argparse
 import os
 import platform
-import random
-import socket
-import string
-import sys
-import time
+import shutil
 import subprocess
-from ConfigParser import RawConfigParser
-from SimpleXMLRPCServer import SimpleXMLRPCServer
-from StringIO import StringIO
-from _winreg import CreateKeyEx, DeleteValue, SetValueEx
-from _winreg import HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_SZ
-from zipfile import ZipFile
+import sys
+import tempfile
+import traceback
+import zipfile
 
-BIND_IP = "0.0.0.0"
-BIND_PORT = 8000
+try:
+    from flask import Flask, request, jsonify
+except ImportError:
+    sys.exit("ERROR: Flask library is missing (`pip install flask`)")
 
-STATUS_INIT = 0x0001
-STATUS_RUNNING = 0x0002
-STATUS_COMPLETED = 0x0003
-STATUS_FAILED = 0x0004
-CURRENT_STATUS = STATUS_INIT
+app = Flask("agent")
+state = {}
 
-ERROR_MESSAGE = ""
-ANALYZER_FOLDER = ""
-RESULTS_FOLDER = ""
+def json_error(error_code, message):
+    r = jsonify(message=message, error_code=error_code)
+    r.status_code = error_code
+    return r
 
-def delete_key(rootkey, subkey, key):
-    h = CreateKeyEx(rootkey, subkey, 0, KEY_ALL_ACCESS)
-    DeleteValue(h, key)
-    h.Close()
+def json_exception(message):
+    r = jsonify(message=message, error_code=500,
+                traceback=traceback.format_exc())
+    r.status_code = 500
+    return r
 
-def update_key(rootkey, subkey, key, value):
-    h = CreateKeyEx(rootkey, subkey, 0, KEY_ALL_ACCESS)
-    SetValueEx(h, key, 0, REG_SZ, value)
-    h.Close()
+def json_success(message, **kwargs):
+    return jsonify(message=message, **kwargs)
 
-class Agent:
-    """Cuckoo agent, it runs inside guest."""
+@app.route("/")
+def get_index():
+    return json_success("Cuckoo Agent!")
 
-    def __init__(self):
-        self.system = platform.system().lower()
-        self.analyzer_path = ""
-        self.analyzer_pid = 0
+@app.route("/status")
+def get_status():
+    return json_success("Analysis status",
+                        status=state.get("status"),
+                        description=state.get("description"))
 
-    def _initialize(self):
-        global ERROR_MESSAGE
-        global ANALYZER_FOLDER
+@app.route("/status", methods=["POST"])
+def put_status():
+    if "status" not in request.form:
+        return json_error("No status has been provided")
 
-        if not ANALYZER_FOLDER:
-            random.seed(time.time())
-            container = "".join(random.choice(string.ascii_lowercase) for x in range(random.randint(5, 10)))
+    state["status"] = request.form["status"]
+    state["description"] = request.form.get("description")
+    return json_success("Analysis status updated")
 
-            if self.system == "windows":
-                system_drive = os.environ["SYSTEMDRIVE"] + os.sep
-                ANALYZER_FOLDER = os.path.join(system_drive, container)
-            elif self.system == "linux" or self.system == "darwin":
-                ANALYZER_FOLDER = os.path.join(os.environ["HOME"], container)
-            else:
-                ERROR_MESSAGE = "Unable to identify operating system"
-                return False
+@app.route("/system")
+def get_system():
+    return json_success("System", system=platform.system())
 
-            try:
-                os.makedirs(ANALYZER_FOLDER)
-            except OSError as e:
-                ERROR_MESSAGE = e
-                return False
+@app.route("/environ")
+def get_environ():
+    return json_success("Environment variables", environ=dict(os.environ))
 
-        return True
+@app.route("/path")
+def get_path():
+    return json_success("Agent path", filepath=os.path.abspath(__file__))
 
-    def get_status(self):
-        """Get current status.
-        @return: status.
-        """
-        return CURRENT_STATUS
+@app.route("/mkdir", methods=["POST"])
+def do_mkdir():
+    if "dirpath" not in request.form:
+        return json_error(400, "No dirpath has been provided")
 
-    def get_error(self):
-        """Get error message.
-        @return: error message.
-        """
-        return str(ERROR_MESSAGE)
-
-    def add_malware(self, data, name):
-        """Get analysis data.
-        @param data: analysis data.
-        @param name: file name.
-        @return: operation status.
-        """
-        global ERROR_MESSAGE
-        data = data.data
-
-        if self.system == "windows":
-            root = os.environ["TEMP"]
-        elif self.system == "linux" or self.system == "darwin":
-            root = "/tmp"
-        else:
-            ERROR_MESSAGE = "Unable to write malware to disk because of " \
-                            "failed identification of the operating system"
-            return False
-
-        file_path = os.path.join(root, name)
-
-        try:
-            with open(file_path, "wb") as malware:
-                malware.write(data)
-        except IOError as e:
-            ERROR_MESSAGE = "Unable to write malware to disk: {0}".format(e)
-            return False
-
-        return True
-
-    def add_config(self, options):
-        """Creates analysis.conf file from current analysis options.
-        @param options: current configuration options, dict format.
-        @return: operation status.
-        """
-        global ERROR_MESSAGE
-
-        if type(options) != dict:
-            return False
-
-        config = RawConfigParser()
-        config.add_section("analysis")
-
-        try:
-            for key, value in options.items():
-                # Options can be UTF encoded.
-                if isinstance(value, basestring):
-                    try:
-                        value = value.encode("utf-8")
-                    except UnicodeEncodeError:
-                        pass
-
-                config.set("analysis", key, value)
-
-            config_path = os.path.join(ANALYZER_FOLDER, "analysis.conf")
-
-            with open(config_path, "wb") as config_file:
-                config.write(config_file)
-        except Exception as e:
-            ERROR_MESSAGE = str(e)
-            return False
-
-        return True
-
-    def add_analyzer(self, data):
-        """Add analyzer.
-        @param data: analyzer data.
-        @return: operation status.
-        """
-        data = data.data
-
-        if not self._initialize():
-            return False
-
-        try:
-            zip_data = StringIO()
-            zip_data.write(data)
-
-            with ZipFile(zip_data, "r") as archive:
-                archive.extractall(ANALYZER_FOLDER)
-        finally:
-            zip_data.close()
-
-        self.analyzer_path = os.path.join(ANALYZER_FOLDER, "analyzer.py")
-
-        return True
-
-    def execute(self):
-        """Execute analysis.
-        @return: analyzer PID.
-        """
-        global ERROR_MESSAGE
-        global CURRENT_STATUS
-
-        if not self.analyzer_path or not os.path.exists(self.analyzer_path):
-            return False
-
-        # Remove this file and its associated registry key as we're about
-        # to execute a sample.
-        if s['vmmode'] != 'longterm':
-            os.unlink(os.path.abspath(__file__))
-            delete_key(HKEY_LOCAL_MACHINE,
-                       'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-                       'Agent')
-
-        try:
-            proc = subprocess.Popen([sys.executable, self.analyzer_path],
-                                    cwd=os.path.dirname(self.analyzer_path))
-            self.analyzer_pid = proc.pid
-        except OSError as e:
-            ERROR_MESSAGE = str(e)
-            return False
-
-        CURRENT_STATUS = STATUS_RUNNING
-
-        return self.analyzer_pid
-
-    def complete(self, success=True, error="", results=""):
-        """Complete analysis.
-        @param success: success status.
-        @param error: error status.
-        """
-        global ERROR_MESSAGE
-        global CURRENT_STATUS
-        global RESULTS_FOLDER
-
-        if success:
-            CURRENT_STATUS = STATUS_COMPLETED
-        else:
-            if error:
-                ERROR_MESSAGE = str(error)
-
-            CURRENT_STATUS = STATUS_FAILED
-
-        RESULTS_FOLDER = results
-
-        return True
-
-if __name__ == "__main__":
-    # Load the configuration values.
-    s = json.loads(sys.argv[1].decode('base64'))
-
-    require_reboot = False
-
-    # Attempt to connect to the host machine.
-    if 'host_ip' in s and 'host_port' in s:
-        sock = None
-        while not sock:
-            try:
-                addr = s['host_ip'], s['host_port']
-                sock = socket.create_connection(addr, 1)
-            except socket.error:
-                time.sleep(0.1)
-                continue
-
-        # Connect to the host machine. In case this is a bird, also
-        # receive the new IP address, mask, and gateway.
-        if s['vmmode'] == 'bird':
-            # Retrieve the configuration for this clone.
-            conf = json.loads(sock.recv(0x10000))
-
-            # Update the VM mode to whatever vmcloak informs us to.
-            s['vmmode'] = conf['vmmode']
-
-            sock.close()
-
-            args = [
-                "netsh", "interface", "ip", "set", "address",
-                "name=Local Area Connection", "static",
-                conf["ip"], conf["netmask"], conf["gateway"], "1",
-            ]
-            subprocess.Popen(args).wait()
-
-            if "hostname" in conf:
-                # For excellent reasons (?) this only works when passed along
-                # as shell command, so here we go.
-                subprocess.call(
-                    'wmic computersystem where name="%s" '
-                    'call rename name="%s"' % (
-                        os.getenv("COMPUTERNAME"), conf["hostname"]
-                    ),
-                    shell=True
-                )
-
-                require_reboot = True
-        else:
-            sock.close()
-
-        del s['host_ip']
-        del s['host_port']
-
-    # Update the registry to reflect any changes to IP addresses, i.e., the
-    # Virtual Machine connected to the host.
-    value = '"%s" "%s" %s' % (sys.executable,
-                              os.path.abspath(__file__),
-                              json.dumps(s).encode('base64'))
-    update_key(HKEY_LOCAL_MACHINE,
-               'Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-               'Agent', value)
-
-    # On some systems a "System Settings Change" message box pops up after
-    # having installed everything. It requires us to reboot, so here goes.
-    # (Notably the Cuckoo human.py will click it for us otherwise which
-    # results in rebooting before the sample is able to achieve persistence,
-    # generally speaking).
-    if ctypes.windll.user32.FindWindowA(None, 'System Settings Change'):
-        require_reboot = True
-
-    # This should be further improved. Namely, per-instance changes to the
-    # registry etc (although it would be easier to do that as a kernel driver).
-    if require_reboot:
-        subprocess.Popen(['shutdown', '-r', '-t', '0']).wait()
+    mode = int(request.form.get("mode", 0777))
 
     try:
-        if not BIND_IP:
-            BIND_IP = socket.gethostbyname(socket.gethostname())
+        os.makedirs(request.form["dirpath"], mode=mode)
+    except:
+        return json_exception("Error creating directory")
 
-        print("[+] Starting agent on %s:%s ..." % (BIND_IP, BIND_PORT))
+    return json_success("Successfully created directory")
 
-        # Disable DNS lookup, by Scott D.
-        def FakeGetFQDN(name=""):
-            return name
-        socket.getfqdn = FakeGetFQDN
+@app.route("/mktemp", methods=["GET", "POST"])
+def do_mktemp():
+    suffix = request.form.get("suffix", "")
+    prefix = request.form.get("prefix", "tmp")
+    dirpath = request.form.get("dirpath")
 
-        server = SimpleXMLRPCServer((BIND_IP, BIND_PORT), allow_none=True)
-        server.register_instance(Agent())
-        server.serve_forever()
-    except KeyboardInterrupt:
-        server.shutdown()
+    fd, filepath = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=dirpath)
+    os.close(fd)
+
+    return json_success("Successfully created temporary file",
+                        filepath=filepath)
+
+@app.route("/mkdtemp", methods=["GET", "POST"])
+def do_mkdtemp():
+    suffix = request.form.get("suffix", "")
+    prefix = request.form.get("prefix", "tmp")
+    dirpath = request.form.get("dirpath")
+
+    dirpath = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dirpath)
+    return json_success("Successfully created temporary directory",
+                        dirpath=dirpath)
+
+@app.route("/store", methods=["POST"])
+def do_store():
+    if "filepath" not in request.form:
+        return json_error(400, "No filepath has been provided")
+
+    if "file" not in request.files:
+        return json_error(400, "No file has been provided")
+
+    try:
+        with open(request.form["filepath"], "wb") as f:
+            f.write(request.files["file"].read())
+    except:
+        return json_exception("Error storing file")
+
+    return json_success("Successfully stored file")
+
+@app.route("/extract", methods=["POST"])
+def do_extract():
+    if "dirpath" not in request.form:
+        return json_error(400, "No dirpath has been provided")
+
+    if "zipfile" not in request.files:
+        return json_error(400, "No zip file has been provided")
+
+    try:
+        with zipfile.ZipFile(request.files["zipfile"], "r") as archive:
+            archive.extractall(request.form["dirpath"])
+    except:
+        return json_exception("Error extracting zip file")
+
+    return json_success("Successfully extracted zip file")
+
+@app.route("/remove", methods=["POST"])
+def do_remove():
+    if "path" not in request.form:
+        return json_error(400, "No path has been provided")
+
+    try:
+        if os.path.isdir(request.form["path"]):
+            shutil.rmtree(request.form["path"])
+            message = "Successfully deleted directory"
+        elif os.path.isfile(request.form["path"]):
+            os.remove(request.form["path"])
+            message = "Successfully deleted file"
+    except:
+        return json_exception("Error removing file or directory")
+
+    return json_success(message)
+
+@app.route("/execute", methods=["POST"])
+def do_execute():
+    if "command" not in request.form:
+        return json_error(400, "No command has been provided")
+
+    # Execute the command asynchronously?
+    async = "async" in request.form
+
+    cwd = request.form.get("cwd")
+    stdout = stderr = None
+
+    try:
+        if async:
+            subprocess.Popen(request.form["command"], shell=True, cwd=cwd)
+        else:
+            p = subprocess.Popen(request.form["command"], shell=True, cwd=cwd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+    except:
+        return json_exception("Error executing command")
+
+    return json_success("Successfully executed command",
+                        stdout=stdout, stderr=stderr)
+
+@app.route("/kill")
+def do_kill():
+    shutdown = request.environ.get("werkzeug.server.shutdown")
+    if shutdown is None:
+        return json_error(500, "Not running with the Werkzeug server")
+
+    shutdown()
+    return json_success("Quit the Cuckoo Agent")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("host", nargs="?", default="0.0.0.0")
+    parser.add_argument("port", nargs="?", default="8000")
+    args = parser.parse_args()
+
+    app.run(host=args.host, port=int(args.port))

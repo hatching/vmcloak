@@ -19,6 +19,7 @@ setup(
     ],
     scripts=[
         'bin/vmcloak',
+        'bin/vmcloak-init',
         'bin/vmcloak-bird',
         'bin/vmcloak-clone',
         'bin/vmcloak-deps',
@@ -45,5 +46,8 @@ setup(
 
         # Required on BSD systems for unknown reasons.
         'jinja2',
+
+        # For interaction with the Agent.
+        'requests',
     ],
 )

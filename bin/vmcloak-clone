@@ -4,11 +4,11 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
+import os.path
 import json
 import socket
 import sys
 
-from vmcloak.conf import vboxmanage_path
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.winxp import WindowsXP
@@ -51,8 +51,6 @@ def main():
         log.error('A name for the Virtual Machine is required.')
         exit(1)
 
-    vboxmanage = vboxmanage_path(s)
-
     bird = read_bird(s.bird)
     if not bird:
         log.critical('Specified bird not found! Please verify its name.')
@@ -63,8 +61,8 @@ def main():
         exit(1)
 
     # Only VirtualBox support at the moment.
-    m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
-                   vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
+    m = VirtualBox(s.vmname, os.path.join(s.data_dir, '%s.vdi' % s.vmname),
+                   tempdir=s.tempdir)
 
     if bird['vmtype'] == 'winxp':
         h = WindowsXP()

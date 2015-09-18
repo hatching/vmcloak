@@ -5,25 +5,26 @@
 import logging
 import os
 import subprocess
+import time
 
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.exceptions import CommandError
 from vmcloak.rand import random_mac
+from vmcloak.repository import vms_path
 
 log = logging.getLogger(__name__)
 
 class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
+    VBOXMANAGE = "/usr/bin/VBoxManage"
 
-    def __init__(self, *args, **kwargs):
-        self.vboxmanage = kwargs.pop('vboxmanage')
-        Machinery.__init__(self, *args, **kwargs)
-
-        self.hdd_path = os.path.join(self.data_dir, '%s.vdi' % self.name)
+    def __init__(self, name, tempdir, hdd_path):
+        Machinery.__init__(self, name, tempdir)
+        self.hdd_path = hdd_path
 
     def _call(self, *args, **kwargs):
-        cmd = [self.vboxmanage] + list(args)
+        cmd = [self.VBOXMANAGE] + list(args)
 
         for k, v in kwargs.items():
             if v is None or v is True:
@@ -56,8 +57,19 @@ class VirtualBox(Machinery):
             ret[key] = value
         return ret if element is None else ret.get(element)
 
+    def wait_for_state(self, shutdown=False):
+        while True:
+            try:
+                status = self.vminfo("VMState")
+                if shutdown and status == "poweroff":
+                    break
+            except CommandError:
+                pass
+
+            time.sleep(1)
+
     def api_status(self):
-        if not os.path.isfile(self.vboxmanage):
+        if not os.path.isfile(self.VBOXMANAGE):
             log.error('VBoxManage not found!')
             return False
 
@@ -65,7 +77,7 @@ class VirtualBox(Machinery):
 
     def create_vm(self):
         return self._call('createvm', name=self.name,
-                          basefolder=self.vm_dir, register=True)
+                          basefolder=vms_path, register=True)
 
     def delete_vm(self):
         self._call('unregistervm', self.name, delete=True)
@@ -80,7 +92,7 @@ class VirtualBox(Machinery):
         }
         return self._call('modifyvm', self.name, ostype=operating_systems[os])
 
-    def create_hd(self, fsize):
+    def create_hd(self, fsize=256*1024):
         self._call('createhd', filename=self.hdd_path, size=fsize)
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',

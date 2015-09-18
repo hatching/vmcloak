@@ -12,9 +12,7 @@ import sys
 import tempfile
 import time
 
-from vmcloak.conf import vboxmanage_path
 from vmcloak.deps import DependencyManager, DependencyWriter
-from vmcloak.exceptions import CommandError
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
 from vmcloak.winxp import WindowsXP
@@ -89,12 +87,7 @@ def main():
         exit(1)
 
     if s.vm.lower() == 'virtualbox':
-        vboxmanage = vboxmanage_path(s)
-        if not vboxmanage:
-            exit(1)
-
-        m = VirtualBox(s.vmname, s.vm_dir, s.data_dir,
-                       vboxmanage=vboxmanage, temp_dir=s.temp_dirpath)
+        m = VirtualBox(s.vmname, s.vm_dir, s.data_dir)
     else:
         log.error('Only the VirtualBox --vm is supported as of now.')
         exit(1)
@@ -156,7 +149,6 @@ def main():
         GUEST_IP=s.host_init_ip if s.bird else s.hostonly_ip,
         GUEST_MASK=s.host_init_mask if s.bird else s.hostonly_mask,
         GUEST_GATEWAY=s.host_init_gateway if s.bird else s.hostonly_gateway,
-        VMMODE='bird' if s.bird else 'normal',
         DEBUG='yes' if s.debug else 'no',
     )
 
@@ -172,7 +164,7 @@ def main():
     else:
         settings_bat['RUNEXEC'] = ''
 
-    bootstrap = tempfile.mkdtemp(dir=s.temp_dirpath)
+    bootstrap = tempfile.mkdtemp(dir=s.tempdir)
 
     vmcloak_dir = os.path.join(bootstrap, 'vmcloak')
     os.mkdir(vmcloak_dir)
@@ -218,7 +210,7 @@ def main():
     # Create the ISO file.
     log.debug('Creating ISO file.')
     if not h.buildiso(s.iso_mount or h.mount, m.iso_path, bootstrap,
-                      s.temp_dirpath):
+                      s.tempdir):
         shutil.rmtree(bootstrap)
         exit(1)
 
@@ -245,14 +237,7 @@ def main():
         guest.close()
     else:
         # Wait until the Virtual Machine is shutdown.
-        while True:
-            try:
-                if m.vminfo('VMState') == 'poweroff':
-                    break
-            except CommandError:
-                pass
-
-            time.sleep(1)
+        m.wait_for_state(shutdown=True)
 
     log.debug('It took %d seconds to install Windows!', time.time() - t)
 

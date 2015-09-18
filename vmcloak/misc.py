@@ -223,7 +223,7 @@ def shared_parameters():
     parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
     parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
-    parser.add_argument('--temp-dirpath', type=str, help='Directory where to put temporary files.')
+    parser.add_argument('--tempdir', type=str, help='Directory where to put temporary files.')
     parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
     parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
     parser.add_argument('--run-executable', type=str, help='Extra executable to be ran after full initialization of the Virtual Machine.')
@@ -296,11 +296,11 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
         log.error('Error registering the VM: %s.', e)
         return False
 
-def wait_for_host(ip):
-    # Wait for the XMLRPC agent to come up with a timeout of 1 second.
+def wait_for_host(ipaddr, port):
+    # Wait for the Agent to come up with a timeout of 1 second.
     while True:
         try:
-            socket.create_connection((ip, 8000), 1).close()
+            socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
             pass

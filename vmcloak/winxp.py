@@ -33,14 +33,15 @@ class WindowsXP(OperatingSystem):
             'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
             'ORGANIZATION': '',
             'WORKGROUP': random_string(4, 8),
-            'KBLAYOUT': s.keyboard_layout,
+            # 'KBLAYOUT': s.keyboard_layout,
+            'KBLAYOUT': 'US',
         }
 
         buf = open(os.path.join(self.path, 'winnt.sif'), 'rb').read()
         for key, value in values.items():
             buf = buf.replace('@%s@' % key, value)
 
-        fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.temp_dirpath)
+        fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.tempdir)
         os.write(fd, buf)
         os.close(fd)
 
