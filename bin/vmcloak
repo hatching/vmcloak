@@ -17,7 +17,8 @@ from vmcloak.deps import DependencyManager, DependencyWriter
 from vmcloak.exceptions import CommandError
 from vmcloak.misc import add_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
-from vmcloak.os import WindowsXP, Windows7
+from vmcloak.winxp import WindowsXP
+from windows.win7 import Windows7
 from vmcloak.verify import valid_keyboard_layout
 from vmcloak.vm import VirtualBox, initialize_vm
 

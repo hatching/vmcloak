@@ -11,7 +11,8 @@ import sys
 from vmcloak.conf import vboxmanage_path
 from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
 from vmcloak.misc import wait_for_host, resolve_parameters
-from vmcloak.os import WindowsXP, Windows7
+from vmcloak.winxp import WindowsXP
+from vmcloak.win7 import Windows7
 from vmcloak.rand import random_string
 from vmcloak.vm import VirtualBox, initialize_vm
 

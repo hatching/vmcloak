@@ -11,7 +11,6 @@ from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
 
-
 class Windows7(OperatingSystem):
     name = 'win7'
     service_pack = 2

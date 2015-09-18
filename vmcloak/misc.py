@@ -2,7 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from __future__ import absolute_import
 import argparse
 import hashlib
 import json
