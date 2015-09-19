@@ -32,9 +32,9 @@ def main():
     parser.add_argument("--netmask", type=str, default="255.255.255.0", help="Guest IP address.")
     parser.add_argument("--gateway", type=str, default="192.168.56.1", help="Guest IP address.")
     parser.add_argument("--tempdir", type=str, default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
-    parser.add_argument("--vm-visible", action="store_true", default=None, help="Start the Virtual Machine in GUI mode.")
-    parser.add_argument("-d", "--debug", action="store_true", default=None, help="Install Virtual Machine in debug mode.")
-    parser.add_argument("-v", "--verbose", action="store_true", default=None, help="Verbose logging.")
+    parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
+    parser.add_argument("-d", "--debug", action="store_true", help="Install Virtual Machine in debug mode.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging.")
     args = parser.parse_args()
 
     if args.verbose:
@@ -87,10 +87,11 @@ def main():
         for key, value in settings.items():
             print>>f, "set %s=%s" % (key, value)
 
+    iso_path = os.path.join(args.tempdir, "%s.iso" % args.name)
     hdd_path = os.path.join(image_path, "%s.vdi" % args.name)
-    m = VirtualBox(name=args.name, tempdir=args.tempdir, hdd_path=hdd_path)
+    m = VirtualBox(name=args.name)
 
-    if not h.buildiso(args.iso_mount or h.mount, m.iso_path, bootstrap,
+    if not h.buildiso(args.iso_mount or h.mount, iso_path, bootstrap,
                       args.tempdir):
         shutil.rmtree(bootstrap)
         exit(1)
@@ -99,8 +100,8 @@ def main():
 
     m.create_vm()
     m.os_type(os=h.name, sp=h.service_pack)
-    m.create_hd()
-    m.attach_iso(m.iso_path)
+    m.create_hd(hdd_path)
+    m.attach_iso(iso_path)
     m.hostonly(nictype=h.nictype)
 
     log.info("Starting the Virtual Machine %r to install Windows.", args.name)
@@ -109,11 +110,11 @@ def main():
     m.wait_for_state(shutdown=True)
 
     m.detach_iso()
-    os.unlink(m.iso_path)
+    os.unlink(iso_path)
 
     m.remove_hd()
-    m.compact_hd()
-    m.remove_vm()
+    m.compact_hd(hdd_path)
+    m.delete_vm()
 
     log.info("Added image %r to the repository.", args.name)
     db.add(Image(name=args.name, path=hdd_path, osversion=osversion))

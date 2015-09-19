@@ -19,10 +19,6 @@ class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
     VBOXMANAGE = "/usr/bin/VBoxManage"
 
-    def __init__(self, name, tempdir, hdd_path):
-        Machinery.__init__(self, name, tempdir)
-        self.hdd_path = hdd_path
-
     def _call(self, *args, **kwargs):
         cmd = [self.VBOXMANAGE] + list(args)
 
@@ -92,13 +88,13 @@ class VirtualBox(Machinery):
         }
         return self._call('modifyvm', self.name, ostype=operating_systems[os])
 
-    def create_hd(self, fsize=256*1024):
-        self._call('createhd', filename=self.hdd_path, size=fsize)
+    def create_hd(self, hdd_path, fsize=256*1024):
+        self._call('createhd', filename=hdd_path, size=fsize)
         self._call('storagectl', self.name, name='IDE', add='ide')
         self._call('storageattach', self.name, storagectl='IDE',
-                   type_='hdd', device=0, port=0, medium=self.hdd_path)
+                   type_='hdd', device=0, port=0, medium=hdd_path)
 
-    def attach_hd(self, path):
+    def attach_hd(self, hdd_path):
         # When a harddisk is not attached to a Virtual Machine it will quickly
         # be forgotten. This seems to be within a couple of seconds. When this
         # happens, its "type" (multiattach in our case) is also forgotten,
@@ -106,14 +102,14 @@ class VirtualBox(Machinery):
         # before attaching it to a Virtual Machine, hoping this approach
         # is "good enough".
         self._call('storagectl', self.name, name='IDE', add='ide')
-        self._call('modifyhd', path, type_='multiattach')
+        self._call('modifyhd', hdd_path, type_='multiattach')
         self._call('storageattach', self.name, storagectl='IDE',
-                   type_='hdd', device=0, port=0, medium=path)
+                   type_='hdd', device=0, port=0, medium=hdd_path)
 
-    def compact_hd(self):
+    def compact_hd(self, hdd_path):
         # We first make the HDD "more" compact - this should be basically
         # defragmenting it.
-        self._call('modifyhd', self.hdd_path, compact=True)
+        self._call('modifyhd', hdd_path, compact=True)
 
     def clone_hd(self, hdd_inpath, hdd_outpath):
         self._call('clonehd', hdd_inpath, hdd_outpath)

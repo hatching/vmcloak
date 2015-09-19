@@ -22,10 +22,9 @@ class Machinery(object):
     vm_dir_required = True
     data_dir_required = True
 
-    def __init__(self, name, tempdir):
+    def __init__(self, name):
         self.name = name
         self.network_idx = 0
-        self.iso_path = os.path.join(tempdir, '%s.iso' % self.name)
 
     def vminfo(self, element=None):
         """Returns a dictionary with all available information for the
