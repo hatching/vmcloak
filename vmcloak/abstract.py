@@ -237,3 +237,35 @@ class OperatingSystem(object):
 
         shutil.rmtree(outdir)
         return True
+
+class Dependency(object):
+    """Dependency instance. Each software has its own dependency class which
+    informs VMCloak on how to install that particular piece of software."""
+    name = None
+
+    def __init__(self, h, m, a, i, settings):
+        self.h = h
+        self.m = m
+        self.a = a
+        self.i = i
+        self.settings = settings
+
+        self.init()
+
+        # Emit settings directly into the instance. Should be fine.
+        for target, value in settings.items():
+            package, key = target.split(".", 1)
+            if package == self.name:
+                setattr(self, key, value)
+
+        self.check()
+
+    def run(self):
+        raise NotImplementedError
+
+    def disable_autorun(self):
+        """Disables AutoRun under Windows XP."""
+        if self.h.name == "winxp":
+            self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
+                           "Windows\\CurrentVersion\\Policies\\Explorer "
+                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 177")

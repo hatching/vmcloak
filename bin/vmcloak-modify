@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+# Copyright (C) 2014-2015 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+import argparse
+import logging
+
+from vmcloak.misc import wait_for_host
+from vmcloak.repository import Session, Image
+from vmcloak.vm import VirtualBox
+from vmcloak.winxp import WindowsXP
+from vmcloak.win7 import Windows7
+
+logging.basicConfig()
+log = logging.getLogger("vmcloak-modify")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("name", type=str, help="Name of the instance.")
+    parser.add_argument("dependencies", type=str, nargs="*", help="Dependencies to install.")
+    parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
+    args = parser.parse_args()
+
+    session = Session()
+
+    image = session.query(Image).filter_by(name=args.name).first()
+    if not image:
+        log.error("Image not found: %s", args.name)
+        exit(1)
+
+    m = VirtualBox(name=args.name)
+
+    if image.osversion == "winxp":
+        h = WindowsXP()
+    elif image.osversion == "win7":
+        h = Windows7()
+
+    m.create_vm()
+    m.os_type(os=h.name, sp=h.service_pack)
+    m.attach_hd(image.path, multi=False)
+    m.detach_iso()
+    m.hostonly(nictype=h.nictype)
+    m.start_vm(visible=args.vm_visible)
+    wait_for_host(image.ipaddr, image.port)
+
+    log.info("The Virtual Machine has booted and is ready to be modified!")
+    log.info("When you shut it down, all changes will be saved.")
+
+    m.wait_for_state(shutdown=True)
+
+    m.remove_hd()
+    m.compact_hd(image.path)
+    m.delete_vm()
+
+if __name__ == "__main__":
+    main()

@@ -21,6 +21,8 @@ setup(
         'bin/vmcloak',
         'bin/vmcloak-init',
         'bin/vmcloak-snapshot',
+        'bin/vmcloak-install',
+        'bin/vmcloak-modify',
         'bin/vmcloak-bird',
         'bin/vmcloak-clone',
         'bin/vmcloak-deps',

@@ -4,6 +4,8 @@
 
 import requests
 
+from StringIO import StringIO
+
 from vmcloak.misc import wait_for_host
 
 class Agent(object):
@@ -27,7 +29,27 @@ class Agent(object):
         return requests.post(url, files=files, data=kwargs)
 
     def ping(self):
-        return self.get("/")
+        """Ping the machine."""
+        return self.get("/", timeout=5)
+
+    def execute(self, command, async=False):
+        """Execute a command."""
+        if async:
+            return self.post("/execute", command=command, async="true")
+        else:
+            return self.post("/execute", command=command)
+
+    def remove(self, path):
+        """Remove a file or entire directory."""
+        self.post("/remove", path=path)
+
+    def shutdown(self):
+        """Power off the machine."""
+        self.execute("shutdown -s -t 0", async=True)
+
+    def killprocess(self, process_name):
+        """Terminate a process."""
+        self.execute("taskkill /F /IM %s" % process_name)
 
     def static_ip(self, ipaddr, netmask, gateway):
         """Change the IP address of this machine."""
@@ -44,3 +66,9 @@ class Agent(object):
         # Now wait until the Agent is reachable on the new IP address.
         wait_for_host(ipaddr, self.port)
         self.ipaddr = ipaddr
+
+    def upload(self, filepath, contents):
+        """Upload a file to the Agent."""
+        if isinstance(contents, basestring):
+            contents = StringIO(contents)
+        self.postfile("/store", {"file": contents}, filepath=filepath)

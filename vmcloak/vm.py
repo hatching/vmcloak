@@ -94,7 +94,7 @@ class VirtualBox(Machinery):
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=hdd_path)
 
-    def attach_hd(self, hdd_path):
+    def attach_hd(self, hdd_path, multi=False):
         # When a harddisk is not attached to a Virtual Machine it will quickly
         # be forgotten. This seems to be within a couple of seconds. When this
         # happens, its "type" (multiattach in our case) is also forgotten,
@@ -102,7 +102,10 @@ class VirtualBox(Machinery):
         # before attaching it to a Virtual Machine, hoping this approach
         # is "good enough".
         self._call('storagectl', self.name, name='IDE', add='ide')
-        self._call('modifyhd', hdd_path, type_='multiattach')
+        if multi:
+            self._call('modifyhd', hdd_path, type_='multiattach')
+        else:
+            self._call('modifyhd', hdd_path, type_='normal')
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='hdd', device=0, port=0, medium=hdd_path)
 
@@ -121,9 +124,10 @@ class VirtualBox(Machinery):
     def cpus(self, count):
         self._call('modifyvm', self.name, cpus=count, ioapic='on')
 
-    def attach_iso(self, iso):
+    def attach_iso(self, iso_path):
+        """Mount an ISO to the Virtual Machine."""
         self._call('storageattach', self.name, storagectl='IDE',
-                   type_='dvddrive', port=1, device=0, medium=iso)
+                   type_='dvddrive', port=1, device=0, medium=iso_path)
 
     def detach_iso(self):
         self._call('storageattach', self.name, storagectl='IDE',
