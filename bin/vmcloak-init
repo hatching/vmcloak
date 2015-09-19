@@ -11,11 +11,10 @@ import tempfile
 
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
-from vmcloak.repository import image_path, Database, Image
+from vmcloak.repository import image_path, Session, Image
 from vmcloak.vm import VirtualBox
 
 log = logging.getLogger("vmcloak")
-db = Database()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -117,7 +116,11 @@ def main():
     m.delete_vm()
 
     log.info("Added image %r to the repository.", args.name)
-    db.add(Image(name=args.name, path=hdd_path, osversion=osversion))
+    session = Session()
+    session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
+                      servicepack="%s" % h.service_pack,
+                      ipaddr=args.ip, port=args.port))
+    session.commit()
 
 if __name__ == "__main__":
     main()

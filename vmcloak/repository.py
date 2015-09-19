@@ -4,7 +4,7 @@
 
 import os
 
-from sqlalchemy import create_engine, Column, Integer, Text
+from sqlalchemy import create_engine, Column, Integer, Text, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -21,15 +21,14 @@ class Image(Base):
     __tablename__ = "image"
 
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    name = Column(String(64))
     path = Column(Text)
-    osversion = Column(Text)
-
-class Database(object):
-    def add(self, obj):
-        session = Session()
-        session.add(obj)
-        session.commit()
+    osversion = Column(String(32))
+    servicepack = Column(String(32))
+    ipaddr = Column(String(32))
+    port = Column(Integer)
+    netmask = Column(String(32))
+    gateway = Column(String(32))
 
 Base.metadata.create_all(engine)
 

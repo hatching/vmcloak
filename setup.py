@@ -20,6 +20,7 @@ setup(
     scripts=[
         'bin/vmcloak',
         'bin/vmcloak-init',
+        'bin/vmcloak-snapshot',
         'bin/vmcloak-bird',
         'bin/vmcloak-clone',
         'bin/vmcloak-deps',
@@ -41,13 +42,9 @@ setup(
         'vmcloak.data.win7': ['*.*'],
     },
     install_requires=[
-        # Libraries to build the documentation.
-        'sphinx',
-
-        # Required on BSD systems for unknown reasons.
-        'jinja2',
-
-        # For interaction with the Agent.
         'requests',
+        'sqlalchemy',
+        'sphinx',
+        'jinja2',
     ],
 )
