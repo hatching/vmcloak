@@ -59,6 +59,10 @@ class Machinery(object):
         """Remove a harddisk."""
         raise
 
+    def clone_hd(self, hdd_inpath, hdd_outpath):
+        """Clone a harddisk."""
+        raise
+
     def cpus(self, count):
         """Set the number of CPUs to assign to this Virtual Machine."""
         raise

@@ -3,147 +3,44 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import argparse
 import logging
 import os.path
-import json
-import socket
-import sys
 
-from vmcloak.misc import read_bird, shared_parameters, register_cuckoo
-from vmcloak.misc import wait_for_host, resolve_parameters
-from vmcloak.winxp import WindowsXP
-from vmcloak.win7 import Windows7
-from vmcloak.rand import random_string
-from vmcloak.vm import VirtualBox, initialize_vm
+from sqlalchemy.orm.session import make_transient
+
+from vmcloak.repository import Session, Image, image_path
+from vmcloak.vm import VirtualBox
 
 logging.basicConfig(level=logging.INFO)
-log = logging.getLogger('vmcloak-clone')
+log = logging.getLogger("vmcloak-clone")
 
 def main():
-    parser, defaults, types = shared_parameters()
-    parser.add_argument('--bird', type=str, required=True, help='Name of the bird to clone from.')
-    parser.add_argument('--vmmode', type=str, required=False, help='Virtual Machine mode - normal/longterm.')
-    parser.add_argument('--hostname', type=str, required=False, help='Hostname of the Virtual Machine.')
-    parser.add_argument('--clonehd', action='store_true', help='Clone the harddisk.')
-
-    defaults.update(dict(
-        vmmode='normal',
-        hostname=random_string(10, 16),
-    ))
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("name", type=str, help="Name of the image to clone from.")
+    parser.add_argument("outname", type=str, help="Name of the new image.")
     args = parser.parse_args()
 
-    if args.verbose:
-        log.setLevel(logging.DEBUG)
+    session = Session()
 
-    try:
-        s = resolve_parameters(args, defaults, types)
-    except Exception as e:
-        sys.exit(e.message)
-
-    # Not really sure if this is possible in a cleaner way, but if no
-    # arguments have been given on the command line, then show the usage.
-    if len(sys.argv) == 1:
-        parser.print_help()
-        exit(0)
-
-    if not s.vmname:
-        log.error('A name for the Virtual Machine is required.')
+    image = session.query(Image).filter_by(name=args.name).first()
+    if not image:
+        log.error("Image not found: %s", args.name)
         exit(1)
 
-    bird = read_bird(s.bird)
-    if not bird:
-        log.critical('Specified bird not found! Please verify its name.')
-        exit(1)
+    outpath = os.path.join(image_path, "%s.vdi" % args.outname)
 
-    if s.vmmode not in ('normal', 'longterm'):
-        log.error('Incorrect Virtual Machine mode: %s', s.vmmode)
-        exit(1)
+    m = VirtualBox(None)
+    m.clone_hd(image.path, outpath)
 
-    # Only VirtualBox support at the moment.
-    m = VirtualBox(s.vmname, os.path.join(s.data_dir, '%s.vdi' % s.vmname),
-                   tempdir=s.tempdir)
+    # Retain all fields but update the name & path.
+    make_transient(image)
+    image.id = None
+    image.name = args.outname
+    image.path = outpath
 
-    if bird['vmtype'] == 'winxp':
-        h = WindowsXP()
-    elif bird['vmtype'] == 'win7':
-        h = Windows7()
-    else:
-        log.error('Invalid Virtual Machine Type detected: %s', bird['vmtype'])
-        exit(1)
-
-    initialize_vm(m, s, h, clone=True)
-
-    # Clone the harddisk. This is not required per se but perhaps somebody
-    # has a use for it, so we'll just keep it in there for now.
-    if s.clonehd:
-        m.clone_hd(bird['hdd_path'], m.hdd_path)
-        m.attach_hd(m.hdd_path)
-    else:
-        m.attach_hd(bird['hdd_path'])
-
-    log.debug('Starting Virtual Machine, waiting for connect back.')
-    m.start_vm(visible=s.vm_visible)
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind((s.host_ip, s.host_port))
-    sock.listen(1)
-
-    # Wait at most five minutes, otherwise something is wrong.
-    sock.settimeout(5.0 * 60)
-
-    try:
-        guest, (ip, port) = sock.accept()
-        sock.close()
-    except socket.timeout:
-        log.error('The Virtual Machine hasn\'t replied yet after five '
-                  'minutes.. something is going wrong.')
-        exit(1)
-
-    log.info('Incoming connection from %s:%s', ip, port)
-    log.info('Assigning IP address %s (mask %s, gateway %s)',
-             s.hostonly_ip, s.hostonly_mask, s.hostonly_gateway)
-    log.info('Assigning hostname: %s', s.hostname)
-
-    # Send various variables to the clone.
-    guest.send(json.dumps({
-        'ip': s.hostonly_ip,
-        'netmask': s.hostonly_mask,
-        'gateway': s.hostonly_gateway,
-        'vmmode': s.vmmode,
-        'hostname': s.hostname,
-    }))
-
-    # TODO Catch the correct exception.
-    try:
-        guest.close()
-    except:
-        pass
-
-    # Wait for the host to get up and running.
-    wait_for_host(s.hostonly_ip)
-
-    log.debug('Taking a snapshot of the current state.')
-    m.snapshot('vmcloak', 'Snapshot created by VM Cloak.')
-
-    log.debug('Powering off the virtual machine.')
-    m.stopvm()
-
-    if s.register_cuckoo:
-        rdp_port = None
-
-        # A longterm vmmode also implies the longterm tag.
-        if s.vmmode == 'longterm':
-            if 'longterm' not in s.tags:
-                s.tags += ', longterm'
-
-            if s.vrde:
-                rdp_port = s.vrde_port
-
-        register_cuckoo(hostonly_ip=s.hostonly_ip, tags=s.tags,
-                        vmname=s.vmname, rdp_port=rdp_port,
-                        cuckoo_dirpath=s.cuckoo)
+    session.add(image)
+    session.commit()
 
 if __name__ == '__main__':
     main()
