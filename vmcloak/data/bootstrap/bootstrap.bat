@@ -60,9 +60,5 @@ else (
 
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d "%PYTHON% C:\agent.py 0.0.0.0 %AGENT_PORT%"
 
-echo Removing VMCloak files.
-cd C:\
-rem rmdir /S /Q C:\vmcloak
-
 echo Shutting down.
 shutdown -s -t 0

@@ -46,6 +46,7 @@ def main():
 
     a = Agent(image.ipaddr, image.port)
     a.ping()
+    a.remove("C:\\vmcloak")
     a.static_ip(args.ipaddr, image.netmask, image.gateway)
 
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
