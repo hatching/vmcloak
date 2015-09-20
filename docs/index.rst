@@ -21,9 +21,8 @@ Contents:
    requirements
    setup
    vbox
-   config   
+   config
    network
-   deps
    hwconfig
    license
    credits

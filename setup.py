@@ -25,7 +25,6 @@ setup(
         'bin/vmcloak-modify',
         'bin/vmcloak-bird',
         'bin/vmcloak-clone',
-        'bin/vmcloak-deps',
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
         'bin/vmcloak-killvbox',

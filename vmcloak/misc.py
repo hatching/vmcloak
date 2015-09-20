@@ -225,8 +225,6 @@ def shared_parameters():
     parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
     parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
     parser.add_argument('--tempdir', type=str, help='Directory where to put temporary files.')
-    parser.add_argument('--deps-directory', type=str, help='Dependency directory.')
-    parser.add_argument('--deps-repository', type=str, help='Dependency repository.')
     parser.add_argument('--run-executable', type=str, help='Extra executable to be ran after full initialization of the Virtual Machine.')
     parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
     parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
@@ -255,10 +253,7 @@ def shared_parameters():
         keyboard_layout='US',
         cpu_count=1,
         register_cuckoo=True,
-        dependencies='',
         auxiliary_local='auxiliary',
-        deps_directory='~/.vmcloak/deps',
-        deps_repository='https://raw.githubusercontent.com/jbremer/vmcloak-deps/master/',
         vrde=False,
         vrde_port=3389,
         vrde_password='vmcloak',

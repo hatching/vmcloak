@@ -139,7 +139,6 @@ provided.
 * :ref:`conf-hostonly-mask`
 * :ref:`conf-hostonly-macaddr`
 * :ref:`conf-host-ip`
-* :ref:`conf-dependencies`
 
 .. _conf-hostonly-ip:
 
@@ -148,8 +147,8 @@ Guest hostonly IP address
 
 The IP address to assign to the Guest is set by ``--hostonly-ip``. It defaults
 to ``192.168.56.101``, which is perfectly fine when one only intends to
-create one VM. However, if one wants to create multiple VMs, then the static 
-IP addresses should be unique. Normally one would start counting at 
+create one VM. However, if one wants to create multiple VMs, then the static
+IP addresses should be unique. Normally one would start counting at
 ``192.168.56.101`` to ``192.168.56.102``, ``192.168.56.103``, etc.
 
 .. _conf-hostonly-gateway:
@@ -179,25 +178,8 @@ Host host-ip
 ^^^^^^^^^^^^
 
 The IP address of the vboxnet interface for communication between guest and host.
-The communication is relevant for the installation process to finish. 
+The communication is relevant for the installation process to finish.
 Set by ``--host-ip``
-
-
-.. _conf-dependencies:
-
-Dependencies
-^^^^^^^^^^^^
-
-``--dependencies`` accepts a list of 3rd party software packages, separated by
-whitespaces, that should be installed automatically in the VM. These packages
-allow one to quickly and easily install commonly used software, such as, the
-.NET framework, Adobe PDF Reader, Firefox, Chrome, Microsoft Office, etc.
-
-As VMCloak has its `own repository for these packages
-<https://github.com/jbremer/vmcloak-deps>`_ it is quite likely that one will
-run into a piece of software which is not in the dependency repository yet.
-In that case, please take a look at :ref:`deps-create` to make your own and
-:ref:`deps-submit`, or alternatively :ref:`deps-request`.
 
 Suggested configuration entries
 -------------------------------
