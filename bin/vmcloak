@@ -7,4 +7,12 @@ import subprocess
 import sys
 
 if __name__ == "__main__":
+    sys.stderr.write("You are now using version 0.3 of VMCloak, this version "
+                     "is not backwards compatible with the latest 0.2 "
+                     "release, 0.2.13. If you'd like to use the 0.2 version "
+                     "please install it: pip install vmcloak==0.2.13\n")
+
+    if len(sys.argv) < 2:
+        sys.exit("No command-line arguments given.")
+
     subprocess.call(["vmcloak-%s" % sys.argv[1]] + sys.argv[2:])
