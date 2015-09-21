@@ -39,11 +39,6 @@ def main():
 
     # From now on this image is multiattach.
     image.mode = "multiattach"
-
-    # Create a database entry for this snapshot.
-    snapshot = Snapshot(image_id=image.id, vmname=args.vmname,
-                        ipaddr=args.ipaddr, port=image.port)
-    session.add(snapshot)
     session.commit()
 
     m.create_vm()
@@ -60,6 +55,12 @@ def main():
 
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
     m.stopvm()
+
+    # Create a database entry for this snapshot.
+    snapshot = Snapshot(image_id=image.id, vmname=args.vmname,
+                        ipaddr=args.ipaddr, port=image.port)
+    session.add(snapshot)
+    session.commit()
 
 if __name__ == "__main__":
     main()
