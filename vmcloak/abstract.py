@@ -301,13 +301,23 @@ class Dependency(object):
         fpath = os.path.join(deps_path, os.path.basename(self.url))
         self.a.upload(filepath, open(fpath, "rb"))
 
+    def wait_process_appear(self, process_name):
+        """Wait for a process to appear."""
+        while True:
+            time.sleep(1)
+
+            for line in self.a.execute("tasklist").json()["stdout"].split("\n"):
+                if line.lower().startswith(process_name.lower()):
+                    return
+
     def wait_process_exit(self, process_name):
         """Wait for a process to exit."""
         while True:
             time.sleep(1)
 
-            for line in self.a.execute("tasklist").content.split("\n"):
+            for line in self.a.execute("tasklist").json()["stdout"].split("\n"):
                 if line.lower().startswith(process_name.lower()):
-                    continue
-
-            break
+                    log.info("Waiting for %s to finish..", process_name)
+                    break
+            else:
+                break
