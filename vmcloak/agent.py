@@ -72,3 +72,8 @@ class Agent(object):
         if isinstance(contents, basestring):
             contents = StringIO(contents)
         self.postfile("/store", {"file": contents}, filepath=filepath)
+
+    def click(self, window_title, button_name):
+        """Identify a window by its title and click one of its buttons."""
+        self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
+            window_title, button_name))

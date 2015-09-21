@@ -11,9 +11,11 @@ import tempfile
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.misc import copytreelower, copytreeinto
+from vmcloak.exceptions import DependencyError
+from vmcloak.misc import copytreelower, copytreeinto, sha1_file
 from vmcloak.paths import get_path
 from vmcloak.rand import random_serial, random_uuid
+from vmcloak.repository import deps_path
 
 log = logging.getLogger(__name__)
 
@@ -246,6 +248,8 @@ class Dependency(object):
     """Dependency instance. Each software has its own dependency class which
     informs VMCloak on how to install that particular piece of software."""
     name = None
+    url = None
+    sha1 = None
 
     def __init__(self, h, m, a, i, settings):
         self.h = h
@@ -262,7 +266,24 @@ class Dependency(object):
             if package == self.name:
                 setattr(self, key, value)
 
-        self.check()
+        # Download the dependency if we don't have it already.
+        if self.url:
+            filepath = os.path.join(deps_path, os.path.basename(self.url))
+            if not os.path.exists(filepath) or sha1_file(filepath) != self.sha1:
+                subprocess.call(["wget", "-O", filepath, self.url])
+
+            if sha1_file(filepath) != self.sha1:
+                log.error("The checksum of %s doesn't match!", self.name)
+                raise DependencyError
+
+        if self.check() is False:
+            raise DependencyError
+
+    def init(self):
+        pass
+
+    def check(self):
+        pass
 
     def run(self):
         raise NotImplementedError
@@ -273,3 +294,8 @@ class Dependency(object):
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 177")
+
+    def upload_dependency(self, filepath):
+        """Upload this dependency to the specified filepath."""
+        fpath = os.path.join(deps_path, os.path.basename(self.url))
+        self.a.upload(filepath, open(fpath, "rb"))

@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 conf_path = os.path.join(os.getenv("HOME"), ".vmcloak")
 image_path = os.path.join(conf_path, "image")
 vms_path = os.path.join(conf_path, "vms")
+deps_path = os.path.join(conf_path, "deps")
 
 repository = os.path.join(conf_path, "repository.db")
 engine = create_engine("sqlite:///%s" % repository)
@@ -37,3 +38,6 @@ if not os.path.isdir(conf_path):
 
 if not os.path.isdir(image_path):
     os.mkdir(image_path)
+
+if not os.path.isdir(deps_path):
+    os.mkdir(deps_path)

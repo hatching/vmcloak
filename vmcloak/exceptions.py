@@ -4,3 +4,6 @@
 
 class CommandError(Exception):
     pass
+
+class DependencyError(Exception):
+    pass

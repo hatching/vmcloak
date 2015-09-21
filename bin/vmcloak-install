@@ -9,6 +9,7 @@ import logging
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
+from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host
 from vmcloak.repository import Session, Image
 from vmcloak.vm import VirtualBox
@@ -66,10 +67,14 @@ def main():
         log.info("Installing dependency %s..", dependency)
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
-            exit(1)
+            break
 
-        d = vmcloak.dependencies.names[dependency](h, m, a, image, settings)
-        d.run()
+        try:
+            d = vmcloak.dependencies.names[dependency](h, m, a, image, settings)
+            d.run()
+        except DependencyError:
+            log.error("The dependency %s returned an error..", dependency)
+            break
 
     a.shutdown()
     m.wait_for_state(shutdown=True)
