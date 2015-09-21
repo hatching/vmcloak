@@ -4,7 +4,8 @@
 
 import os
 
-from sqlalchemy import create_engine, Column, Integer, Text, String
+from sqlalchemy import create_engine, Column, ForeignKey
+from sqlalchemy import Integer, Text, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -19,9 +20,11 @@ Base = declarative_base()
 Session = sessionmaker(bind=engine)
 
 class Image(Base):
+    """Represents each image that is created and altered along the way."""
     __tablename__ = "image"
 
     id = Column(Integer, primary_key=True)
+    mode = Column(String(16))
     name = Column(String(64))
     path = Column(Text)
     osversion = Column(String(32))
@@ -30,6 +33,16 @@ class Image(Base):
     port = Column(Integer)
     netmask = Column(String(32))
     gateway = Column(String(32))
+
+class Snapshot(Base):
+    """Represents each snapshot that has been created."""
+    __tablename__ = "snapshot"
+
+    id = Column(Integer, primary_key=True)
+    image_id = Column(Integer, ForeignKey("image.id"))
+    vmname = Column(String(64))
+    ipaddr = Column(String(32))
+    port = Column(Integer)
 
 Base.metadata.create_all(engine)
 

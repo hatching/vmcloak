@@ -33,9 +33,10 @@ def main():
     m = VirtualBox(None)
     m.clone_hd(image.path, outpath)
 
-    # Retain all fields but update the name & path.
+    # Retain all fields but update the mode, name & path.
     make_transient(image)
     image.id = None
+    image.mode = "normal"
     image.name = args.outname
     image.path = outpath
 

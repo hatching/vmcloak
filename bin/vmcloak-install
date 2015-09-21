@@ -33,6 +33,12 @@ def main():
         log.error("Image not found: %s", args.name)
         exit(1)
 
+    if image.mode != "normal":
+        log.error("You can't install dependencies in this image as you have "
+                  "already made snapshots with it!")
+        log.error("Please vmcloak-clone it and update the clone.")
+        exit(1)
+
     m = VirtualBox(name=args.name)
 
     if image.osversion == "winxp":

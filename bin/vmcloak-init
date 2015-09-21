@@ -118,7 +118,7 @@ def main():
     log.info("Added image %r to the repository.", args.name)
     session = Session()
     session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
-                      servicepack="%s" % h.service_pack,
+                      servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=args.ip, port=args.port,
                       netmask=args.netmask, gateway=args.gateway))
     session.commit()

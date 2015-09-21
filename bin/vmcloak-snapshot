@@ -8,7 +8,7 @@ import logging
 
 from vmcloak.agent import Agent
 from vmcloak.misc import wait_for_host
-from vmcloak.repository import Session, Image
+from vmcloak.repository import Session, Image, Snapshot
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
@@ -37,9 +37,18 @@ def main():
     elif image.osversion == "win7":
         h = Windows7()
 
+    # From now on this image is multiattach.
+    image.mode = "multiattach"
+
+    # Create a database entry for this snapshot.
+    snapshot = Snapshot(image_id=image.id, vmname=args.vmname,
+                        ipaddr=args.ipaddr, port=image.port)
+    session.add(snapshot)
+    session.commit()
+
     m.create_vm()
     m.os_type(os=h.name, sp=h.service_pack)
-    m.attach_hd(image.path)
+    m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype)
     m.start_vm(visible=args.vm_visible)
     wait_for_host(image.ipaddr, image.port)
