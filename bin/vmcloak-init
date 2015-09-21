@@ -119,7 +119,8 @@ def main():
     session = Session()
     session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack,
-                      ipaddr=args.ip, port=args.port))
+                      ipaddr=args.ip, port=args.port,
+                      netmask=args.netmask, gateway=args.gateway))
     session.commit()
 
 if __name__ == "__main__":
