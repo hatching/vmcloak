@@ -40,10 +40,7 @@ class Office2007(Dependency):
         self.a.execute("D:\\setup.exe /config C:\\config.xml")
 
         # Wait until setup.exe is no longer running.
-        while True:
-            if "setup.exe" not in self.a.execute("tasklist").content.lower():
-                log.info("Office has been installed.")
-                break
+        self.wait_process_exit("setup.exe")
 
         self.a.remove("C:\\config.xml")
         self.m.detach_iso()

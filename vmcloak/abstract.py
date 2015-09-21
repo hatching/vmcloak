@@ -8,6 +8,7 @@ import random
 import shutil
 import subprocess
 import tempfile
+import time
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
@@ -299,3 +300,14 @@ class Dependency(object):
         """Upload this dependency to the specified filepath."""
         fpath = os.path.join(deps_path, os.path.basename(self.url))
         self.a.upload(filepath, open(fpath, "rb"))
+
+    def wait_process_exit(self, process_name):
+        """Wait for a process to exit."""
+        while True:
+            time.sleep(1)
+
+            for line in self.a.execute("tasklist").content.split("\n"):
+                if line.lower().startswith(process_name.lower()):
+                    continue
+
+            break
