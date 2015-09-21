@@ -59,7 +59,7 @@ class Agent(object):
             "%s %s %s 1" % (ipaddr, netmask, gateway)
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
-                          data={"command": command}, timeout=10)
+                          data={"command": command}, timeout=5)
         except requests.exceptions.ReadTimeout:
             pass
 
