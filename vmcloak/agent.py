@@ -77,3 +77,10 @@ class Agent(object):
         """Identify a window by its title and click one of its buttons."""
         self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
             window_title, button_name))
+
+    def click_async(self, window_title, button_name):
+        """Identify a window by its title and click one of its buttons
+        asynchronously. This is mostly used in cases where the click may or
+        may not be required, leaving the clicking process hanging."""
+        self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
+            window_title, button_name), async=True)
