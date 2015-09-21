@@ -19,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("name", type=str, help="Name of the instance.")
     parser.add_argument("vmname", type=str, help="Virtual Machine name.")
-    parser.add_argument("ipaddr", type=str, help="IP address.")
+    parser.add_argument("ipaddr", type=str, nargs="?", default="192.168.56.101", help="IP address.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
