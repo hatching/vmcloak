@@ -66,18 +66,25 @@ def main():
         if "." in dependency and "=" in dependency:
             key, value = dependency.split("=", 1)
             settings[key.strip()] = value.strip()
+        elif ":" in dependency:
+            dependency, version = dependency.split(":", 1)
+            dependencies.append((dependency, version))
         else:
-            dependencies.append(dependency)
+            dependencies.append((dependency, None))
 
-    for dependency in dependencies:
-        log.info("Installing dependency %s..", dependency)
+    for dependency, version in dependencies:
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
             break
 
+        if version:
+            log.info("Installing dependency %s %s..", dependency, version)
+        else:
+            log.info("Installing dependency %s..", dependency)
+
         try:
-            d = vmcloak.dependencies.names[dependency](h, m, a, image, settings)
-            d.run()
+            d = vmcloak.dependencies.names[dependency]
+            d(h, m, a, image, version, settings).run()
         except DependencyError:
             log.error("The dependency %s returned an error..", dependency)
             break

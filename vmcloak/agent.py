@@ -84,3 +84,8 @@ class Agent(object):
         may not be required, leaving the clicking process hanging."""
         self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
             window_title, button_name), async=True)
+
+    def resolution(self, width, height):
+        """Set the screen resolution of this Virtual Machine."""
+        self.execute("C:\\Python27\\python.exe C:\\vmcloak\\resolution.py "
+                     "%s %s" % (width, height))

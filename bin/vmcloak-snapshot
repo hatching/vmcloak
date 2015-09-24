@@ -20,6 +20,7 @@ def main():
     parser.add_argument("name", type=str, help="Name of the instance.")
     parser.add_argument("vmname", type=str, help="Virtual Machine name.")
     parser.add_argument("ipaddr", type=str, nargs="?", default="192.168.56.101", help="IP address.")
+    parser.add_argument("--resolution", type=str, help="Screen resolution.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
@@ -50,6 +51,11 @@ def main():
 
     a = Agent(image.ipaddr, image.port)
     a.ping()
+
+    if args.resolution:
+        width, height = args.resolution.split("x")
+        a.resolution(width, height)
+
     a.remove("C:\\vmcloak")
     a.static_ip(args.ipaddr, image.netmask, image.gateway)
 

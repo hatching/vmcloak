@@ -252,11 +252,12 @@ class Dependency(object):
     url = None
     sha1 = None
 
-    def __init__(self, h, m, a, i, settings):
+    def __init__(self, h, m, a, i, version, settings):
         self.h = h
         self.m = m
         self.a = a
         self.i = i
+        self.version = version
         self.settings = settings
 
         self.init()
