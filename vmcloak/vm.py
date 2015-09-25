@@ -87,7 +87,8 @@ class VirtualBox(Machinery):
             'win7': 'Windows7',
             'win7x64': 'Windows7_64',
         }
-        return self._call('modifyvm', self.name, ostype=operating_systems[os])
+        return self._call('modifyvm', self.name,
+                          ostype=operating_systems[osversion])
 
     def create_hd(self, hdd_path, fsize=256*1024):
         self._call('createhd', filename=hdd_path, size=fsize)
