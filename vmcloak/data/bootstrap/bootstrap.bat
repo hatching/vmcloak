@@ -58,7 +58,7 @@ else (
     set PYTHON=C:\Python27\Python.exe
 )
 
-reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d "%PYTHON% C:\agent.py 0.0.0.0 %AGENT_PORT%"
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d "%PYTHON% C:\agent.py 0.0.0.0 %AGENT_PORT%" /f
 
 echo Shutting down.
 shutdown -s -t 0
