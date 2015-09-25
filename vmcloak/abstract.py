@@ -46,8 +46,8 @@ class Machinery(object):
         """Modify the amount of RAM available for this Virtual Machine."""
         raise
 
-    def os_type(self, os, sp):
-        """Set the OS type to the OS and the Service Pack."""
+    def os_type(self, osversion):
+        """Set the OS type."""
         raise
 
     def create_hd(self, fsize):

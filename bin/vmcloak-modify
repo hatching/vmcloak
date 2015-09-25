@@ -40,12 +40,12 @@ def main():
     if image.osversion == "winxp":
         h = WindowsXP()
         ramsize = 1024
-    elif image.osversion == "win7":
+    elif image.osversion == "win7" or image.osversion == "win7x64":
         h = Windows7()
         ramsize = 2048
 
     m.create_vm()
-    m.os_type(os=h.name, sp=h.service_pack)
+    m.os_type(image.osversion)
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=False)
     m.detach_iso()

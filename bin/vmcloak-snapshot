@@ -37,7 +37,7 @@ def main():
     if image.osversion == "winxp":
         h = WindowsXP()
         ramsize = args.ramsize or 1024
-    elif image.osversion == "win7":
+    elif image.osversion == "win7" or image.osversion == "win7x64":
         h = Windows7()
         ramsize = args.ramsize or 2048
 
@@ -46,7 +46,7 @@ def main():
     session.commit()
 
     m.create_vm()
-    m.os_type(os=h.name, sp=h.service_pack)
+    m.os_type(image.osversion)
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype)

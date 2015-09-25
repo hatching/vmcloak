@@ -100,7 +100,7 @@ def main():
     shutil.rmtree(bootstrap)
 
     m.create_vm()
-    m.os_type(os=h.name, sp=h.service_pack)
+    m.os_type(osversion)
     m.ramsize(ramsize)
     m.create_hd(hdd_path)
     m.attach_iso(iso_path)
