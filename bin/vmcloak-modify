@@ -46,6 +46,7 @@ def main():
 
     m.create_vm()
     m.os_type(image.osversion)
+    m.cpus(1)
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=False)
     m.detach_iso()

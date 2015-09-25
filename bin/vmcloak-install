@@ -50,6 +50,7 @@ def main():
 
     m.create_vm()
     m.os_type(image.osversion)
+    m.cpus(1)
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=False)
     # Ensure the slot is at least allocated for by an empty drive.
