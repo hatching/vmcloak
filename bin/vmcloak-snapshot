@@ -21,6 +21,7 @@ def main():
     parser.add_argument("vmname", type=str, help="Virtual Machine name.")
     parser.add_argument("ipaddr", type=str, nargs="?", default="192.168.56.101", help="IP address.")
     parser.add_argument("--resolution", type=str, help="Screen resolution.")
+    parser.add_argument("--ramsize", type=int, help="Amount of virtual memory to assign.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
@@ -35,8 +36,10 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
+        ramsize = args.ramsize or 1024
     elif image.osversion == "win7":
         h = Windows7()
+        ramsize = args.ramsize or 2048
 
     # From now on this image is multiattach.
     image.mode = "multiattach"
@@ -44,6 +47,7 @@ def main():
 
     m.create_vm()
     m.os_type(os=h.name, sp=h.service_pack)
+    m.ramsize(ramsize)
     m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype)
     m.start_vm(visible=args.vm_visible)

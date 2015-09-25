@@ -46,8 +46,10 @@ def main():
     if args.winxp:
         h = WindowsXP()
         osversion = "winxp"
+        ramsize = 1024
     elif args.win7 or args.win7x64:
         h = Windows7()
+        ramsize = 2048
         if args.x64 or args.win7x64:
             osversion = "win7x64"
             args.x64 = True
@@ -99,6 +101,7 @@ def main():
 
     m.create_vm()
     m.os_type(os=h.name, sp=h.service_pack)
+    m.ramsize(ramsize)
     m.create_hd(hdd_path)
     m.attach_iso(iso_path)
     m.hostonly(nictype=h.nictype)

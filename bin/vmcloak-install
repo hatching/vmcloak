@@ -43,11 +43,14 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
+        ramsize = 1024
     elif image.osversion == "win7":
         h = Windows7()
+        ramsize = 2048
 
     m.create_vm()
     m.os_type(os=h.name, sp=h.service_pack)
+    m.ramsize(ramsize)
     m.attach_hd(image.path, multi=False)
     # Ensure the slot is at least allocated for by an empty drive.
     m.detach_iso()
