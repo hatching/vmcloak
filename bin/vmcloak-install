@@ -56,7 +56,7 @@ def main():
     m.attach_hd(image.path, multi=False)
     # Ensure the slot is at least allocated for by an empty drive.
     m.detach_iso()
-    m.hostonly(nictype=h.nictype)
+    m.hostonly(nictype=h.nictype, adapter=image.adapter)
     m.start_vm(visible=args.vm_visible)
     wait_for_host(image.ipaddr, image.port)
 

@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--serial-key", type=str, help="Windows Serial Key.")
     parser.add_argument("--ip", type=str, default="192.168.56.2", help="Guest IP address.")
     parser.add_argument("--port", type=int, default=8000, help="Port to run the Agent on.")
+    parser.add_argument("--adapter", type=str, default="vboxnet0", help="Network adapter.")
     parser.add_argument("--netmask", type=str, default="255.255.255.0", help="Guest IP address.")
     parser.add_argument("--gateway", type=str, default="192.168.56.1", help="Guest IP address.")
     parser.add_argument("--tempdir", type=str, default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
@@ -106,7 +107,7 @@ def main():
     m.ramsize(ramsize)
     m.create_hd(hdd_path)
     m.attach_iso(iso_path)
-    m.hostonly(nictype=h.nictype)
+    m.hostonly(nictype=h.nictype, adapter=args.adapter)
 
     log.info("Starting the Virtual Machine %r to install Windows.", args.name)
     m.start_vm(visible=args.vm_visible)
@@ -124,7 +125,7 @@ def main():
     session = Session()
     session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
-                      ipaddr=args.ip, port=args.port,
+                      ipaddr=args.ip, port=args.port, adapter=args.adapter,
                       netmask=args.netmask, gateway=args.gateway))
     session.commit()
 
