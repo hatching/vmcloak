@@ -102,6 +102,7 @@ def main():
     m.create_vm()
     m.os_type(osversion)
     m.cpus(1)
+    m.mouse("usbtablet")
     m.ramsize(ramsize)
     m.create_hd(hdd_path)
     m.attach_iso(iso_path)

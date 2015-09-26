@@ -49,6 +49,7 @@ def main():
     m.create_vm()
     m.os_type(image.osversion)
     m.cpus(args.cpus)
+    m.mouse("usbtablet")
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype)
