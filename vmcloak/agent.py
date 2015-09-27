@@ -32,6 +32,11 @@ class Agent(object):
         """Ping the machine."""
         return self.get("/", timeout=5)
 
+    def environ(self, value=None, default=None):
+        """Obtain one or all environment variable(s)."""
+        environ = self.get("/environ").json()["environ"]
+        return environ if value is None else environ.get(value, default)
+
     def execute(self, command, async=False):
         """Execute a command."""
         if async:
@@ -47,9 +52,26 @@ class Agent(object):
         """Power off the machine."""
         self.execute("shutdown -s -t 0", async=True)
 
+    def reboot(self):
+        """Reboot the machine."""
+        self.execute("shutdown -r -t 0", async=True)
+
+    def kill(self):
+        """Kill the Agent."""
+        self.get("/kill")
+
     def killprocess(self, process_name):
         """Terminate a process."""
         self.execute("taskkill /F /IM %s" % process_name)
+
+    def hostname(self, hostname):
+        """Assign a new hostname."""
+        cmdline = "wmic computersystem where name=\"%(oldname)s\" " \
+            "call rename name=\"%(newname)s\""
+        args = dict(oldname=self.environ("COMPUTERNAME"), newname=hostname)
+
+        # self.execute(cmdline % args, shell=True)
+        self.execute(cmdline % args)
 
     def static_ip(self, ipaddr, netmask, gateway):
         """Change the IP address of this machine."""

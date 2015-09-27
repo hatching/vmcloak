@@ -44,6 +44,7 @@ class Snapshot(Base):
     vmname = Column(String(64))
     ipaddr = Column(String(32))
     port = Column(Integer)
+    hostname = Column(String(32))
 
 if not os.path.isdir(conf_path):
     os.mkdir(conf_path)

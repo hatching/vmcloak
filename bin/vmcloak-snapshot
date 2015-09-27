@@ -5,9 +5,11 @@
 
 import argparse
 import logging
+import time
 
 from vmcloak.agent import Agent
 from vmcloak.misc import wait_for_host
+from vmcloak.rand import random_string
 from vmcloak.repository import Session, Image, Snapshot
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
@@ -23,6 +25,7 @@ def main():
     parser.add_argument("--resolution", type=str, help="Screen resolution.")
     parser.add_argument("--ramsize", type=int, help="Amount of virtual memory to assign.")
     parser.add_argument("--cpus", type=int, default=1, help="Amount of CPUs to assign.")
+    parser.add_argument("--hostname", type=str, default=random_string(8, 16), help="Hostname for this VM.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
@@ -54,9 +57,19 @@ def main():
     m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype, adapter=image.adapter)
     m.start_vm(visible=args.vm_visible)
-    wait_for_host(image.ipaddr, image.port)
 
+    wait_for_host(image.ipaddr, image.port)
     a = Agent(image.ipaddr, image.port)
+    a.ping()
+
+    # Assign a new hostname.
+    a.hostname(args.hostname)
+    a.reboot()
+    a.kill()
+
+    # Wait for the reboot to kick in.
+    time.sleep(10)
+    wait_for_host(image.ipaddr, image.port)
     a.ping()
 
     if args.resolution:
@@ -71,7 +84,8 @@ def main():
 
     # Create a database entry for this snapshot.
     snapshot = Snapshot(image_id=image.id, vmname=args.vmname,
-                        ipaddr=args.ipaddr, port=image.port)
+                        ipaddr=args.ipaddr, port=image.port,
+                        hostname=args.hostname)
     session.add(snapshot)
     session.commit()
 
