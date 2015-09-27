@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--netmask", type=str, default="255.255.255.0", help="Guest IP address.")
     parser.add_argument("--gateway", type=str, default="192.168.56.1", help="Guest IP address.")
     parser.add_argument("--tempdir", type=str, default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
+    parser.add_argument("--resolution", type=str, default="1024x768", help="Screen resolution.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     parser.add_argument("-d", "--debug", action="store_true", help="Install Virtual Machine in debug mode.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging.")
@@ -71,12 +72,16 @@ def main():
 
     h.configure(args)
 
+    reso_width, reso_height = args.resolution.split("x")
+
     settings = dict(
         GUEST_IP=args.ip,
         AGENT_PORT=args.port,
         GUEST_MASK=args.netmask,
         GUEST_GATEWAY=args.gateway,
         DEBUG="yes" if args.debug else "no",
+        RESO_WIDTH=reso_width,
+        RESO_HEIGHT=reso_height,
     )
 
     bootstrap = tempfile.mkdtemp(dir=args.tempdir)

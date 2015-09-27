@@ -63,6 +63,9 @@ else (
     set PYTHON=C:\Python27\Python.exe
 )
 
+echo Setting the resolution.
+C:\Python27\Python.exe C:\vmcloak\resolution.py %RESO_WIDTH% %RESO_HEIGHT%
+
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d "%PYTHON% C:\agent.py 0.0.0.0 %AGENT_PORT%" /f
 
 echo Shutting down.
