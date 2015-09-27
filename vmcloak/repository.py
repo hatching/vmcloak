@@ -31,6 +31,7 @@ class Image(Base):
     servicepack = Column(String(32))
     ipaddr = Column(String(32))
     port = Column(Integer)
+    adapter = Column(String(32))
     netmask = Column(String(32))
     gateway = Column(String(32))
 
