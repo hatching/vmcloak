@@ -7,6 +7,7 @@ import argparse
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -14,7 +15,7 @@ import traceback
 import zipfile
 
 try:
-    from flask import Flask, request, jsonify
+    from flask import Flask, request, jsonify, send_file
 except ImportError:
     sys.exit("ERROR: Flask library is missing (`pip install flask`)")
 
@@ -118,6 +119,13 @@ def do_store():
 
     return json_success("Successfully stored file")
 
+@app.route("/retrieve", methods=["POST"])
+def do_retrieve():
+    if "filepath" not in request.form:
+        return json_error(400, "No filepath has been provided")
+
+    return send_file(request.form["filepath"])
+
 @app.route("/extract", methods=["POST"])
 def do_extract():
     if "dirpath" not in request.form:
@@ -141,9 +149,15 @@ def do_remove():
 
     try:
         if os.path.isdir(request.form["path"]):
+            # Mark all files as readable so they can be deleted.
+            for dirpath, _, filenames in os.walk(request.form["path"]):
+                for filename in filenames:
+                    os.chmod(os.path.join(dirpath, filename), stat.S_IWRITE)
+
             shutil.rmtree(request.form["path"])
             message = "Successfully deleted directory"
         elif os.path.isfile(request.form["path"]):
+            os.chmod(request.form["path"], stat.S_IWRITE)
             os.remove(request.form["path"])
             message = "Successfully deleted file"
     except:
@@ -156,17 +170,18 @@ def do_execute():
     if "command" not in request.form:
         return json_error(400, "No command has been provided")
 
-    # Execute the command asynchronously?
+    # Execute the command asynchronously? As a shell command?
     async = "async" in request.form
+    shell = "shell" in request.form
 
     cwd = request.form.get("cwd")
     stdout = stderr = None
 
     try:
         if async:
-            subprocess.Popen(request.form["command"], shell=True, cwd=cwd)
+            subprocess.Popen(request.form["command"], shell=shell, cwd=cwd)
         else:
-            p = subprocess.Popen(request.form["command"], shell=True, cwd=cwd,
+            p = subprocess.Popen(request.form["command"], shell=shell, cwd=cwd,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             stdout, stderr = p.communicate()
