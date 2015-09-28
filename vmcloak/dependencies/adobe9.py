@@ -8,8 +8,12 @@ from vmcloak.abstract import Dependency
 
 class Adobe9(Dependency):
     name = "adobe9"
-    url = "http://cuckoo.sh/vmcloak/AdbeRdr90_en_US.exe"
-    sha1 = "8faabd08289b9a88023f71136f13fc4bd3290ef0"
+    exes = [
+        {
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr90_en_US.exe",
+            "sha1": "8faabd08289b9a88023f71136f13fc4bd3290ef0",
+        },
+    ]
 
     def run(self):
         self.upload_dependency("C:\\adobe9.exe")

@@ -249,8 +249,7 @@ class Dependency(object):
     """Dependency instance. Each software has its own dependency class which
     informs VMCloak on how to install that particular piece of software."""
     name = None
-    url = None
-    sha1 = None
+    exes = []
 
     def __init__(self, h, m, a, i, version, settings):
         self.h = h
@@ -259,6 +258,7 @@ class Dependency(object):
         self.i = i
         self.version = version
         self.settings = settings
+        self.exe = None
 
         self.init()
 
@@ -268,17 +268,35 @@ class Dependency(object):
             if package == self.name:
                 setattr(self, key, value)
 
-        # Download the dependency if we don't have it already.
-        if self.url:
-            filepath = os.path.join(deps_path, os.path.basename(self.url))
-            if not os.path.exists(filepath) or sha1_file(filepath) != self.sha1:
-                subprocess.call(["wget", "-O", filepath, self.url])
+        # Locate the matching installer.
+        for exe in self.exes:
+            if "target" in exe and exe["target"] != i.osversion:
+                continue
 
-            if sha1_file(filepath) != self.sha1:
-                log.error("The checksum of %s doesn't match!", self.name)
+            if "version" in exe and exe["version"] != version:
+                continue
+
+            self.exe = exe
+
+            # Download the dependency.
+            self._fetch_file(self.exe["url"], self.exe["sha1"])
+            break
+        else:
+            if self.exes:
+                log.error("Could not find the correct installer!")
                 raise DependencyError
 
         if self.check() is False:
+            raise DependencyError
+
+    def _fetch_file(self, url, sha1):
+        self.filepath = os.path.join(deps_path, os.path.basename(url))
+        if not os.path.exists(self.filepath) or \
+                sha1_file(self.filepath) != sha1:
+            subprocess.call(["wget", "-O", self.filepath, url])
+
+        if sha1_file(self.filepath) != sha1:
+            log.error("The checksum of %s doesn't match!", self.name)
             raise DependencyError
 
     def init(self):
@@ -299,8 +317,7 @@ class Dependency(object):
 
     def upload_dependency(self, filepath):
         """Upload this dependency to the specified filepath."""
-        fpath = os.path.join(deps_path, os.path.basename(self.url))
-        self.a.upload(filepath, open(fpath, "rb"))
+        self.a.upload(filepath, open(self.filepath, "rb"))
 
     def wait_process_appear(self, process_name):
         """Wait for a process to appear."""

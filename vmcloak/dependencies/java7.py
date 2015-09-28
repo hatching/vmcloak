@@ -6,8 +6,12 @@ from vmcloak.abstract import Dependency
 
 class Java7(Dependency):
     name = "java7"
-    url = "http://cuckoo.sh/vmcloak/jdk-7-windows-i586.exe"
-    sha1 = "2546a78b6138466b3e23e25b5ca59f1c89c22d03"
+    exes = [
+        {
+            "url": "http://cuckoo.sh/vmcloak/jdk-7-windows-i586.exe",
+            "sha1": "2546a78b6138466b3e23e25b5ca59f1c89c22d03",
+        },
+    ]
 
     def run(self):
         self.upload_dependency("C:\\java7.exe")

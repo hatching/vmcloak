@@ -6,8 +6,12 @@ from vmcloak.abstract import Dependency
 
 class WIC(Dependency):
     name = "wic"
-    url = "http://cuckoo.sh/vmcloak/wic_x86_enu.exe"
-    sha1 = "53c18652ac2f8a51303deb48a1b7abbdb1db427f"
+    exes = [
+        {
+            "url": "http://cuckoo.sh/vmcloak/wic_x86_enu.exe",
+            "sha1": "53c18652ac2f8a51303deb48a1b7abbdb1db427f",
+        },
+    ]
 
     def run(self):
         self.upload_dependency("C:\\wic.exe")
