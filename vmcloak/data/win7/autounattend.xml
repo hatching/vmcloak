@@ -35,11 +35,11 @@
                 <LocalAccounts>
                     <LocalAccount wcm:action="add">
                         <Password>
-                            <Value>PASSWORD</Value>
+                            <Value>@PASSWORD@</Value>
                             <PlainText>true</PlainText>
                         </Password>
-                        <Name>USERNAME0</Name>
-                        <DisplayName>USERNAME1</DisplayName>
+                        <Name>@USERNAME@</Name>
+                        <DisplayName>@USERNAME@</DisplayName>
                     </LocalAccount>
                 </LocalAccounts>
             </UserAccounts>

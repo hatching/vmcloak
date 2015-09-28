@@ -26,6 +26,8 @@ class Windows7(OperatingSystem):
         values = {
             'PRODUCTKEY': self.serial_key,
             'COMPUTERNAME': random_string(8, 16),
+            'USERNAME': random_string(8, 12),
+            'PASSWORD': random_string(8, 16),
         }
 
         buf = open(os.path.join(self.path, 'autounattend.xml'), 'rb').read()
