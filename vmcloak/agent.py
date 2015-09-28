@@ -89,6 +89,13 @@ class Agent(object):
         wait_for_host(ipaddr, self.port)
         self.ipaddr = ipaddr
 
+    def dns_server(self, ipaddr):
+        """Set the IP address of the DNS server."""
+        command = \
+            "netsh interface ip set dns " \
+            "name=\"Local Area Connection\" static %s" % ipaddr
+        self.execute(command)
+
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
         if isinstance(contents, basestring):
