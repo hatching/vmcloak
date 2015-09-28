@@ -18,7 +18,6 @@ log = logging.getLogger("vmcloak-modify")
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("name", type=str, help="Name of the instance.")
-    parser.add_argument("dependencies", type=str, nargs="*", help="Dependencies to install.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
