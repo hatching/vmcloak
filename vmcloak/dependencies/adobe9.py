@@ -31,6 +31,10 @@ class Adobe9(Dependency):
         self.a.click_async("Adobe Reader 9 - Setup", "&Next >")
 
         self.a.click("Adobe Reader 9 - Setup", "&Install")
+
+        time.sleep(1)
+        self.a.click_async("Adobe Reader 9 - Setup", "&Install")
+
         self.a.click("Adobe Reader 9 - Setup", "&Finish")
 
         # Wait until adobe9.exe is no longer running.

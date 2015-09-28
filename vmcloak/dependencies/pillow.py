@@ -20,4 +20,6 @@ class Pillow(Dependency):
         self.a.click("Setup", "&Next >")
         self.a.click("Setup", "&Next >")
         self.a.click("Setup", "Finish")
+
+        self.wait_process_exit("pillow.exe")
         self.a.remove("C:\\pillow.exe")
