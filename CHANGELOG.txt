@@ -1,3 +1,11 @@
+0.3, September 29th 2015
+
+    New: Complete rewrite of the interaction with the Virtual Machines
+        through the use of the new Cuckoo Agent.
+    New: Easier to use command-line API.
+    New: Much improved dependency support.
+    New: Office 2007 dependency.
+
 0.2.13, September 14th 2015
 
     Tweak: The multiattach flag of a harddisk is only preserved a couple of
