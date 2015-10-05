@@ -26,6 +26,7 @@ def main():
     parser.add_argument("--ramsize", type=int, help="Amount of virtual memory to assign.")
     parser.add_argument("--cpus", type=int, default=1, help="Amount of CPUs to assign.")
     parser.add_argument("--hostname", type=str, default=random_string(8, 16), help="Hostname for this VM.")
+    parser.add_argument("--adapter", type=str, help="Hostonly adapter for this VM.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     args = parser.parse_args()
 
@@ -55,7 +56,7 @@ def main():
     m.mouse("usbtablet")
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=True)
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
+    m.hostonly(nictype=h.nictype, adapter=args.adapter or image.adapter)
     m.start_vm(visible=args.vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
