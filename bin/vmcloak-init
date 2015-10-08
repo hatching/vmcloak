@@ -14,6 +14,7 @@ from vmcloak.win7 import Windows7
 from vmcloak.repository import image_path, Session, Image
 from vmcloak.vm import VirtualBox
 
+logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
 def main():
