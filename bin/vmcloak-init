@@ -63,7 +63,8 @@ def main():
         log.error("Please provide either --winxp or --win7.")
         exit(1)
 
-    if not os.path.isdir(args.iso_mount or h.mount):
+    if not os.path.isdir(args.iso_mount or h.mount) or \
+            not os.listdir(args.iso_mount or h.mount):
         log.error("Please specify --iso-mount to a directory containing the "
                   "mounted Windows Installer ISO image.")
         log.info("Refer to the documentation on mounting an .iso image.")
