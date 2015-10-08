@@ -1,3 +1,11 @@
+0.3.1, October 8th 2015
+
+    Tweak: Updated to the latest Agent which doesn't need any additional
+        Python packages outside of the standard ones.
+    Tweak: Get rid of Python packages and the Python installer in the main
+        repository. The Python installer is now a dependency again.
+    Tweak: Detect empty Windows mounts when they've actually not been mounted.
+
 0.3, September 29th 2015
 
     New: Complete rewrite of the interaction with the Virtual Machines
