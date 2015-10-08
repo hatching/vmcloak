@@ -4,8 +4,11 @@
 # See the file 'docs/LICENSE' for copying permission.
 
 import argparse
+import cgi
+import json
 import os
 import platform
+import re
 import shutil
 import stat
 import subprocess
@@ -14,12 +17,137 @@ import tempfile
 import traceback
 import zipfile
 
-try:
-    from flask import Flask, request, jsonify, send_file
-except ImportError:
-    sys.exit("ERROR: Flask library is missing (`pip install flask`)")
+import SimpleHTTPServer
+import SocketServer
 
-app = Flask("agent")
+class MiniHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    server_version = "Cuckoo Agent"
+
+    def do_GET(self):
+        request.form = {}
+        request.files = {}
+        self.httpd.handle(self)
+
+    def do_POST(self):
+        environ = {
+            "REQUEST_METHOD": "POST",
+            "CONTENT_TYPE": self.headers["Content-Type"],
+        }
+
+        form = cgi.FieldStorage(fp=self.rfile,
+                                headers=self.headers,
+                                environ=environ)
+
+        request.form = {}
+        request.files = {}
+
+        for key in form.keys():
+            value = form[key]
+            if value.filename:
+                request.files[key] = value.file
+            else:
+                request.form[key] = value.value
+
+        self.httpd.handle(self)
+
+class MiniHTTPServer(object):
+    def __init__(self):
+        self.handler = MiniHTTPRequestHandler
+
+        # Reference back to the server.
+        self.handler.httpd = self
+
+        self.routes = {
+            "GET": [],
+            "POST": [],
+        }
+
+    def run(self, host="0.0.0.0", port=8000):
+        self.s = SocketServer.TCPServer((host, port), self.handler)
+        self.s.allow_reuse_address = True
+        self.s.serve_forever()
+
+    def route(self, path, methods=["GET"]):
+        def register(fn):
+            for method in methods:
+                self.routes[method].append((re.compile(path + "$"), fn))
+            return fn
+        return register
+
+    def handle(self, obj):
+        for route, fn in self.routes[obj.command]:
+            if route.match(obj.path):
+                ret = fn()
+                break
+        else:
+            ret = json_error(404, message="Route not found")
+
+        ret.init()
+        obj.send_response(ret.status_code)
+        ret.headers(obj)
+        obj.end_headers()
+
+        if isinstance(ret, jsonify):
+            obj.wfile.write(ret.json())
+        elif isinstance(ret, send_file):
+            ret.write(obj.wfile)
+
+    def shutdown(self):
+        # BaseServer also features a .shutdown() method, but you can't use
+        # that from the same thread as that will deadlock the whole thing.
+        self.s._BaseServer__shutdown_request = True
+
+class jsonify(object):
+    """Wrapper that represents Flask.jsonify functionality."""
+    def __init__(self, **kwargs):
+        self.status_code = 200
+        self.values = kwargs
+
+    def init(self):
+        pass
+
+    def json(self):
+        return json.dumps(self.values)
+
+    def headers(self, obj):
+        pass
+
+class send_file(object):
+    """Wrapper that represents Flask.send_file functionality."""
+    def __init__(self, path):
+        self.path = path
+        self.status_code = 200
+
+    def init(self):
+        if not os.path.isfile(self.path):
+            self.status_code = 404
+            self.length = 0
+        else:
+            self.length = os.path.getsize(self.path)
+
+    def write(self, sock):
+        if not self.length:
+            return
+
+        with open(self.path, "rb") as f:
+            while True:
+                buf = f.read(1024 * 1024)
+                if not buf:
+                    break
+
+                sock.write(buf)
+
+    def headers(self, obj):
+        obj.send_header("Content-Length", self.length)
+
+class request(object):
+    form = {}
+    files = {}
+    environ = {
+        "werkzeug.server.shutdown": lambda: app.shutdown(),
+    }
+
+app = MiniHTTPServer()
 state = {}
 
 def json_error(error_code, message):
