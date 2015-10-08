@@ -251,7 +251,8 @@ class Dependency(object):
     name = None
     exes = []
 
-    def __init__(self, h, m, a, i, version, settings):
+    def __init__(self, h=None, m=None, a=None, i=None,
+                 version=None, settings={}):
         self.h = h
         self.m = m
         self.a = a
@@ -277,19 +278,20 @@ class Dependency(object):
                 continue
 
             self.exe = exe
-
-            # Download the dependency.
-            self._fetch_file(self.exe["url"], self.exe["sha1"])
             break
         else:
             if self.exes:
                 log.error("Could not find the correct installer!")
                 raise DependencyError
 
+        # Download the dependency.
+        self.download()
+
         if self.check() is False:
             raise DependencyError
 
-    def _fetch_file(self, url, sha1):
+    def download(self):
+        url, sha1 = self.exe["url"], self.exe["sha1"]
         self.filepath = os.path.join(deps_path, os.path.basename(url))
         if not os.path.exists(self.filepath) or \
                 sha1_file(self.filepath) != sha1:

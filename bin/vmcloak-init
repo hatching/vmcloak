@@ -9,6 +9,7 @@ import os.path
 import shutil
 import tempfile
 
+from vmcloak.dependencies import Python27
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
 from vmcloak.repository import image_path, Session, Image
@@ -97,6 +98,11 @@ def main():
     with open(os.path.join(vmcloak_dir, "settings.bat"), "wb") as f:
         for key, value in settings.items():
             print>>f, "set %s=%s" % (key, value)
+
+    # Download the Python dependency and set it up for bootstrapping the VM.
+    d = Python27(i=Image(osversion=osversion))
+    d.download()
+    shutil.copy(d.filepath, vmcloak_dir)
 
     iso_path = os.path.join(args.tempdir, "%s.iso" % args.name)
     hdd_path = os.path.join(image_path, "%s.vdi" % args.name)
