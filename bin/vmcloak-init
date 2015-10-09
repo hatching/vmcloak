@@ -16,7 +16,7 @@ from vmcloak.repository import image_path, Session, Image
 from vmcloak.vm import VirtualBox
 
 logging.basicConfig()
-log = logging.getLogger("vmcloak")
+log = logging.getLogger("vmcloak-init")
 
 def main():
     parser = argparse.ArgumentParser()

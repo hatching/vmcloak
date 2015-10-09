@@ -15,7 +15,7 @@ from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
 
-log = logging.getLogger("vmcloak")
+log = logging.getLogger("vmcloak-snapshot")
 
 def main():
     parser = argparse.ArgumentParser()
