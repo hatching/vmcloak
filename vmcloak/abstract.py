@@ -284,8 +284,9 @@ class Dependency(object):
                 log.error("Could not find the correct installer!")
                 raise DependencyError
 
-        # Download the dependency.
-        self.download()
+        # Download the dependency (if there is any to download).
+        if self.exe:
+            self.download()
 
         if self.check() is False:
             raise DependencyError
