@@ -1,3 +1,10 @@
+0.3.2, October 9th 2015
+
+    Tweak: Try to avoid running VMCloak 0.2 command line arguments on a 0.3
+        install, showing an error message about it.
+    Bugfix: Only download dependency when there is any to download.
+    New: Register a Snapshot with Cuckoo using vmcloak-register.
+
 0.3.1, October 8th 2015
 
     Tweak: Updated to the latest Agent which doesn't need any additional
