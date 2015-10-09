@@ -28,3 +28,6 @@ def main():
     # TODO Add snapshot.port & snapshot.adapter to the configuration.
     # But those options will require various changes in Cuckoo as well.
     register_cuckoo(snapshot.ipaddr, args.tags, args.vmname, args.cuckoo)
+
+if __name__ == "__main__":
+    main()
