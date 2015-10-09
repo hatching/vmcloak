@@ -28,6 +28,7 @@ setup(
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
         'bin/vmcloak-killvbox',
+        'bin/vmcloak-register',
         'bin/vmcloak-removevms',
         'bin/vmcloak-vboxnet0',
     ],

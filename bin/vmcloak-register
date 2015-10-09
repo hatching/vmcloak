@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+# Copyright (C) 2014-2015 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+import argparse
+import logging
+
+from vmcloak.misc import register_cuckoo
+from vmcloak.repository import Session, Snapshot
+
+log = logging.getLogger("vmcloak-register")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vmname", type=str, help="Virtual Machine name.")
+    parser.add_argument("cuckoo", type=str, help="Path to Cuckoo installation.")
+    parser.add_argument("tags", type=str, nargs="?", help="Cuckoo tags for this VM.")
+    args = parser.parse_args()
+
+    session = Session()
+
+    snapshot = session.query(Snapshot).filter_by(vmname=args.vmname).first()
+    if not snapshot:
+        log.error("Snapshot not found: %s", args.vmname)
+        exit(1)
+
+    # TODO Add snapshot.port & snapshot.adapter to the configuration.
+    # But those options will require various changes in Cuckoo as well.
+    register_cuckoo(snapshot.ipaddr, args.tags, args.vmname, args.cuckoo)
