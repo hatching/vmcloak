@@ -275,7 +275,7 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
             machine_py, '--add',
             '--ip', hostonly_ip,
             '--platform', 'windows',
-            '--tags', tags,
+            '--tags', tags or "",
             '--snapshot', 'vmcloak',
             vmname,
         ]
