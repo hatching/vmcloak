@@ -23,6 +23,7 @@ the process of generating a new VM.
 Usage
 -----
 
-In order to run the tool you'll have to provide at the very least all required
-variables. For more information on this please refer to the documentation or
-go for an trial and error approach.
+For a quick walkthrough on the general usage of VMCloak, please refer to the
+following blogpost: [http://jbremer.org/vmcloak3][blogpost].
+
+[blogpost]: http://jbremer.org/vmcloak3
