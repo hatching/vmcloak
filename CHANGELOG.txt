@@ -1,4 +1,4 @@
-0.3.3, TBD
+0.3.3, October 17th 2015
 
     Bugfix: The vmcloak-register utility was not functional yet, fixed now.
     Tweak: Update the readme to include a link to the howto 0.3 blogpost.
