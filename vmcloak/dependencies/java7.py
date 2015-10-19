@@ -30,9 +30,9 @@ class Java7(Dependency):
         self.a.killprocess("iexplore.exe")
 
         self.a.remove("C:\\java7.exe")
-        
+
         if self.i.osversion == "winxp" or self.i.osversion == "win7":
             self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Update\\Policy\" /v EnableJavaUpdate /t REG_DWORD /d 0 /f")
 
         if self.i.osversion == "win7x64":
-        	self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\JavaSoft\\Java Update\\Policy\" /v EnableJavaUpdate /t REG_DWORD /d 0 /f")
+            self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\JavaSoft\\Java Update\\Policy\" /v EnableJavaUpdate /t REG_DWORD /d 0 /f")
