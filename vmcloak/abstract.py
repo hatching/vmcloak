@@ -342,3 +342,11 @@ class Dependency(object):
                     break
             else:
                 break
+            
+    def disable_javaupdate(self):
+        """Disables java update under Windows XP. Win7 x86"""
+        if self.i.osversion == "winxp" / "win7":
+            self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Update\\Policy\" /v EnableJavaUpdate /t REG_DWORD /d 0 /f")
+
+        if self.i.osversion == "win7x64":
+        	self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\JavaSoft\\Java Update\\Policy\" /v EnableJavaUpdate /t REG_DWORD /d 0 /f")
