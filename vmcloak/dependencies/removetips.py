@@ -1,7 +1,8 @@
 from vmcloak.abstract import Dependency
 
-class RemoveTips(Dependency):
-    name = "removetips"
+class RemoveTooltips(Dependency):
+    name = "removetooltips"
+    description = "Removes balloon tooltips for new users"
     exes = [
         {
             "url": "http://cuckoo.sh/vmcloak/MicrosoftFixit50048.msi",
@@ -10,6 +11,6 @@ class RemoveTips(Dependency):
     ]
 
     def run(self):
-	      self.upload_dependency("C:\\MicrosoftFixit50048.msi")
+        self.upload_dependency("C:\\MicrosoftFixit50048.msi")
         self.a.execute("msiexec /i C:\\MicrosoftFixit50048.msi /passive /norestart")
         self.a.remove("C:\\MicrosoftFixit50048.msi")
