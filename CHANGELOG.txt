@@ -1,3 +1,9 @@
+0.3.4, October 21th 2015
+
+    New: Prevent Java from updating itself (thanks Jason Lewis).
+    New: Remove Balloon Tooltips for new users (thanks Jason Lewis).
+    Tweak: Update the Agent to the latest version (thanks Jason Lewis).
+
 0.3.3, October 17th 2015
 
     Bugfix: The vmcloak-register utility was not functional yet, fixed now.
