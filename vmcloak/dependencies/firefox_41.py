@@ -1,8 +1,8 @@
-#silent install of Firefox 41
-#https://download-installer.cdn.mozilla.net/pub/firefox/releases/41.0.2/win32/en-US/Firefox%20Setup%2041.0.2.exe
-#file was renamed Firefox_Setup_41.0.2.exe to avoid issues with spaces.
+# Silent install of Firefox 41
+# https://download-installer.cdn.mozilla.net/pub/firefox/releases/41.0.2/win32/en-US/Firefox%20Setup%2041.0.2.exe
+# file was renamed Firefox_Setup_41.0.2.exe to avoid issues with spaces.
 
-rom vmcloak.abstract import Dependency
+from vmcloak.abstract import Dependency
 
 class Firefox_41(Dependency):
     name = "firefox_41"
