@@ -24,7 +24,7 @@ def main():
     parser.add_argument("ipaddr", type=str, nargs="?", default="192.168.56.101", help="IP address.")
     parser.add_argument("--resolution", type=str, help="Screen resolution.")
     parser.add_argument("--ramsize", type=int, help="Amount of virtual memory to assign.")
-    parser.add_argument("--cpus", type=int, default=1, help="Amount of CPUs to assign.")
+    parser.add_argument("--cpus", type=int, help="Amount of CPUs to assign.")
     parser.add_argument("--hostname", type=str, default=random_string(8, 16), help="Hostname for this VM.")
     parser.add_argument("--adapter", type=str, help="Hostonly adapter for this VM.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
@@ -52,7 +52,7 @@ def main():
 
     m.create_vm()
     m.os_type(image.osversion)
-    m.cpus(args.cpus)
+    m.cpus(args.cpus or image.cpus)
     m.mouse("usbtablet")
     m.ramsize(ramsize)
     m.attach_hd(image.path, multi=True)

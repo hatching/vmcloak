@@ -34,6 +34,7 @@ class Image(Base):
     adapter = Column(String(32))
     netmask = Column(String(32))
     gateway = Column(String(32))
+    cpus = Column(Integer)
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
