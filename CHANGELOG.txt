@@ -1,3 +1,8 @@
+0.3.6, November 9th 2015
+
+    Bugfix: Forgot to remove vmcloak-bird from setup.py disallowing proper
+        installation of vmcloak.
+
 0.3.5, November 9th 2015
 
     New: Chrome Dependency (thanks Jason Lewis).

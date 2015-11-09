@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version='0.3.5',
+    version='0.3.6',
     author='Jurriaan Bremer',
     author_email='jurriaanbremer@gmail.com',
     packages=[
@@ -23,7 +23,6 @@ setup(
         'bin/vmcloak-snapshot',
         'bin/vmcloak-install',
         'bin/vmcloak-modify',
-        'bin/vmcloak-bird',
         'bin/vmcloak-clone',
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
