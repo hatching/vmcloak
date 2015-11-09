@@ -1,3 +1,11 @@
+0.3.5, November 9th 2015
+
+    New: Chrome Dependency (thanks Jason Lewis).
+    New: Firefox 41 Dependency (thanks Jason Lewis and booboule).
+    Remove: Got rid of deprecated vmcloak-bird.
+    Tweak: Allow --cpus to be set from vmcloak-init and forward (thanks
+        Jason Lewis for the request).
+
 0.3.4, October 21th 2015
 
     New: Prevent Java from updating itself (thanks Jason Lewis).
