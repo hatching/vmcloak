@@ -12,13 +12,13 @@ class Hide(Object):
 
         self.a = a
 
-    def load_json(file_name):
+    def load_json(self, file_name):
         """ Takes a JSON file and returns the content in a dictionnary."""
         file_object = open(file_name, "r")
         file_content = file_object.read()
         return loads(file_content)
 
-    def modify_registry(key):
+    def modify_registry(self, key):
         """ Takes a key dictionnary and
         applies the required reg command to modify the Windows Registry."""
         command = "reg {0} {1} /v {2} /t {3} /d {4}".format(
@@ -33,7 +33,7 @@ class Hide(Object):
         #    print "Invalid operation for the following key : {}".format(
         # key["value"])
 
-    def modify_directory(directory):
+    def modify_directory(self, directory):
         """ Takes a directory dictionnary,
         Applies the required command to create or remove a directory.
         Uses the Agent directory commands."""
@@ -49,4 +49,8 @@ class Hide(Object):
 
         elif mod_type == "create":
 
-            raise
+            print "Method not yet created."
+
+    def upload_file(self, filepath, contents):
+        """Wrapper to upload a file."""
+        self.a.upload(filepath, contents)
