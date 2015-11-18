@@ -8,7 +8,9 @@ from StringIO import StringIO
 
 from vmcloak.misc import wait_for_host
 
+
 class Agent(object):
+
     def __init__(self, ipaddr, port):
         self.ipaddr = ipaddr
         self.port = port
@@ -47,6 +49,10 @@ class Agent(object):
     def remove(self, path):
         """Remove a file or entire directory."""
         self.post("/remove", path=path)
+
+    def rename(self, path):
+        """Rename a file or directory."""
+        self.post("/rename", path=path)
 
     def shutdown(self):
         """Power off the machine."""
