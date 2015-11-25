@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+# Copyright (C) 2014-2015 Jurriaan Bremer - Hugo Genesse.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+from json import loads, dumps
+
+def main():
+
+	raise
+
+if __name__ = "__main__":
+
+	main

@@ -6,9 +6,9 @@
 from json import loads
 
 
-class Hide(Object):
+class Hide(object):
 
-    def __init__(a):
+    def __init__(self, a):
 
         self.a = a
 
