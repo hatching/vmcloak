@@ -3,12 +3,49 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import argparse
 from json import loads, dumps
+from hide import Hide
+from os import path
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--name", type=str, default="hwconf.json", help="Name of the profile.")
+    parser.add_argument("--key", help="Used for registry keys.")
+    parser.add_argument("--modtype", type=str, default="add",
+        help="Modification type for regisry keys and directories.")
+    parser.add_argument("--location", type=str, default="", help="Location of the registry key." )
+    parser.add_argument("--value", type=str, default="", help="Registry key name.")
+    parser.add_argument("--datatype", type=str, default="string", help="Registry data type.")
+    parser.add_argument("--data", type=str, default="", help="Key data.")
+    parser.add_argument("--directory", type=str, help="Used for directory manipulation.")
+    parser.add_argument("--dirpath", type=str, default="", help="Path of the directory to manipulate.")
 
-	raise
+    args = parser.parse_args()
+
+    if args.key:
+        d = dict({
+                "modification_type" : args.modtype,
+                "location" : args.location,
+                "value" : args.value,
+                "datatype" : args.datatype,
+                "value" : args.value
+            })
+
+        if os.path.isfile("../vmcloak/data/hwconf/" + args.name):
+
+            open("../vmcloak/data/hwconf/" + args.name, "a")
+            hwconf.write(dumps(d))
+
+        else:
+
+            open("../vmcloak/data/hwconf/", "w")
+            hwconf.write(dumps(d))
+
+    elif args.directory:
+
+        raise
 
 if __name__ = "__main__":
 
-	main
+    main()
