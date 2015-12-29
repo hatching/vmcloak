@@ -22,7 +22,7 @@ class Hide(object):
         """ Takes a key dictionnary and
         applies the required reg command to modify the Windows Registry."""
         command = "reg {0} {1} /v {2} /t {3} /d {4}".format(
-                key["modification_type"],
+                key["modification_type"].strip("_key"),
                 key["location"],
                 key["value"],
                 key["type"],
