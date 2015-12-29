@@ -50,10 +50,26 @@ def main():
             "dirpath": args.dirpath
             })
 
+    """ Modified version of :
+        http://stackoverflow.com/questions/16245090/file-io-with-defaultdict"""
+    try:
+        """ Check if profile already exists to avoid overwriting."""
+        with open(HWCONF_PATH + args.name + ".json", "r") as hwconf:
+            hwconf_content = hwconf.read()
+            hwconf_content = loads(hwconf_content)
+            hwconf.close()
+
+    except IOError:
+        hwconf_content = []
     """ Dumps the content of the created dictionnary."""
-    hwconf = open(HWCONF_PATH + args.name + ".json", "a")
-    hwconf.write(dumps(d))
-    hwconf.close()
+
+    """ Appends the new key."""
+    hwconf_content.append(d)
+
+    """ Writes the updated profile."""
+    with open(HWCONF_PATH + args.name + ".json", "w") as hwconf:
+        hwconf.write(dumps(hwconf_content))
+        hwconf.close()
 
 if __name__ == "__main__":
 
