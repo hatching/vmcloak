@@ -14,10 +14,10 @@ HWCONF_PATH = "../vmcloak/data/hwconf/"
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--name", type=str, default="hwconf.json",
+    parser.add_argument("--name", type=str, default="hwconf",
                         help="Name of the profile.")
     # parser.add_argument("--key", help="Used for registry keys.")
-    parser.add_argument("--modtype", type=str, default="add_key",
+    parser.add_argument("--modtype", type=str, default="",
                         help="Modification type for regisry and directories.")
     parser.add_argument("--location", type=str, default="",
                         help="Location of the registry key.")
@@ -33,22 +33,51 @@ def main():
 
     args = parser.parse_args()
 
-    if args.modtype == "add_key" or args.modtype == "del_key":
+    if args.modtype.find("key") != -1:
         """ Dumps the JSON key in a hwconf profile file."""
         d = dict({
             "modification_type": args.modtype,
             "location": args.location,
             "value": args.value,
             "datatype": args.datatype,
-            "value": args.value
+            "data": args.data
             })
 
-    elif args.directory:
+    elif args.dirpath != "":
         """Handles the JSON keys to specify directories manipulation."""
+        print "here"
         d = dict({
             "modification_type": args.modtype,
             "dirpath": args.dirpath
             })
+
+    else:
+        print "Inside"
+        """ Manual entry."""
+        mod_type = raw_input("Modification type: ")
+
+        if mod_type.find("key") != -1:
+            """ Registry key dictionnary."""
+            location = raw_input("Location: ")
+            value = raw_input("Value: ")
+            data_type = raw_input("Date type: ")
+            data = raw_input("Data: ")
+
+            d = dict({
+                "modification_type": mod_type,
+                "location": location,
+                "value": value,
+                "datatype": data_type,
+                "data": data
+                })
+        elif mod_type.find("dir") != 1:
+            """ Directory modification dictionnary."""
+            dirpath = raw_input("Directory path: ")
+
+            d = dict({
+                "mod_type": mod_type,
+                "dirpath": dirpath
+                })
 
     """ Modified version of :
         http://stackoverflow.com/questions/16245090/file-io-with-defaultdict"""
@@ -60,8 +89,8 @@ def main():
             hwconf.close()
 
     except IOError:
+        """ New list for a new profile."""
         hwconf_content = []
-    """ Dumps the content of the created dictionnary."""
 
     """ Appends the new key."""
     hwconf_content.append(d)
