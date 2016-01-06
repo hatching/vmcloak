@@ -45,6 +45,12 @@ def main():
     if args.verbose:
         log.setLevel(logging.DEBUG)
 
+    session = Session()
+    image = session.query(Image).filter_by(name=args.name).first()
+    if image:
+        log.error("Image already exists: %s", args.name)
+        exit(1)
+
     if args.vm != "virtualbox":
         log.error("Only the VirtualBox Machinery is supported at this point.")
         exit(1)
@@ -138,7 +144,6 @@ def main():
     m.delete_vm()
 
     log.info("Added image %r to the repository.", args.name)
-    session = Session()
     session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=args.ip, port=args.port, adapter=args.adapter,
