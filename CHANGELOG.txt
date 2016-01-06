@@ -1,3 +1,7 @@
+0.3.7, January 6th 2016
+
+    Tweak: Creating a bird through vmcloak-init fails when it already exists.
+
 0.3.6, November 9th 2015
 
     Bugfix: Forgot to remove vmcloak-bird from setup.py disallowing proper
