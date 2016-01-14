@@ -1,0 +1,14 @@
+#!/usr/bin/python
+# Copyright (C) 2016 Hugo Genesse.
+# This file is part of VMCloak - http://vmcloak.org.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+# import 
+
+def main():
+
+
+
+if __name__ == "__main__":
+
+    main()
