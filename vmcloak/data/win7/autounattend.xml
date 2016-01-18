@@ -140,7 +140,7 @@
                     <InstallFrom>
                         <MetaData wcm:action="add">
                             <Key>/IMAGE/NAME</Key>
-                            <Value>Windows 7 HOMEBASIC</Value>
+                            <Value>Windows 7 @PRODUCT@</Value>
                         </MetaData>
                     </InstallFrom>
                     <InstallTo>

@@ -6,6 +6,7 @@ import logging
 import os.path
 
 from vmcloak.abstract import OperatingSystem
+from vmcloak.misc import ini_read
 from vmcloak.rand import random_string
 from vmcloak.verify import valid_serial_key
 
@@ -22,12 +23,16 @@ class Windows7(OperatingSystem):
         '-joliet-long', '-relaxed-filenames',
     ]
 
-    def _autounattend_xml(self):
+    # List of preferences when multiple Windows 7 types are available.
+    preference = "professional", "homepremium", "ultimate", "homebasic"
+
+    def _autounattend_xml(self, product):
         values = {
             'PRODUCTKEY': self.serial_key,
             'COMPUTERNAME': random_string(8, 16),
             'USERNAME': random_string(8, 12),
             'PASSWORD': random_string(8, 16),
+            "PRODUCT": product.upper(),
         }
 
         buf = open(os.path.join(self.path, 'autounattend.xml'), 'rb').read()
@@ -37,8 +42,36 @@ class Windows7(OperatingSystem):
         return buf
 
     def isofiles(self, outdir, tmp_dir=None):
+        products = []
+
+        product_ini = os.path.join(outdir, "sources", "product.ini")
+        mode, conf = ini_read(product_ini)
+
+        for line in conf.get("BuildInfo", []):
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            if key != "staged":
+                continue
+
+            for product in value.split(","):
+                products.append(product.lower())
+
+            break
+
+        for preference in self.preference:
+            if preference in products:
+                product = preference
+                break
+        else:
+            if products:
+                product = products[0]
+            else:
+                product = self.preference[0]
+
         with open(os.path.join(outdir, 'autounattend.xml'), 'wb') as f:
-            f.write(self._autounattend_xml())
+            f.write(self._autounattend_xml(product))
 
     def set_serial_key(self, serial_key):
         if serial_key and not valid_serial_key(serial_key):
