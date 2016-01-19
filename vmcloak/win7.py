@@ -70,8 +70,13 @@ class Windows7(OperatingSystem):
             else:
                 product = self.preference[0]
 
+        if self.s.product and self.s.product.lower() not in self.preference:
+            log.error("The product version of Windows 7 that was specified "
+                      "on the command-line is not known by us, ignoring it.")
+            self.s.product = None
+
         with open(os.path.join(outdir, 'autounattend.xml'), 'wb') as f:
-            f.write(self._autounattend_xml(product))
+            f.write(self._autounattend_xml(self.s.product or product))
 
     def set_serial_key(self, serial_key):
         if serial_key and not valid_serial_key(serial_key):
