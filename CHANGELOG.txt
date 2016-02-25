@@ -1,3 +1,9 @@
+0.3.9, February 26th 2016
+
+    Tweak: Fixed Chrome sha1 value (thanks baufrecht).
+    Tweak: Fixed logging in vmcloak-register (thanks Geoffrey van den Berge).
+    Tweak: Removed VMCloak 0.2.13 warning.
+
 0.3.8, January 19th 2016
 
     Tweak: Fixed issue with non-homebasic Windows 7 product versions.
