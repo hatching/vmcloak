@@ -15,6 +15,7 @@ from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
 
+logging.basicConfig()
 log = logging.getLogger("vmcloak-snapshot")
 
 def main():
