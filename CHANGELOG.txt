@@ -1,3 +1,22 @@
+0.3.10, February 26th 2016
+
+    Tweak: Fixed logging in vmcloak-register (thanks justaguy).
+
+0.3.9, February 26th 2016
+
+    Tweak: Fixed Chrome sha1 value (thanks baufrecht).
+    Tweak: Fixed logging in vmcloak-snapshot (thanks Geoffrey van den Berge).
+    Tweak: Removed VMCloak 0.2.13 warning.
+
+0.3.8, January 19th 2016
+
+    Tweak: Fixed issue with non-homebasic Windows 7 product versions.
+    Tweak: Allow users to specify which Windows 7 product version they want.
+
+0.3.7, January 6th 2016
+
+    Tweak: Creating a bird through vmcloak-init fails when it already exists.
+
 0.3.6, November 9th 2015
 
     Bugfix: Forgot to remove vmcloak-bird from setup.py disallowing proper

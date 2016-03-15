@@ -9,6 +9,7 @@ import logging
 from vmcloak.misc import register_cuckoo
 from vmcloak.repository import Session, Snapshot
 
+logging.basicConfig()
 log = logging.getLogger("vmcloak-register")
 
 def main():
