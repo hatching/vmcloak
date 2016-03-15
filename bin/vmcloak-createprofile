@@ -7,8 +7,9 @@ import argparse
 from json import loads, dumps
 from os import path
 # from Hide import *
+import os
 
-HWCONF_PATH = "../vmcloak/data/hwconf/"
+PROFILE_PATH = os.path.join(os.getenv('HOME'), '.vmcloak', 'profiles')
 
 
 def main():
@@ -52,9 +53,19 @@ def main():
             })
 
     else:
-        print "Inside"
         """ Manual entry."""
-        mod_type = raw_input("Modification type: ")
+        mod_type = raw_input("Modification type (h for options): ")
+
+        if (mod_type == "h"):
+            print "Registry key modifications:"
+            print "\t- Add key: add_key"
+            print "\t- Delete key: del_key"
+            print "\t- Modify key: mod_key"
+            print "Directory modifications:"
+            print "\t- Add directory: add_dir"
+            print "\t- Delete directory: del_dir"
+            print "\t- Modify directory: mod_dir"
+            mod_type = raw_input("Modification type: ")
 
         if mod_type.find("key") != -1:
             """ Registry key dictionnary."""
@@ -83,22 +94,29 @@ def main():
         http://stackoverflow.com/questions/16245090/file-io-with-defaultdict"""
     try:
         """ Check if profile already exists to avoid overwriting."""
-        with open(HWCONF_PATH + args.name + ".json", "r") as hwconf:
-            hwconf_content = hwconf.read()
-            hwconf_content = loads(hwconf_content)
-            hwconf.close()
+        with open(os.path.join(PROFILE_PATH, "%s.json" % args.name), "r")
+        as profile:
+            profile_content = profile.read()
+            if profile_content:
+                profile_content = loads(profile_content)
+            profile.close()
 
     except IOError:
         """ New list for a new profile."""
-        hwconf_content = []
+        profile_content = []
+    try:
+        """ Appends the new key."""
+        profile_content.append(d)
 
-    """ Appends the new key."""
-    hwconf_content.append(d)
+    except AttributeError:
+        """ Empty file case. """
+        profile_content = d
 
     """ Writes the updated profile."""
-    with open(HWCONF_PATH + args.name + ".json", "w") as hwconf:
-        hwconf.write(dumps(hwconf_content))
-        hwconf.close()
+    with open(os.path.join(PROFILE_PATH, "%s.json" % args.name), "w")
+    as profile:
+        profile.write(dumps(profile_content))
+        profile.close()
 
 if __name__ == "__main__":
 
