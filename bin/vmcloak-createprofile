@@ -94,8 +94,9 @@ def main():
         http://stackoverflow.com/questions/16245090/file-io-with-defaultdict"""
     try:
         """ Check if profile already exists to avoid overwriting."""
-        with open(os.path.join(PROFILE_PATH, "%s.json" % args.name), "r")
-        as profile:
+        with open(
+                os.path.join(PROFILE_PATH, "%s.json" % args.name),
+                "r") as profile:
             profile_content = profile.read()
             if profile_content:
                 profile_content = loads(profile_content)
@@ -113,8 +114,8 @@ def main():
         profile_content = d
 
     """ Writes the updated profile."""
-    with open(os.path.join(PROFILE_PATH, "%s.json" % args.name), "w")
-    as profile:
+    with open(
+            os.path.join(PROFILE_PATH, "%s.json" % args.name), "w") as profile:
         profile.write(dumps(profile_content))
         profile.close()
 
