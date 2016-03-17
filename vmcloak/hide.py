@@ -21,13 +21,14 @@ class Hide(object):
     def modify_registry(self, key):
         """ Takes a key dictionnary and
         applies the required reg command to modify the Windows Registry."""
-        command = "reg {0} {1} /v {2} /t {3} /d {4}".format(
-                key["modification_type"].strip("_key"),
+        mod_type = key["mod_type"].split("_")
+        command = "reg {0} {1} /v {2} /t {3} /d {4} /f".format(
+                mod_type[0],
                 key["location"],
                 key["value"],
                 key["type"],
                 key["data"])
-
+        print "Executing: {}".format(command)
         self.a.execute(command)
 
         #    print "Invalid operation for the following key : {}".format(
@@ -37,19 +38,23 @@ class Hide(object):
         """ Takes a directory dictionnary,
         Applies the required command to create or remove a directory.
         Uses the Agent directory commands."""
-        mod_type = directory["modifcation_type"]
+        mod_type = directory["mod_type"].split("_")
+        print mod_type[0]
+        if mod_type[0] == "rm":
+            print "Removing directory : %s" % directory["dirpath"]
+            self.a.remove(directory["dirpath"])
 
-        if mod_type == "remove":
+        elif mod_type[0] == "mv":
 
-            self.a.remove(directory["path"])
+            self.a.rename(directory["dirpath"])
 
-        elif mod_type == "rename":
+        elif mod_type[0] == "add":
 
-            self.a.rename(directory["path"])
+            print "Adding directory %s." % directory["dirpath"]
+            self.a.mkdir(directory["dirpath"])
 
-        elif mod_type == "create":
-
-            print "Method not yet created."
+        else:
+            print "Not a valid option."
 
     def upload_file(self, filepath, contents):
         """Wrapper to upload a file."""

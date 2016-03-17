@@ -52,6 +52,7 @@ def main():
     m.detach_iso()
     m.hostonly(nictype=h.nictype, adapter=image.adapter)
     m.start_vm(visible=args.vm_visible)
+    print "[*] Waiting for host."
     wait_for_host(image.ipaddr, image.port)
 
     log.info("The Virtual Machine has booted and is ready to be modified!")

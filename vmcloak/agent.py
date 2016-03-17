@@ -50,6 +50,10 @@ class Agent(object):
         """Remove a file or entire directory."""
         self.post("/remove", path=path)
 
+    def mkdir(self, path):
+        """Make a new directory."""
+        self.post("/mkdir", path=path)
+
     def rename(self, path):
         """Rename a file or directory."""
         self.post("/rename", path=path)
