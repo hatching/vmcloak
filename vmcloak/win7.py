@@ -29,7 +29,7 @@ class Windows7(OperatingSystem):
     def _autounattend_xml(self, product):
         values = {
             'PRODUCTKEY': self.serial_key,
-            'COMPUTERNAME': random_string(8, 16),
+            'COMPUTERNAME': random_string(8, 14),
             'USERNAME': random_string(8, 12),
             'PASSWORD': random_string(8, 16),
             "PRODUCT": product.upper(),
@@ -106,7 +106,7 @@ class Windows7x64(OperatingSystem):
     def _autounattend_xml(self, product):
         values = {
             'PRODUCTKEY': self.serial_key,
-            'COMPUTERNAME': random_string(8, 16),
+            'COMPUTERNAME': random_string(8, 14),
             'USERNAME': random_string(8, 12),
             'PASSWORD': random_string(8, 16),
             "PRODUCT": product.upper(),
