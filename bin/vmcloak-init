@@ -71,7 +71,7 @@ def main():
         args.x64 = True
         
     else:
-        log.error("Please provide either --winxp or --win7 or --win7xq64.")
+        log.error("Please provide either --winxp or --win7 or --win7x64.")
         exit(1)
 
     if not os.path.isdir(args.iso_mount or h.mount) or \
