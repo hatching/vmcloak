@@ -12,6 +12,7 @@ import tempfile
 from vmcloak.dependencies import Python27
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
+from vmcloak.win7 import Windows7x64
 from vmcloak.repository import image_path, Session, Image
 from vmcloak.vm import VirtualBox
 
@@ -60,16 +61,17 @@ def main():
         h = WindowsXP()
         osversion = "winxp"
         ramsize = 1024
-    elif args.win7 or args.win7x64:
+    if args.win7:
         h = Windows7()
+        ramsize = 1024
+        osversion = "win7"
+    elif args.x64 or args.win7x64:
+        h = Windows7x86()
         ramsize = 2048
-        if args.x64 or args.win7x64:
-            osversion = "win7x64"
-            args.x64 = True
-        else:
-            osversion = "win7"
+        args.x64 = True
+        
     else:
-        log.error("Please provide either --winxp or --win7.")
+        log.error("Please provide either --winxp or --win7 or --win7xq64.")
         exit(1)
 
     if not os.path.isdir(args.iso_mount or h.mount) or \
