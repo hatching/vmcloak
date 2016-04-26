@@ -89,7 +89,7 @@ class Windows7(OperatingSystem):
         self.serial_key = serial_key or '33PXH-7Y6KF-2VJC9-XBBR8-HVTHH'
         return True
 
-class Windows7x86(OperatingSystem):
+class Windows7x64(OperatingSystem):
     name = 'win7'
     service_pack = 2
     mount = '/mnt/win7'
