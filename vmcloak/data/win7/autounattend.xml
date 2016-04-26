@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <unattend xmlns="urn:schemas-microsoft-com:unattend">
     <settings pass="oobeSystem">
-        <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-International-Core" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0409:00020409</InputLocale>
             <SystemLocale>en-US</SystemLocale>
             <UILanguage>en-US</UILanguage>
             <UILanguageFallback>en-US</UILanguageFallback>
             <UserLocale>en-US</UserLocale>
         </component>
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <TimeZone>W. Europe Standard Time</TimeZone>
             <OOBE>
                 <HideEULAPage>true</HideEULAPage>
@@ -46,7 +46,7 @@
         </component>
     </settings>
     <settings pass="specialize">
-        <component name="Microsoft-Windows-Deployment" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Deployment" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <RunSynchronous>
                 <RunSynchronousCommand wcm:action="add">
                     <Order>1</Order>
@@ -60,17 +60,17 @@
                 </RunSynchronousCommand>
             </RunSynchronous>
         </component>
-        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <SkipAutoActivation>true</SkipAutoActivation>
         </component>
-        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <ComputerName>@COMPUTERNAME@</ComputerName>
             <ShowWindowsLive>false</ShowWindowsLive>
         </component>
-        <component name="Security-Malware-Windows-Defender" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Security-Malware-Windows-Defender" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <DisableAntiSpyware>true</DisableAntiSpyware>
         </component>
-        <component name="Networking-MPSSVC-Svc" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Networking-MPSSVC-Svc" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <DisableStatefulFTP>true</DisableStatefulFTP>
             <DisableStatefulPPTP>true</DisableStatefulPPTP>
             <DomainProfile_EnableFirewall>false</DomainProfile_EnableFirewall>
@@ -79,7 +79,7 @@
         </component>
     </settings>
     <settings pass="windowsPE">
-        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0409:00020409</InputLocale>
             <SystemLocale>en-US</SystemLocale>
             <UILanguage>en-US</UILanguage>
@@ -89,7 +89,7 @@
                 <UILanguage>en-US</UILanguage>
             </SetupUILanguage>
         </component>
-        <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-Setup" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Diagnostics>
                 <OptIn>false</OptIn>
             </Diagnostics>
@@ -157,7 +157,7 @@
                 </ProductKey>
             </UserData>
         </component>
-        <component name="Microsoft-Windows-TCPIP" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <component name="Microsoft-Windows-TCPIP" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <Interfaces>
                 <Interface wcm:action="add">
                     <Identifier>Local Area Connection</Identifier>
