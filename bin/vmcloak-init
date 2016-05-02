@@ -66,9 +66,10 @@ def main():
         ramsize = 1024
         osversion = "win7"
     elif args.x64 or args.win7x64:
-        h = Windows7x86()
+        h = Windows7x64()
         ramsize = 2048
         args.x64 = True
+        osversion = "win7"
         
     else:
         log.error("Please provide either --winxp or --win7 or --win7x64.")
