@@ -132,6 +132,7 @@ class VirtualBox(Machinery):
                    type_='dvddrive', port=1, device=0, medium=iso_path)
 
     def detach_iso(self):
+        time.sleep(1)
         self._call('storageattach', self.name, storagectl='IDE',
                    type_='dvddrive', port=1, device=0, medium='emptydrive')
 
