@@ -37,6 +37,7 @@ def main():
     parser.add_argument("--gateway", type=str, default="192.168.56.1", help="Guest IP address.")
     parser.add_argument("--dns", type=str, default="8.8.8.8", help="DNS Server.")
     parser.add_argument("--cpus", type=int, default=1, help="CPU count.")
+    parser.add_argument("--ramsize", type=int, default=1024, help="Memory size")
     parser.add_argument("--tempdir", type=str, default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
     parser.add_argument("--resolution", type=str, default="1024x768", help="Screen resolution.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
@@ -57,17 +58,18 @@ def main():
         log.error("Only the VirtualBox Machinery is supported at this point.")
         exit(1)
 
+	ramsize = args.ramsize
+
     if args.winxp:
         h = WindowsXP()
         osversion = "winxp"
-        ramsize = 1024
     if args.win7:
         h = Windows7()
-        ramsize = 1024
         osversion = "win7"
     elif args.x64 or args.win7x64:
         h = Windows7x64()
-        ramsize = 2048
+		if ramsize == 1024:
+       		ramsize = 2048
         args.x64 = True
         osversion = "win7"
         
