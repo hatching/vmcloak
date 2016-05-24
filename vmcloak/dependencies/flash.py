@@ -20,3 +20,4 @@ class Flash11(Dependency):
         self.a.execute("msiexec /i C:\\flashplayer11_4r402_287_winax.msi /passive")
 
         self.a.remove("C:\\flashplayer11_4r402_287_winax.msi")
+        
