@@ -58,7 +58,7 @@ def main():
         log.error("Only the VirtualBox Machinery is supported at this point.")
         exit(1)
 
-	ramsize = args.ramsize
+    ramsize = args.ramsize
 
     if args.winxp:
         h = WindowsXP()
