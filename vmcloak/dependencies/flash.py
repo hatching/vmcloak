@@ -6,8 +6,8 @@ import time
 
 from vmcloak.abstract import Dependency
 
-class Flash11(Dependency):
-    name = "flash11"
+class Flash(Dependency):
+    name = "flash"
     exes = [
         {
             "url": "http://cuckoo.sh/vmcloak/flashplayer11_4r402_287_winax.msi",
