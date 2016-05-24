@@ -2,7 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import argparse
 import hashlib
 import importlib
 import json
@@ -190,82 +189,6 @@ def add_bird(name, vmtype, hdd_path):
     birds[name] = dict(vmtype=vmtype, hdd_path=hdd_path)
 
     open(path, 'wb').write(json.dumps(birds))
-
-def shared_parameters():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('vmname', type=str, nargs='?', help='Name of the Virtual Machine.')
-    parser.add_argument('--cuckoo', type=str, help='Directory where Cuckoo is located.')
-    parser.add_argument('--vm-dir', type=str, help='Base directory for the virtual machine and its associated files.')
-    parser.add_argument('--data-dir', type=str, help='Base directory for the virtual machine harddisks and images.')
-    parser.add_argument('--vm', type=str, help='Virtual Machine Software (VirtualBox.)')
-    parser.add_argument('--ramsize', help='Available virtual memory (in MB) for this virtual machine.')
-    parser.add_argument('--resolution', type=str, help='Virtual Machine resolution.')
-    parser.add_argument('--hdsize', help='Maximum size (in MB) of the dynamically allocated harddisk.')
-    parser.add_argument('--host-ip', type=str, help='Static IP address to bind to on the Host.')
-    parser.add_argument('--host-port', type=str, help='Port to bind to on the Host.')
-    parser.add_argument('--hostonly-ip', type=str, help='Static IP address to use on the Guest for the hostonly network.')
-    parser.add_argument('--hostonly-mask', type=str, help='Static IP address mask to use on the Guest for the hostonly network.')
-    parser.add_argument('--hostonly-gateway', type=str, help='Static IP address gateway to use on the Guest for the hostonly network.')
-    parser.add_argument('--hostonly-macaddr', type=str, help='Mac address for the hostonly interface.')
-    parser.add_argument('--hostonly-adapter', type=str, help='Hostonly interface to use.')
-    parser.add_argument('--nat', action='store_true', help='Name of the NAT network to attach to.')
-    parser.add_argument('--dns-server', type=str, help='Address of DNS server to be used.')
-    parser.add_argument('--hwvirt', action='store_true', default=None, help='Explicitly enable Hardware Virtualization.')
-    parser.add_argument('--no-hwvirt', action='store_false', default=None, dest='hwvirt', help='Explicitly disable Hardware Virtualization.')
-    parser.add_argument('--tags', type=str, help='Cuckoo Tags for the Virtual Machine.')
-    parser.add_argument('--no-register-cuckoo', action='store_false', default=None, dest='register_cuckoo', help='Explicitly disable registering the Virtual Machine with Cuckoo upon completion.')
-    parser.add_argument('--vboxmanage', type=str, help='Path to VBoxManage.')
-    parser.add_argument('--vm-visible', action='store_true', default=None, help='Start the Virtual Machine in GUI mode.')
-    parser.add_argument('--keyboard-layout', type=str, help='Keyboard Layout within the Virtual Machine.')
-    parser.add_argument('--cpu-count', help='Number of CPUs to use with this Virtual Machine.')
-    parser.add_argument('--vrde', action='store_true', help='Enable VRDE support in VirtualBox.')
-    parser.add_argument('--vrde-port', type=int, help='Port for the VRDE server.')
-    parser.add_argument('--vrde-password', type=str, help='Password for the VRDE server.')
-    parser.add_argument('--hwconfig-profile', type=str, help='Take a particular hardware profile.')
-    parser.add_argument('--auxiliary', type=str, help='Path to a directory containing auxiliary files that should be shipped to the Virtual Machine.')
-    parser.add_argument('--auxiliary-local', type=str, help='Overwrite the directory path to the auxiliary files in the Virtual Machine.')
-    parser.add_argument('--tempdir', type=str, help='Directory where to put temporary files.')
-    parser.add_argument('--run-executable', type=str, help='Extra executable to be ran after full initialization of the Virtual Machine.')
-    parser.add_argument('-s', '--settings', type=str, default=[], action='append', help='Configuration file with various settings.')
-    parser.add_argument('-r', '--recommended-settings', action='store_true', help='Use the recommended settings.')
-    parser.add_argument('-u', '--user', type=str, help='Drop user privileges to this user')
-    parser.add_argument('-v', '--verbose', action='store_true', help='Display debug messages.')
-
-    defaults = dict(
-        vm='virtualbox',
-        cuckoo='',
-        ramsize=1024,
-        resolution='1024x768',
-        hdsize=256*1024,
-        host_ip='192.168.56.1',
-        host_port=0x4141,
-        host_init_ip='192.168.56.2',
-        host_init_mask='255.255.255.0',
-        host_init_gateway='192.168.56.1',
-        hostonly_ip='192.168.56.101',
-        hostonly_mask='255.255.255.0',
-        hostonly_gateway='192.168.56.1',
-        hostonly_adapter=None,
-        dns_server='8.8.8.8',
-        tags='',
-        vboxmanage='/usr/bin/VBoxManage',
-        vm_visible=False,
-        keyboard_layout='US',
-        cpu_count=1,
-        register_cuckoo=True,
-        auxiliary_local='auxiliary',
-        vrde=False,
-        vrde_port=3389,
-        vrde_password='vmcloak',
-    )
-
-    types = dict(
-        ramsize=int,
-        hdsize=int,
-        cpu_count=int,
-        host_port=int,
-    )
-    return parser, defaults, types
 
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
     log.debug('Registering the Virtual Machine with Cuckoo.')
