@@ -312,18 +312,17 @@ class Dependency(object):
         raise NotImplementedError
 
     def disable_autorun(self):
-        """Disables AutoRun under Windows XP."""
+        """Disables AutoRun under Windows XP and Windows 7."""
         if self.h.name == "winxp":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 177")
 
-        """Disables Autorun for Windows 7 """
         if self.h.name == "win7" or self.h.name == "win7x64":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 255")
-            
+
     def upload_dependency(self, filepath):
         """Upload this dependency to the specified filepath."""
         self.a.upload(filepath, open(self.filepath, "rb"))

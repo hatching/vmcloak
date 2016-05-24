@@ -71,7 +71,6 @@ def main():
         ramsize = 2048
         args.x64 = True
         osversion = "win7"
-        
     else:
         log.error("Please provide either --winxp or --win7 or --win7x64.")
         exit(1)

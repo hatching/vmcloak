@@ -2,8 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import time
-
 from vmcloak.abstract import Dependency
 
 class Flash(Dependency):
@@ -20,4 +18,3 @@ class Flash(Dependency):
         self.a.execute("msiexec /i C:\\flashplayer11_4r402_287_winax.msi /passive")
 
         self.a.remove("C:\\flashplayer11_4r402_287_winax.msi")
-        
