@@ -42,10 +42,8 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
-        ramsize = args.ramsize or 1024
     elif image.osversion == "win7" or image.osversion == "win7x64":
         h = Windows7()
-        ramsize = args.ramsize or 2048
 
     # From now on this image is multiattach.
     image.mode = "multiattach"
@@ -55,7 +53,7 @@ def main():
     m.os_type(image.osversion)
     m.cpus(args.cpus or image.cpus)
     m.mouse("usbtablet")
-    m.ramsize(ramsize)
+    m.ramsize(args.ramsize or image.ramsize)
     m.attach_hd(image.path, multi=True)
     m.hostonly(nictype=h.nictype, adapter=args.adapter or image.adapter)
     m.start_vm(visible=args.vm_visible)

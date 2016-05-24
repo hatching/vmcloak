@@ -155,7 +155,7 @@ def main():
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=args.ip, port=args.port, adapter=args.adapter,
                       netmask=args.netmask, gateway=args.gateway,
-                      cpus=args.cpus))
+                      cpus=args.cpus, ramsize=ramsize))
     session.commit()
 
 if __name__ == "__main__":

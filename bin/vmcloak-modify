@@ -38,16 +38,14 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
-        ramsize = 1024
     elif image.osversion == "win7" or image.osversion == "win7x64":
         h = Windows7()
-        ramsize = 2048
 
     m.create_vm()
     m.os_type(image.osversion)
     m.cpus(image.cpus)
     m.mouse("usbtablet")
-    m.ramsize(ramsize)
+    m.ramsize(image.ramsize)
     m.attach_hd(image.path, multi=False)
     m.detach_iso()
     m.hostonly(nictype=h.nictype, adapter=image.adapter)
