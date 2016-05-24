@@ -68,8 +68,8 @@ def main():
         osversion = "win7"
     elif args.x64 or args.win7x64:
         h = Windows7x64()
-		if ramsize == 1024:
-       		ramsize = 2048
+        if ramsize == 1024:
+           ramsize = 2048
         args.x64 = True
         osversion = "win7"
         
