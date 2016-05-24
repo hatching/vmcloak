@@ -1,6 +1,11 @@
 # Copyright (C) 2014-2015 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
+# 
+# The Windows Imaging Component (WIC) provides WIC-enabled 
+# applications to display and edit any image format for which
+# a WIC-compliant CODEC is installed, and also to read and 
+# write metadata in image files. 
 
 from vmcloak.abstract import Dependency
 
