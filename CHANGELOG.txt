@@ -1,3 +1,11 @@
+0.3.11, May 28th 2016
+
+    New: Support for 32-bit Windows 7 (thanks Lane Huff, slackr).
+    Bugfix: Issues with VirtualBox 5-series (thanks razu).
+    New: Disable autorun for Windows 7 (thanks razu).
+    New: Add --ramsize flag to vmcloak-init (thanks razu).
+    New: Adobe Flash player dependencies (thanks razu).
+
 0.3.10, February 26th 2016
 
     Tweak: Fixed logging in vmcloak-register (thanks justaguy).
