@@ -22,14 +22,20 @@ class Hide(object):
         """ Takes a key dictionnary and
         applies the required reg command to modify the Windows Registry."""
         mod_type = key["mod_type"].split("_")
-        command = "reg {0} {1} /v {2} /t {3} /d {4} /f".format(
-                mod_type[0],
-                key["location"],
-                key["value"],
-                key["type"],
-                key["data"])
-        print "Executing: {}".format(command)
-        self.a.execute(command)
+        if mod_type[0] == "add":
+            command = "reg {0} {1} /v {2} /t {3} /d {4} /f".format(
+                    mod_type[0],
+                    key["location"],
+                    key["value"],
+                    key["datatype"],
+                    key["data"])
+        elif mod_type[0].find("del") >= 0:
+            command = "reg delete {} /f".format(key["location"])
+
+        # command = "{}".format(command)
+        print command
+        response = self.a.execute(command)
+        print response.content
 
         #    print "Invalid operation for the following key : {}".format(
         # key["value"])
