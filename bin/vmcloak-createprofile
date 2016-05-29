@@ -4,9 +4,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import argparse
-from json import loads, dumps
-from os import path
-# from Hide import *
+from json import loads, dump
 import os
 
 PROFILE_PATH = os.path.join(os.getenv('HOME'), '.vmcloak', 'profiles')
@@ -37,7 +35,7 @@ def main():
     if args.modtype.find("key") != -1:
         """ Dumps the JSON key in a hwconf profile file."""
         d = dict({
-            "modification_type": args.modtype,
+            "mod_type": args.modtype,
             "location": args.location,
             "value": args.value,
             "datatype": args.datatype,
@@ -48,7 +46,7 @@ def main():
         """Handles the JSON keys to specify directories manipulation."""
         print "here"
         d = dict({
-            "modification_type": args.modtype,
+            "mod_type": args.modtype,
             "dirpath": args.dirpath
             })
 
@@ -60,11 +58,9 @@ def main():
             print "Registry key modifications:"
             print "\t- Add key: add_key"
             print "\t- Delete key: del_key"
-            print "\t- Modify key: mod_key"
             print "Directory modifications:"
             print "\t- Add directory: add_dir"
             print "\t- Delete directory: del_dir"
-            print "\t- Modify directory: mod_dir"
             mod_type = raw_input("Modification type: ")
 
         if mod_type.find("key") != -1:
@@ -75,7 +71,7 @@ def main():
             data = raw_input("Data: ")
 
             d = dict({
-                "modification_type": mod_type,
+                "mod_type": mod_type,
                 "location": location,
                 "value": value,
                 "datatype": data_type,
@@ -92,32 +88,28 @@ def main():
 
     """ Modified version of :
         http://stackoverflow.com/questions/16245090/file-io-with-defaultdict"""
+    profile_file_path = os.path.join(PROFILE_PATH, "%s.json" % args.name)
     try:
         """ Check if profile already exists to avoid overwriting."""
-        with open(
-                os.path.join(PROFILE_PATH, "%s.json" % args.name),
-                "r") as profile:
-            profile_content = profile.read()
-            if profile_content:
-                profile_content = loads(profile_content)
-            profile.close()
+        with open(profile_file_path, "r") as profile:
+            content = profile.read()
+            if content:
+                content = loads(content)
 
     except IOError:
         """ New list for a new profile."""
-        profile_content = []
+        content = []
     try:
         """ Appends the new key."""
-        profile_content.append(d)
+        content.append(d)
 
     except AttributeError:
         """ Empty file case. """
-        profile_content = d
+        content = d
 
     """ Writes the updated profile."""
-    with open(
-            os.path.join(PROFILE_PATH, "%s.json" % args.name), "w") as profile:
-        profile.write(dumps(profile_content))
-        profile.close()
+    with open(profile_file_path, "w") as p:
+        dump(content, p, sort_keys=True, indent=4, separators=(',', ': '))
 
 if __name__ == "__main__":
 
