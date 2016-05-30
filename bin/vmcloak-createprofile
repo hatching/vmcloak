@@ -67,7 +67,7 @@ def main():
             """ Registry key dictionnary."""
             location = raw_input("Location: ")
             value = raw_input("Value: ")
-            data_type = raw_input("Date type: ")
+            data_type = raw_input("Data type: ")
             data = raw_input("Data: ")
 
             d = dict({
