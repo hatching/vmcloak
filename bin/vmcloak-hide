@@ -84,9 +84,9 @@ def main():
         if action["mod_type"].find("dir") > 0:
             hide.modify_directory(action)
         elif action["mod_type"].find("key") > 0:
-            hide.modify_key(action)
+            hide.modify_registry(action)
         else:
-            print "Modification type not valid."     
+            print "Modification type not valid."
 
     a.shutdown()
     m.wait_for_state(shutdown=True)
