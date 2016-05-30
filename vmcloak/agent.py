@@ -52,7 +52,7 @@ class Agent(object):
 
     def mkdir(self, path):
         """Make a new directory."""
-        self.post("/mkdir", path=path)
+        self.post("/mkdir", dirpath=path)
 
     def rename(self, path):
         """Rename a file or directory."""
