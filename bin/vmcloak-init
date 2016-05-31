@@ -61,7 +61,7 @@ def main():
         h = WindowsXP()
         osversion = "winxp"
         ramsize = 1024
-    if args.win7:
+    elif args.win7:
         h = Windows7x86()
         ramsize = 1024
         osversion = "win7"
