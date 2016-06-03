@@ -120,6 +120,7 @@ class VirtualBox(Machinery):
         self._call('clonehd', hdd_inpath, hdd_outpath)
 
     def remove_hd(self):
+        time.sleep(1)
         self._call('storagectl', self.name, portcount=0,
                    name='IDE', remove=True)
 
