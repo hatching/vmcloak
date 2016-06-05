@@ -24,11 +24,11 @@ class Office2007(Dependency):
         self.serialkey = None
 
     def check(self):
-        if not self.isopath:
+        if not self.serialkey:
             log.error("Please provide a serial key for Office 2007.")
             return False
 
-        if not os.path.isfile(self.isopath):
+        if not self.isopath or not os.path.isfile(self.isopath):
             log.error("Please provide the Office 2007 installer ISO file.")
             return False
 
