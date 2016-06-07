@@ -91,8 +91,8 @@ class Windows7(OperatingSystem):
         self.serial_key = serial_key or '33PXH-7Y6KF-2VJC9-XBBR8-HVTHH'
         return True
 
-class Windows7x64(OperatingSystem):
+class Windows7x64(Windows7):
     ARCH = "amd64"
 
-class Windows7x86(OperatingSystem):
+class Windows7x86(Windows7):
     ARCH = "x86"
