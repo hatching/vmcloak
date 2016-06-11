@@ -249,6 +249,7 @@ class Dependency(object):
     """Dependency instance. Each software has its own dependency class which
     informs VMCloak on how to install that particular piece of software."""
     name = None
+    default = None
     exes = []
 
     def __init__(self, h=None, m=None, a=None, i=None,
@@ -257,7 +258,7 @@ class Dependency(object):
         self.m = m
         self.a = a
         self.i = i
-        self.version = version
+        self.version = version or self.default
         self.settings = settings
         self.exe = None
 
