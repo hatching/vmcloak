@@ -41,3 +41,31 @@ class Adobe9(Dependency):
         self.wait_process_exit("adobe9.exe")
 
         self.a.remove("C:\\adobe9.exe")
+        
+        # add needed registry keys to skip Licence Agreement
+        self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
+            "Adobe\\Acrobat Reader\\9.0\\AdobeViewer\" ")
+        self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
+            "Adobe\\Acrobat Reader\\9.0\\AdobeViewer\" "
+            "/v EULA /t REG_DWORD /d 1 /f")
+        self.a.execute("reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
+            "Adobe\\Acrobat Reader\\9.0\\AdobeViewer\" "
+            "/v Launched /t REG_DWORD /d 1 /f")
+
+        # man : https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/
+        # we don't care about updates really
+        self.a.execute("reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
+            "Acrobat Reader\\9.0\\AVGeneral\" "
+            "/v bCheckForUpdatesAtStartup /t REG_DWORD /d 0 /f")
+
+        # allow URL access
+        self.a.execute("reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
+            "Acrobat Reader\\9.0\\TrustManager\\cDefaultLaunchURLPerms\" ")
+        self.a.execute("reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
+            "Acrobat Reader\\9.0\\TrustManager\\cDefaultLaunchURLPerms\" "
+            "/v iURLPerms /t REG_DWORD /d 2 /f")
+
+        # FIXME: really needed ? 
+        self.a.execute("reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
+            "Acrobat Reader\\9.0\\Security\\cDigSig\\cCustomDownload\" "
+            "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f")

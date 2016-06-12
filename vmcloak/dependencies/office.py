@@ -15,9 +15,8 @@ config = """
     <PIDKEY Value="%(serial_key)s" />
 </Configuration>
 """
-
-class Office2007(Dependency):
-    name = "office2007"
+class Office(Dependency):
+    name = "office"
 
     def init(self):
         self.isopath = None
@@ -25,11 +24,11 @@ class Office2007(Dependency):
 
     def check(self):
         if not self.serialkey:
-            log.error("Please provide a serial key for Office 2007.")
+            log.error("Please provide a serial key for Office.")
             return False
 
         if not self.isopath or not os.path.isfile(self.isopath):
-            log.error("Please provide the Office 2007 installer ISO file.")
+            log.error("Please provide the Office installer ISO file.")
             return False
 
     def run(self):
@@ -44,3 +43,6 @@ class Office2007(Dependency):
 
         self.a.remove("C:\\config.xml")
         self.m.detach_iso()
+
+class Office2007(Office, Dependency): 
+    name = "office2007"

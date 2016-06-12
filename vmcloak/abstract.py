@@ -317,12 +317,12 @@ class Dependency(object):
         if self.h.name == "winxp":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
-                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 177")
+                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 177 /f")
 
         if self.h.name == "win7" or self.h.name == "win7x64":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
-                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 255")
+                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f")
 
     def upload_dependency(self, filepath):
         """Upload this dependency to the specified filepath."""
