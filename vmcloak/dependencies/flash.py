@@ -11,6 +11,7 @@ class Flash(Dependency):
     default = "11.7.700.169"
     exes = [
         {
+            "version": "11.4.402.287",
             "url": "http://cuckoo.sh/vmcloak/flashplayer11_4r402_287_winax.msi",
             "sha1": "99fb61ed221df9125698e78d659ee1fc93b97c60",
         },
