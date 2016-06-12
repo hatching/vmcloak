@@ -15,7 +15,6 @@ config = """
     <PIDKEY Value="%(serial_key)s" />
 </Configuration>
 """
-
 class Office(Dependency):
     name = "office"
 
@@ -44,3 +43,6 @@ class Office(Dependency):
 
         self.a.remove("C:\\config.xml")
         self.m.detach_iso()
+
+class Office2007(Office, Dependency): 
+    name = "office2007"
