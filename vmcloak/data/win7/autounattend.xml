@@ -20,7 +20,7 @@
             </OOBE>
             <AutoLogon>
                 <Enabled>true</Enabled>
-                <LogonCount>5</LogonCount>
+                <LogonCount>50</LogonCount>
                 <Username>Administrator</Username>
                 <Password>
                     <Value>cuckoo</Value>
