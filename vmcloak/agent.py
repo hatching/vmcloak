@@ -50,7 +50,8 @@ class Agent(object):
 
     def extract(self, dirpath, zipfile):
         """Extract a zip file to folder."""
-        self.postfile("/extract", {"zipfile": open(zipfile)}, dirpath=dirpath)
+        zipfile = open(zipfile, "rb")
+        self.postfile("/extract", {"zipfile": zipfile}, dirpath=dirpath)
 
     def shutdown(self):
         """Power off the machine."""
