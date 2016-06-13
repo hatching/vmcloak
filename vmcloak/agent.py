@@ -48,9 +48,9 @@ class Agent(object):
         """Remove a file or entire directory."""
         self.post("/remove", path=path)
 
-    def extract(self, path):
+    def extract(self, dirpath, zipfile):
         """Extract a zip file to folder."""
-        self.post("/extract", path=path)
+        self.postfile("/extract", {"zipfile": open(zipfile)}, dirpath=dirpath)
 
     def shutdown(self):
         """Power off the machine."""

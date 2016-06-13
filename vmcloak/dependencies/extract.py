@@ -14,13 +14,16 @@ class Extract(Dependency):
 
     def init(self):
         self.zip = None
+        self.dir = None
 
     def check(self):
         if not self.zip or not os.path.isfile(self.zip):
             log.error("Please provide zip file to extract.")
             return False
 
+        if not self.dir:
+            log.error("Please provide %USERPROFILE% folder to extract to.")
+            return False
+
     def run(self):
-        self.upload_dependency("C:\\package.zip", self.zip)
-        self.a.extract("C:\\package.zip")
-        self.a.remove("C:\\package.zip")
+        self.a.extract(os.path.join(self.a.environ("USERPROFILE"), self.dir), self.zip)
