@@ -325,11 +325,8 @@ class Dependency(object):
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f")
 
     def upload_dependency(self, filepath, srcpath = None):
-        """ Have possibility to override when specific path is provided """ 
-        if srcpath is not None:
-            self.filepath = srcpath
         """Upload this dependency to the specified filepath."""
-        self.a.upload(filepath, open(self.filepath, "rb"))
+        self.a.upload(filepath, open(srcpath or self.filepath, "rb"))
 
     def wait_process_appear(self, process_name):
         """Wait for a process to appear."""
