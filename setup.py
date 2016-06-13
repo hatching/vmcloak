@@ -8,9 +8,9 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version="0.3.11",
+    version="0.3.12",
     author='Jurriaan Bremer',
-    author_email='jurriaanbremer@gmail.com',
+    author_email="jbr@cuckoo.sh",
     packages=[
         'vmcloak',
         'vmcloak.data',

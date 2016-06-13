@@ -1,3 +1,14 @@
+0.3.12, June 13th 2016
+
+    Bugfix: vmcloak init --winxp was broken (thanks Daniel Teixeira).
+    Tweak: Default version for flash if none is provided.
+    New: Office 2010 support (thanks razu).
+    Bugfix: Don't hang if registry key already exists (thanks razu).
+    Bugfix: Resolve logon issue after a couple of reboots (thanks razu).
+    New: Various Adobe PDF Reader-related registry keys (thanks razu).
+    New: WinRAR Dependency (thanks razu).
+    New: Extract Dependency for dropping files on the VM (thanks razu).
+
 0.3.11, May 28th 2016
 
     New: Support for 32-bit Windows 7 (thanks Lane Huff, slackr).
