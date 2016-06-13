@@ -22,7 +22,7 @@ class Winrar(Dependency):
 
     def run(self):
         filename = os.path.basename(self.exe["url"])
-        
+
         self.upload_dependency("C:\\%s" % filename)
         self.a.execute("C:\\%s /S" % filename)
         self.a.remove("C:\\%s" % filename)

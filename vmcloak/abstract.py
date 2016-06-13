@@ -324,9 +324,9 @@ class Dependency(object):
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f")
 
-    def upload_dependency(self, filepath, srcpath = None):
+    def upload_dependency(self, filepath):
         """Upload this dependency to the specified filepath."""
-        self.a.upload(filepath, open(srcpath or self.filepath, "rb"))
+        self.a.upload(filepath, open(self.filepath, "rb"))
 
     def wait_process_appear(self, process_name):
         """Wait for a process to appear."""

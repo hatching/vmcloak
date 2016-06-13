@@ -26,4 +26,5 @@ class Extract(Dependency):
             return False
 
     def run(self):
-        self.a.extract(os.path.join(self.a.environ("USERPROFILE"), self.dir), self.zip)
+        dirpath = os.path.join(self.a.environ("USERPROFILE"), self.dir)
+        self.a.extract(dirpath, self.zip)
