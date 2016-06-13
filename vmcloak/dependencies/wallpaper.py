@@ -25,7 +25,7 @@ class Wallpaper(Dependency):
             self.a.environ("USERPROFILE"), "Pictures", "wall.jpg"
         )
 
-        self.upload_dependency(uploadpath, self.filepath)
+        self.upload_dependency(uploadpath)
 
         # Add Wallpaper in registry.
         self.a.execute(
