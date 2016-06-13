@@ -1,0 +1,28 @@
+# Silent install of Winrar
+
+import os.path
+
+from vmcloak.abstract import Dependency
+
+class Winrar(Dependency):
+    name = "winrar"
+    default = "5.31"
+    exes = [
+        {
+            "version": "5.31_x64",
+            "url": "http://cuckoo.sh/vmcloak/winrar-x64-531.exe",
+            "sha1": "48add5a966ed940c7d88456caf7a5f5c2a6c27a7",
+        },
+        {
+            "version": "5.31",
+            "url": "http://cuckoo.sh/vmcloak/wrar531.exe",
+            "sha1": "e19805a1738975aeec19a25a4e461d52eaf9b231",
+        },
+    ]
+
+    def run(self):
+        filename = os.path.basename(self.exe["url"])
+        
+        self.upload_dependency("C:\\%s" % filename)
+        self.a.execute("C:\\%s /S" % filename)
+        self.a.remove("C:\\%s" % filename)
