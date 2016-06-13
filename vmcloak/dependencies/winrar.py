@@ -1,5 +1,7 @@
 # Silent install of Winrar
 
+import os.path
+
 from vmcloak.abstract import Dependency
 
 class Winrar(Dependency):
@@ -19,6 +21,8 @@ class Winrar(Dependency):
     ]
 
     def run(self):
-        self.upload_dependency("C:\\winrar.exe")
-        self.a.execute("C:\\winrar.exe /S")
-        self.a.remove("C:\\winrar.exe")
+        filename = os.path.basename(self.exe["url"])
+        
+        self.upload_dependency("C:\\%s" % filename)
+        self.a.execute("C:\\%s /S" % filename)
+        self.a.remove("C:\\%s" % filename)
