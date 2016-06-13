@@ -275,7 +275,7 @@ class Dependency(object):
             if "target" in exe and exe["target"] != i.osversion:
                 continue
 
-            if "version" in exe and exe["version"] != version:
+            if "version" in exe and exe["version"] != self.version:
                 continue
 
             self.exe = exe
