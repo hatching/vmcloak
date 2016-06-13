@@ -17,15 +17,17 @@ class Wallpaper(Dependency):
 
     def check(self):
         if not self.filepath or not os.path.isfile(self.filepath):
-            log.error("Please provide wallpaper png file to upload.")
+            log.error("Please provide wallpaper .png file to use.")
             return False
 
     def run(self):
-        uploadpath = os.path.join(self.a.environ("USERPROFILE"), "Pictures", "wall.jpg")
+        uploadpath = os.path.join(
+            self.a.environ("USERPROFILE"), "Pictures", "wall.jpg"
+        )
 
         self.upload_dependency(uploadpath, self.filepath)
-        
-        # add Wallpaper in registry 
+
+        # Add Wallpaper in registry.
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Control Panel\\Desktop\" "
             "/v Wallpaper /t REG_SZ /d  %s /f" % uploadpath
