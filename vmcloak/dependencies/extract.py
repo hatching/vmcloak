@@ -22,8 +22,5 @@ class Extract(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\package.zip", self.zip)
-        self.a.execute("\"%PROGRAMFILES%\\WinRAR\\Winrar.exe\" x C:\\package.zip *.* \"%USERPROFILE%\Desktop\"")
-
-        self.wait_process_exit("Winrar.exe")
-        
+        self.a.extract("C:\\package.zip")
         self.a.remove("C:\\package.zip")

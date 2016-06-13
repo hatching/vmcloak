@@ -48,6 +48,10 @@ class Agent(object):
         """Remove a file or entire directory."""
         self.post("/remove", path=path)
 
+    def extract(self, path):
+        """Extract a zip file to folder."""
+        self.post("/extract", path=path)
+
     def shutdown(self):
         """Power off the machine."""
         self.execute("shutdown -s -t 0", async=True)
