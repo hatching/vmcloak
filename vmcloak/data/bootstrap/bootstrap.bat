@@ -24,10 +24,10 @@ C:\vmcloak\click.exe "Python 2.7.6 Setup" "Finish"
 echo Installing the Agent.
 copy C:\vmcloak\agent.py C:\agent.py
 if "%DEBUG%" == "yes" (
-    set PYTHON=C:\Python27\Pythonw.exe
+    set PYTHON=C:\Python27\Python.exe
 )
 else (
-    set PYTHON=C:\Python27\Python.exe
+    set PYTHON=C:\Python27\Pythonw.exe
 )
 
 echo Setting the resolution.
