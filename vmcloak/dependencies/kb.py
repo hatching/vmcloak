@@ -35,18 +35,25 @@ class KB(Dependency):
             "url": "http://download.microsoft.com/download/1/8/F/18F9AE2C-4A10-417A-8408-C205420C22C3/Windows6.1-KB2786081-x64.msu",
             "sha1": "dc63b04c58d952d533c40b185a8b555b50d47905",
         },
+        {
+            "version": "2639308",
+            "url": "http://download.microsoft.com/download/9/1/C/91CC3B0D-F58B-4B36-941D-D810A8FF6805/Windows6.1-KB2639308-x64.msu",
+            "sha1": "67eedaf061e02d503028d970515d88d8fe95579d",
+        },
+        {
+            "version": "2834140",
+            "url": "https://download.microsoft.com/download/F/1/4/F1424AD7-F754-4B6E-B0DA-151C7CBAE859/Windows6.1-KB2834140-v2-x86.msu",
+            "sha1": "b57c05e9da2c66e1bb27868c92db177a1d62b2fb",
+        },
     ]
 
     def run(self):
         self.upload_dependency("C:\\setup.msu")
-        # wusa.exe needs wuauserv
         self.a.execute("sc config wuauserv start= auto")
-
         time.sleep(1)
         self.a.execute("wusa.exe C:\\setup.msu /quiet /norestart")
 
         self.a.remove("C:\\setup.msu")
         
-        # disable wuauserv again
         self.a.execute("sc config wuauserv start= disabled")
         self.a.execute("net stop wuauserv")
