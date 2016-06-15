@@ -72,10 +72,13 @@ def main():
         elif ":" in dependency:
             dependency, version = dependency.split(":", 1)
             dependencies.append((dependency, version))
+            print "appended v : %s %s" % dependency, str(version)
         else:
             dependencies.append((dependency, None))
+            print "appended : %s " % dependency
 
     for dependency, version in dependencies:
+	print "while dep : %s " % dependency
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
             break
@@ -87,6 +90,19 @@ def main():
 
         try:
             d = vmcloak.dependencies.names[dependency]
+            # check if there are any "childs" for dependencies 
+            if d.depends:
+                depends = d.depends
+                if isinstance(depends, basestring):
+                    depends = [depends]
+
+                for depend in depends[::-1]:
+		            if ":" in depend:
+			           depend, dversion = depend.split(":", 1)
+                    # install dependency child before dependency itself
+		            dd = vmcloak.dependencies.names[depend]
+		            dd(h, m, a, image, dversion, settings).run()
+
             d(h, m, a, image, version, settings).run()
         except DependencyError:
             log.error("The dependency %s returned an error..", dependency)
