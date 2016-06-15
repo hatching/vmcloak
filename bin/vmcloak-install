@@ -72,13 +72,10 @@ def main():
         elif ":" in dependency:
             dependency, version = dependency.split(":", 1)
             dependencies.append((dependency, version))
-            print "appended v : %s %s" % dependency, str(version)
         else:
             dependencies.append((dependency, None))
-            print "appended : %s " % dependency
 
     for dependency, version in dependencies:
-	print "while dep : %s " % dependency
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
             break
@@ -102,6 +99,12 @@ def main():
                     # install dependency child before dependency itself
 		            dd = vmcloak.dependencies.names[depend]
 		            dd(h, m, a, image, dversion, settings).run()
+		            
+                # reboot the VM as we expect most dependencies to be related to KB installs
+                a.shutdown()
+                m.wait_for_state(shutdown=True)
+                m.start_vm(visible=args.vm_visible)
+                wait_for_host(image.ipaddr, image.port)
 
             d(h, m, a, image, version, settings).run()
         except DependencyError:
