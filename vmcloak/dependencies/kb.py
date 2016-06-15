@@ -39,14 +39,14 @@ class KB(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\setup.msu")
+        # wusa.exe needs wuauserv
         self.a.execute("sc config wuauserv start= auto")
-        time.sleep(1)
-        self.a.execute("C:\\setup.msu /quiet /norestart", async=True)
 
         time.sleep(1)
-        self.wait_process_exit("wusa.exe")
+        self.a.execute("wusa.exe C:\\setup.msu /quiet /norestart")
 
         self.a.remove("C:\\setup.msu")
         
+        # disable wuauserv again
         self.a.execute("sc config wuauserv start= disabled")
         self.a.execute("net stop wuauserv")
