@@ -26,12 +26,10 @@ class Cuteftp(Dependency):
         
         time.sleep(1)
         self.a.click("InstallShield Wizard", "&Next >")
+        self.a.click("InstallShield Wizard", "&Yes")
+        self.a.click("InstallShield Wizard", "&Next >")
         time.sleep(1)
-        self.a.click_async("InstallShield Wizard", "&Yes")
-        time.sleep(1)
-        self.a.click_async("InstallShield Wizard", "&Next >")
-
-        self.a.click("InstallShield Wizard", "&Finish")
+        self.a.click("InstallShield Wizard", "Finish")
         
         self.wait_process_exit("cuteftp.exe")
 
