@@ -37,13 +37,23 @@ class KB(Dependency):
         },
         {
             "version": "2639308",
-            "url": "http://download.microsoft.com/download/9/1/C/91CC3B0D-F58B-4B36-941D-D810A8FF6805/Windows6.1-KB2639308-x64.msu",
+        "url": "http://download.microsoft.com/download/9/1/C/91CC3B0D-F58B-4B36-941D-D810A8FF6805/Windows6.1-KB2639308-x64.msu",
             "sha1": "67eedaf061e02d503028d970515d88d8fe95579d",
         },
         {
             "version": "2834140",
-            "url": "https://download.microsoft.com/download/F/1/4/F1424AD7-F754-4B6E-B0DA-151C7CBAE859/Windows6.1-KB2834140-v2-x86.msu",
-            "sha1": "b57c05e9da2c66e1bb27868c92db177a1d62b2fb",
+            "url": "https://download.microsoft.com/download/5/A/5/5A548BFE-ADC5-414B-B6BD-E1EC27A8DD80/Windows6.1-KB2834140-v2-x64.msu",
+            "sha1": "3db9d9b3dc20515bf4b164821b721402e34ad9d6",
+        },
+        {
+            "version": "2882822",
+            "url": "https://download.microsoft.com/download/6/1/4/6141BFD5-40FD-4148-A3C9-E355338A9AC8/Windows6.1-KB2882822-x64.msu",
+            "sha1": "ec92821f6ee62ac9d2f74e847f87be0bf9cfcb31",
+        },
+        {
+            "version": "2888049",
+            "url": "https://download.microsoft.com/download/4/1/3/41321D2E-2D08-4699-A635-D9828AADB177/Windows6.1-KB2888049-x64.msu",
+            "sha1": "fae6327b151ae04b56fac431e682145c14474c69",
         },
     ]
 
