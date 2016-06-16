@@ -12,7 +12,7 @@ class Win7sp(Dependency):
     exes = [
         {
             "version": "1",
-            "target": "win7x86",
+            "target": "win7x64",
             "url": "https://download.microsoft.com/download/0/A/F/0AFB5316-3062-494A-AB78-7FB0D4461357/windows6.1-KB976932-X64.exe",
             "sha1": "74865ef2562006e51d7f9333b4a8d45b7a749dab",
         },
