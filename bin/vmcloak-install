@@ -14,7 +14,7 @@ from vmcloak.misc import wait_for_host
 from vmcloak.repository import Session, Image
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
-from vmcloak.win7 import Windows7
+from vmcloak.win7 import Windows7x86, Windows7x64
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak-install")
@@ -43,8 +43,10 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
-    elif image.osversion == "win7" or image.osversion == "win7x64":
-        h = Windows7()
+    elif image.osversion == "win7":
+        h = Windows7x86()
+    elif image.osversion == "win7x64":
+        h = Windows7x64()
 
     m.create_vm()
     m.os_type(image.osversion)
