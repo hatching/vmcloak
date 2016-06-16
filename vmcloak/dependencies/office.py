@@ -46,4 +46,5 @@ class Office(Dependency):
         self.m.detach_iso()
 
 class Office2007(Office, Dependency):
+    """Backwards compatibility."""
     name = "office2007"
