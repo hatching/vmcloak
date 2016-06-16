@@ -2,8 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os.path
-
 from vmcloak.abstract import Dependency
 
 class Flash(Dependency):
@@ -113,8 +111,6 @@ class Flash(Dependency):
     ]
 
     def run(self):
-        filename = os.path.basename(self.exe["url"])
-
-        self.upload_dependency("C:\\%s" % filename)
-        self.a.execute("msiexec /i C:\\%s /passive" % filename)
-        self.a.remove("C:\\%s" % filename)
+        self.upload_dependency("C:\\%s" % self.filename)
+        self.a.execute("msiexec /i C:\\%s /passive" % self.filename)
+        self.a.remove("C:\\%s" % self.filename)

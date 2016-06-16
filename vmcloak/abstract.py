@@ -261,6 +261,7 @@ class Dependency(object):
         self.version = version or self.default
         self.settings = settings
         self.exe = None
+        self.filename = None
 
         self.init()
 
@@ -287,6 +288,7 @@ class Dependency(object):
 
         # Download the dependency (if there is any to download).
         if self.exe:
+            self.filename = os.path.basename(self.exe["url"])
             self.download()
 
         if self.check() is False:
