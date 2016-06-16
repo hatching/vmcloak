@@ -30,8 +30,9 @@ class Cuteftp(Dependency):
         self.a.click_async("InstallShield Wizard", "&Yes")
         time.sleep(1)
         self.a.click_async("InstallShield Wizard", "&Next >")
-        #FIXME: not a nice way to install :)
-        time.sleep(10)        
-        self.a.killprocess("cuteftp.exe")
+
+        self.a.click("InstallShield Wizard", "&Finish")
+        
+        self.wait_process_exit("cuteftp.exe")
 
         self.a.remove("C:\\%s" % filename)
