@@ -5,6 +5,7 @@
 
 import argparse
 import logging
+import time
 
 import vmcloak.dependencies
 
@@ -105,6 +106,7 @@ def main():
                 # reboot the VM as we expect most dependencies to be related to KB installs
                 a.shutdown()
                 m.wait_for_state(shutdown=True)
+                time.sleep(1)
                 m.start_vm(visible=args.vm_visible)
                 wait_for_host(image.ipaddr, image.port)
 
