@@ -6,8 +6,8 @@ import time
 
 from vmcloak.abstract import Dependency
 
-class Adobe9(Dependency):
-    name = "adobe9"
+class AdobePdf(Dependency):
+    name = "adobepdf"
     exes = [
         {
             "url": "http://cuckoo.sh/vmcloak/AdbeRdr90_en_US.exe",
@@ -83,3 +83,7 @@ class Adobe9(Dependency):
             "Acrobat Reader\\9.0\\Security\\cDigSig\\cCustomDownload\" "
             "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f"
         )
+
+class Adobe9(AdobePdf, Dependency):
+    """Backwards compatibility."""
+    name = "adobe9"
