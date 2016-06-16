@@ -2,8 +2,11 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import io
 import logging
 import os.path
+import random
+import requests
 
 from vmcloak.abstract import Dependency
 
@@ -12,20 +15,26 @@ log = logging.getLogger(__name__)
 class Wallpaper(Dependency):
     name = "wallpaper"
 
+    doges = [
+        "http://cuckoo.sh/vmcloak/doge1.jpg",
+        "http://cuckoo.sh/vmcloak/doge2.jpg",
+        "http://cuckoo.sh/vmcloak/doge3.jpg",
+    ]
+
     def init(self):
         self.filepath = None
-
-    def check(self):
-        if not self.filepath or not os.path.isfile(self.filepath):
-            log.error("Please provide wallpaper .png file to use.")
-            return False
 
     def run(self):
         uploadpath = os.path.join(
             self.a.environ("USERPROFILE"), "Pictures", "wall.jpg"
         )
 
-        self.upload_dependency(uploadpath)
+        if not self.filepath:
+            f = io.BytesIO(requests.get(random.choice(self.doges)).content)
+        else:
+            f = open(self.filepath, "rb")
+
+        self.a.upload(uploadpath, f)
 
         # Add Wallpaper in registry.
         self.a.execute(
