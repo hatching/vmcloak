@@ -18,6 +18,12 @@ class IE10(Dependency):
             "url": "http://download.microsoft.com/download/C/E/0/CE0AB8AE-E6B7-43F7-9290-F8EB0EA54FB5/IE10-Windows6.1-x64-en-us.exe",
             "sha1": "17d1eaca123e453269b12b20863fd5ce96727888",
         },
+        {
+            "version": "10",
+            "target": "win7",
+            "url": "https://download.microsoft.com/download/5/2/B/52BE95BF-22D8-4415-B644-0FDF398F6D96/IE10-Windows6.1-KB2859903-x86.msu",
+            "sha1": "edef436d2ee7b71663607df7fa13e2647e9b0d6a",
+        },
     ]
 
     def run(self):

@@ -18,6 +18,12 @@ class IE11(Dependency):
             "url": "http://download.microsoft.com/download/7/1/7/7179A150-F2D2-4502-9D70-4B59EA148EAA/IE11-Windows6.1-x64-en-us.exe",
             "sha1": "ddec9ddc256ffa7d97831af148f6cc45130c6857",
         },
+        {
+            "version": "11",
+            "target": "win7",
+            "url": "https://download.microsoft.com/download/9/0/8/908B5C6B-F23E-4DED-9906-77CE4E9E8528/EIE11_EN-US_MCM_WIN7.EXE",
+            "sha1": "fd4d99ef80f42221f842951740cfa63c0b3f784e",
+        },
     ]
 
     def run(self):
