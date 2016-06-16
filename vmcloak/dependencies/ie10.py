@@ -21,8 +21,8 @@ class IE10(Dependency):
         {
             "version": "10",
             "target": "win7",
-            "url": "https://download.microsoft.com/download/5/2/B/52BE95BF-22D8-4415-B644-0FDF398F6D96/IE10-Windows6.1-KB2859903-x86.msu",
-            "sha1": "edef436d2ee7b71663607df7fa13e2647e9b0d6a",
+            "url": "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe",
+            "sha1": "e6552da75de95f6b1f7937c2bdb5fe14443dea2a",
         },
     ]
 
