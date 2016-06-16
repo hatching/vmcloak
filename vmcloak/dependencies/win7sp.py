@@ -26,6 +26,6 @@ class Win7sp(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\setup.exe")
-        self.a.execute("C:\\setup.msu /quiet /norestart")
+        self.a.execute("C:\\setup.exe /quiet /norestart")
 
-#        self.a.remove("C:\\setup.msu")
+        self.a.remove("C:\\setup.exe")
