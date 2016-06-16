@@ -21,8 +21,8 @@ class IE11(Dependency):
         {
             "version": "11",
             "target": "win7",
-            "url": "https://download.microsoft.com/download/9/0/8/908B5C6B-F23E-4DED-9906-77CE4E9E8528/EIE11_EN-US_MCM_WIN7.EXE",
-            "sha1": "fd4d99ef80f42221f842951740cfa63c0b3f784e",
+            "url": "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe",
+            "sha1": "fefdcdde83725e393d59f89bb5855686824d474e",
         },
     ]
 
