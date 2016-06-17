@@ -15,13 +15,13 @@ class IE10(Dependency):
         {
             "version": "10",
             "target": "win7x64",
-            "url": "http://download.microsoft.com/download/C/E/0/CE0AB8AE-E6B7-43F7-9290-F8EB0EA54FB5/IE10-Windows6.1-x64-en-us.exe",
+            "url": "http://cuckoo.sh/vmcloak/IE10-Windows6.1-x64-en-us.exe",
             "sha1": "17d1eaca123e453269b12b20863fd5ce96727888",
         },
         {
             "version": "10",
             "target": "win7",
-            "url": "http://download.microsoft.com/download/8/A/C/8AC7C482-BC74-492E-B978-7ED04900CEDE/IE10-Windows6.1-x86-en-us.exe",
+            "url": "http://cuckoo.sh/vmcloak/IE10-Windows6.1-x86-en-us.exe",
             "sha1": "e6552da75de95f6b1f7937c2bdb5fe14443dea2a",
         },
     ]

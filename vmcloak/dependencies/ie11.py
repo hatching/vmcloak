@@ -15,13 +15,13 @@ class IE11(Dependency):
         {
             "version": "11",
             "target": "win7x64",
-            "url": "http://download.microsoft.com/download/7/1/7/7179A150-F2D2-4502-9D70-4B59EA148EAA/IE11-Windows6.1-x64-en-us.exe",
+            "url": "http://cuckoo.sh/vmcloak/IE11-Windows6.1-x64-en-us.exe",
             "sha1": "ddec9ddc256ffa7d97831af148f6cc45130c6857",
         },
         {
             "version": "11",
             "target": "win7",
-            "url": "http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe",
+            "url": "http://cuckoo.sh/vmcloak/IE11-Windows6.1-x86-en-us.exe",
             "sha1": "fefdcdde83725e393d59f89bb5855686824d474e",
         },
     ]
