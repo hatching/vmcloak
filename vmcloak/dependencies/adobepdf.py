@@ -2,45 +2,37 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import time
-
 from vmcloak.abstract import Dependency
 
 class AdobePdf(Dependency):
     name = "adobepdf"
+    default = "9.0.0"
     exes = [
         {
+            "version": "9.0.0",
             "url": "http://cuckoo.sh/vmcloak/AdbeRdr90_en_US.exe",
             "sha1": "8faabd08289b9a88023f71136f13fc4bd3290ef0",
+        },
+        {
+            "version": "11.0.9",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11009_en_US.exe",
+            "sha1": "53b367bff07a63ee07cf1cd090360b75d3fc6bfb",
+        },
+        {
+            "version": "11.0.10",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
+            "sha1": "98b2b838e6c4663fefdfd341dfdc596b1eff355c",
         },
     ]
 
     def run(self):
-        self.upload_dependency("C:\\adobe9.exe")
-        self.a.execute("C:\\adobe9.exe", async=True)
+        self.upload_dependency("C:\\%s" % self.filename)
+        self.a.execute(
+            "C:\\%s /sAll /msi /norestart /quiet ALLUSERS=1 EULA_ACCEPT=YES" %
+            self.filename
+        )
 
-        # For some reason clicking buttons for Adobe9 is a bit random
-        # sometimes so for now we resort to starting a couple background
-        # clicking instances as well.
-        self.a.click("Adobe Reader 9 - Setup", "&Next >")
-
-        time.sleep(1)
-        self.a.click_async("Adobe Reader 9 - Setup", "&Next >")
-
-        time.sleep(1)
-        self.a.click_async("Adobe Reader 9 - Setup", "&Next >")
-
-        self.a.click("Adobe Reader 9 - Setup", "&Install")
-
-        time.sleep(1)
-        self.a.click_async("Adobe Reader 9 - Setup", "&Install")
-
-        self.a.click("Adobe Reader 9 - Setup", "&Finish")
-
-        # Wait until adobe9.exe is no longer running.
-        self.wait_process_exit("adobe9.exe")
-
-        self.a.remove("C:\\adobe9.exe")
+        self.a.remove("C:\\%s" % self.filename)
 
         # add needed registry keys to skip Licence Agreement
         self.a.execute(
