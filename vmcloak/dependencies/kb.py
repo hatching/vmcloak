@@ -2,7 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os.path
 import time
 
 from vmcloak.abstract import Dependency
@@ -127,6 +126,6 @@ class KB(Dependency):
         self.a.execute("wusa.exe C:\\setup.msu /quiet /norestart")
 
         self.a.remove("C:\\setup.msu")
-        
+
         self.a.execute("sc config wuauserv start= disabled")
         self.a.execute("net stop wuauserv")

@@ -2,15 +2,15 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os.path
-import time
-
 from vmcloak.abstract import Dependency
 
 class IE11(Dependency):
     name = "ie11"
     default = "11"
-    depends = ["KB:2670838", "KB:2639308", "KB:2533623", "KB:2731771", "KB:2729094", "KB:2786081", "KB:2882822", "KB:2888049", "KB:2834140"]
+    depends = [
+        "KB:2670838", "KB:2639308", "KB:2533623", "KB:2731771", "KB:2729094",
+        "KB:2786081", "KB:2882822", "KB:2888049", "KB:2834140",
+    ]
     exes = [
         {
             "version": "11",
@@ -27,8 +27,6 @@ class IE11(Dependency):
     ]
 
     def run(self):
-
         self.upload_dependency("C:\\setup.exe")
         self.a.execute("C:\\setup.exe /quiet /norestart /update-no")
-
         self.a.remove("C:\\setup.exe")

@@ -2,9 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os.path
-import time
-
 from vmcloak.abstract import Dependency
 
 class Win7sp(Dependency):
@@ -27,5 +24,4 @@ class Win7sp(Dependency):
     def run(self):
         self.upload_dependency("C:\\setup.exe")
         self.a.execute("C:\\setup.exe /quiet /norestart")
-
         self.a.remove("C:\\setup.exe")

@@ -2,15 +2,15 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import os.path
-import time
-
 from vmcloak.abstract import Dependency
 
 class IE10(Dependency):
     name = "ie10"
     default = "10"
-    depends = ["KB:2729094", "KB:2731771", "KB:2533623", "KB:2670838", "KB:2786081", "KB:2639308", "KB:2834140"]
+    depends = [
+        "KB:2729094", "KB:2731771", "KB:2533623", "KB:2670838", "KB:2786081",
+        "KB:2639308", "KB:2834140",
+    ]
     exes = [
         {
             "version": "10",

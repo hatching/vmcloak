@@ -90,7 +90,7 @@ def main():
 
         try:
             d = vmcloak.dependencies.names[dependency]
-            # check if there are any "childs" for dependencies 
+            # check if there are any "childs" for dependencies
             if d.depends:
                 depends = d.depends
                 if isinstance(depends, basestring):
@@ -101,10 +101,11 @@ def main():
                         depend, dversion = depend.split(":", 1)
                     else:
                         dversion = None
+
                     # install dependency child before dependency itself
                     dd = vmcloak.dependencies.names[depend]
                     dd(h, m, a, image, dversion, settings).run()
-		            
+
                 # reboot the VM as we expect most dependencies to be related to KB installs
                 a.shutdown()
                 m.wait_for_state(shutdown=True)

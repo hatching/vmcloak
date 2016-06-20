@@ -1,5 +1,5 @@
-#silent install of chrome. installer is the standalone version
-#https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi
+# Silent install of Chrome using the standalone installer.
+# https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi
 
 from vmcloak.abstract import Dependency
 
