@@ -13,7 +13,7 @@ class Cuteftp(Dependency):
     exes = [
         {
             "version": "9.0.5",
-            "url": "http://installer.globalscape.com/pub/cuteftp/cuteftp.exe",
+            "url": "http://cuckoo.sh/vmcloak/cuteftp.exe",
             "sha1": "1d8497b3f31f76168eb2573efe60dcefb3422e1d",
         },
     ]

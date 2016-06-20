@@ -13,13 +13,13 @@ class Win7sp(Dependency):
         {
             "version": "1",
             "target": "win7x64",
-            "url": "https://download.microsoft.com/download/0/A/F/0AFB5316-3062-494A-AB78-7FB0D4461357/windows6.1-KB976932-X64.exe",
+            "url": "http://cuckoo.sh/vmcloak/windows6.1-KB976932-X64.exe",
             "sha1": "74865ef2562006e51d7f9333b4a8d45b7a749dab",
         },
         {
             "version": "1",
             "target": "win7",
-            "url": "https://download.microsoft.com/download/0/A/F/0AFB5316-3062-494A-AB78-7FB0D4461357/windows6.1-KB976932-X86.exe",
+            "url": "http://cuckoo.sh/vmcloak/windows6.1-KB976932-X86.exe",
             "sha1": "c3516bc5c9e69fee6d9ac4f981f5b95977a8a2fa",
         },
     ]
