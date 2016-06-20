@@ -99,6 +99,8 @@ def main():
                 for depend in depends:
                     if ":" in depend:
                         depend, dversion = depend.split(":", 1)
+                    else:
+                        dversion = None
                     # install dependency child before dependency itself
                     dd = vmcloak.dependencies.names[depend]
                     dd(h, m, a, image, dversion, settings).run()
