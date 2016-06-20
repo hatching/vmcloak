@@ -5,6 +5,7 @@
 
 import argparse
 import logging
+import time
 
 import vmcloak.dependencies
 
@@ -14,7 +15,7 @@ from vmcloak.misc import wait_for_host
 from vmcloak.repository import Session, Image
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
-from vmcloak.win7 import Windows7
+from vmcloak.win7 import Windows7x86, Windows7x64
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak-install")
@@ -43,8 +44,10 @@ def main():
 
     if image.osversion == "winxp":
         h = WindowsXP()
-    elif image.osversion == "win7" or image.osversion == "win7x64":
-        h = Windows7()
+    elif image.osversion == "win7":
+        h = Windows7x86()
+    elif image.osversion == "win7x64":
+        h = Windows7x64()
 
     m.create_vm()
     m.os_type(image.osversion)
@@ -87,6 +90,28 @@ def main():
 
         try:
             d = vmcloak.dependencies.names[dependency]
+            # check if there are any "childs" for dependencies 
+            if d.depends:
+                depends = d.depends
+                if isinstance(depends, basestring):
+                    depends = [depends]
+
+                for depend in depends:
+                    if ":" in depend:
+                        depend, dversion = depend.split(":", 1)
+                    else:
+                        dversion = None
+                    # install dependency child before dependency itself
+                    dd = vmcloak.dependencies.names[depend]
+                    dd(h, m, a, image, dversion, settings).run()
+		            
+                # reboot the VM as we expect most dependencies to be related to KB installs
+                a.shutdown()
+                m.wait_for_state(shutdown=True)
+                time.sleep(1)
+                m.start_vm(visible=args.vm_visible)
+                wait_for_host(image.ipaddr, image.port)
+
             d(h, m, a, image, version, settings).run()
         except DependencyError:
             log.error("The dependency %s returned an error..", dependency)

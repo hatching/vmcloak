@@ -250,6 +250,7 @@ class Dependency(object):
     informs VMCloak on how to install that particular piece of software."""
     name = None
     default = None
+    depends = None
     exes = []
 
     def __init__(self, h=None, m=None, a=None, i=None,

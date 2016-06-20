@@ -6,7 +6,7 @@ from vmcloak.abstract import Dependency
 
 class DotNet40(Dependency):
     name = "dotnet40"
-    depends = "wic",
+    depends = "wic"
     exes = [
         {
             "url": "http://cuckoo.sh/vmcloak/dotNetFx40_Full_x86_x64.exe",
