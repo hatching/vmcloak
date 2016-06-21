@@ -22,6 +22,7 @@ class Windows7(OperatingSystem):
         '-no-emul-boot', '-iso-level', '2', '-udf', '-J', '-l', '-D', '-N',
         '-joliet-long', '-relaxed-filenames',
     ]
+    interface = "Local Area Connection"
 
     # List of preferences when multiple Windows 7 types are available.
     preference = "professional", "homepremium", "ultimate", "homebasic"
@@ -36,6 +37,7 @@ class Windows7(OperatingSystem):
             'PASSWORD': random_string(8, 16),
             "PRODUCT": product.upper(),
             "ARCH": self.ARCH,
+            "INTERFACE": self.interface,
         }
 
         buf = open(os.path.join(self.path, 'autounattend.xml'), 'rb').read()

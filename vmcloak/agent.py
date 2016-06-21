@@ -78,18 +78,13 @@ class Agent(object):
         # self.execute(cmdline % args, shell=True)
         self.execute(cmdline % args)
 
-    def static_ip(self, ipaddr, netmask, gateway, interface=None):
+    def static_ip(self, ipaddr, netmask, gateway, interface):
         """Change the IP address of this machine."""
-        if interface:
-            command = \
-                "netsh interface ip set address " \
-                "name=\"%s\" static " \
-                "%s %s %s 1" % (interface, ipaddr, netmask, gateway)
-        else:    
-            command = \
-                "netsh interface ip set address " \
-                "name=\"Local Area Connection\" static " \
-                "%s %s %s 1" % (ipaddr, netmask, gateway)
+        command = \
+            "netsh interface ip set address " \
+            "name=\"%s\" static " \
+            "%s %s %s 1" % (interface, ipaddr, netmask, gateway)
+
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
                           data={"command": command}, timeout=5)

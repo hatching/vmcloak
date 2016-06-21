@@ -24,6 +24,7 @@ class WindowsXP(OperatingSystem):
         '-iso-level', '2', '-J', '-l', '-D', '-N', '-joliet-long',
         '-relaxed-filenames',
     ]
+    interface = "Local Area Connection"
 
     def _winnt_sif(self):
         s = self.s

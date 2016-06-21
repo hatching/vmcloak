@@ -83,10 +83,7 @@ def main():
         a.resolution(width, height)
 
     a.remove("C:\\vmcloak")
-    if image.osversion.startswith("win8") or image.osversion.startswith("win10"):
-        a.static_ip(args.ipaddr, image.netmask, image.gateway, "Ethernet")
-    else:
-        a.static_ip(args.ipaddr, image.netmask, image.gateway)
+    a.static_ip(args.ipaddr, image.netmask, image.gateway, h.interface)
 
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
     m.stopvm()

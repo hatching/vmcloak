@@ -127,6 +127,7 @@ def main():
         DEBUG="yes" if args.debug else "no",
         RESO_WIDTH=reso_width,
         RESO_HEIGHT=reso_height,
+        INTERFACE=h.interface,
     )
 
     bootstrap = tempfile.mkdtemp(dir=args.tempdir)
