@@ -14,6 +14,41 @@ class AdobePdf(Dependency):
             "sha1": "8faabd08289b9a88023f71136f13fc4bd3290ef0",
         },
         {
+            "version": "10.1.4",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr1014_en_US.exe",
+            "sha1": "fe6808d5d11e94dc5581f33ed386ce552f0c84d6",
+        },
+        {
+            "version": "11.0.2",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11002_en_US.exe",
+            "sha1": "e1d9e57f08e169fb1c925f8ded93e5f5efe5cda3",
+        },
+        {
+            "version": "11.0.3",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11003_en_US.exe",
+            "sha1": "9c2b6903b000ecf2869e1555bc6e1b287e6176bf",
+        },
+        {
+            "version": "11.0.4",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11004_en_US.exe",
+            "sha1": "9c295c16d374735bf292ef6c630c9ab392c22500",
+        },
+        {
+            "version": "11.0.6",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11006_en_US.exe",
+            "sha1": "6a3d5b494b4ed6e11fc7d917afc03eaf05d4a6aa",
+        },
+        {
+            "version": "11.0.7",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11007_en_US.exe",
+            "sha1": "3e08c3f6daad59f463227590cc438b3906648f5e",
+        },
+        {
+            "version": "11.0.8",
+            "url": "http://cuckoo.sh/vmcloak/AdbeRdr11008_en_US.exe",
+            "sha1": "3e889258ea2000337bbe180d81317d44f617a292",
+        },
+        {
             "version": "11.0.9",
             "url": "http://cuckoo.sh/vmcloak/AdbeRdr11009_en_US.exe",
             "sha1": "53b367bff07a63ee07cf1cd090360b75d3fc6bfb",
