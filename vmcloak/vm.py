@@ -86,6 +86,8 @@ class VirtualBox(Machinery):
             'winxp': 'WindowsXP',
             'win7': 'Windows7',
             'win7x64': 'Windows7_64',
+            'win81x86': 'Windows81',
+            'win81x64': 'Windows81_64',
         }
         return self._call('modifyvm', self.name,
                           ostype=operating_systems[osversion])
