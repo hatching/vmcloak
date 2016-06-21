@@ -3,10 +3,13 @@ call C:\vmcloak\settings.bat
 echo Setting static IPv4 address.
 netsh interface ip set address name="Local Area Connection" ^
     static %GUEST_IP% %GUEST_MASK% %GUEST_GATEWAY% 1
+netsh interface ip set address name="Ethernet" ^
+    static %GUEST_IP% %GUEST_MASK% %GUEST_GATEWAY% 1
 
 echo Setting the DNS Server IP address.
 if "%DNSSERVER%" neq "" (
     netsh interface ip set dns name="Local Area Connection" static %DNSSERVER%
+    netsh interface ip set dns name="Ethernet" static %DNSSERVER%
 )
 
 echo Completely disable Windows Update.
