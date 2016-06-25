@@ -16,12 +16,12 @@ class DotNet(Dependency):
         },
         {
             "version": "4.5.1",
-            "url": "https://download.microsoft.com/download/1/6/7/167F0D79-9317-48AE-AEDB-17120579F8E2/NDP451-KB2858728-x86-x64-AllOS-ENU.exe",
+            "url": "http://cuckoo.sh/vmcloak/NDP451-KB2858728-x86-x64-AllOS-ENU.exe",
             "sha1": "5934dd101414bbc0b7f1ee2780d2fc8b9bec5c4d",
         },
         {
             "version": "4.6.1",
-            "url": "https://download.microsoft.com/download/E/4/1/E4173890-A24A-4936-9FC9-AF930FE3FA40/NDP461-KB3102436-x86-x64-AllOS-ENU.exe",
+            "url": "http://cuckoo.sh/vmcloak/NDP461-KB3102436-x86-x64-AllOS-ENU.exe",
             "sha1": "83d048d171ff44a3cad9b422137656f585295866",
         },
     ]
