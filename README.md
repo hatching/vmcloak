@@ -27,3 +27,10 @@ For a quick walkthrough on the general usage of VMCloak, please refer to the
 following blogpost: [http://jbremer.org/vmcloak3][blogpost].
 
 [blogpost]: http://jbremer.org/vmcloak3
+
+Credits
+-------
+
+The development of the VMCloak project initially started out as part of the
+ITES Project at Avira, thanks to **Thorsten Sick**. Many thanks to
+**Rasmus Männa** for lots of great contributions lately.

@@ -6,6 +6,7 @@
     New: Change the Desktop wallpaper with a doge default (thanks razu).
     New: More versions for Adobe PDF Reader.
     New: CuteFTP dependency (thanks razu).
+    New: Silverlight dependency (thanks razu).
 
 0.3.12, June 13th 2016
 
