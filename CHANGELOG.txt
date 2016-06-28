@@ -1,3 +1,12 @@
+0.3.13, June 28th 2016
+
+    New: 32-bit and 64-bit IE9, IE10, and IE11 dependencies (thanks razu).
+    New: Windows 7 upgrade to SP1 dependency (thanks razu).
+    Tweak: By default use pythonw.exe to hide the Cuckoo Agent (thanks razu).
+    New: Change the Desktop wallpaper with a doge default (thanks razu).
+    New: More versions for Adobe PDF Reader.
+    New: CuteFTP dependency (thanks razu).
+
 0.3.12, June 13th 2016
 
     Bugfix: vmcloak init --winxp was broken (thanks Daniel Teixeira).
