@@ -87,7 +87,7 @@ def main():
     if not h.set_serial_key(args.serial_key):
         exit(1)
 
-    h.configure(args)
+    h.configure(args.tempdir, args.product)
 
     reso_width, reso_height = args.resolution.split("x")
 

@@ -26,7 +26,6 @@ class WindowsXP(OperatingSystem):
     ]
 
     def _winnt_sif(self):
-        s = self.s
         values = {
             'PRODUCTKEY': self.serial_key,
             'COMPUTERNAME': random_string(8, 16),
@@ -41,7 +40,7 @@ class WindowsXP(OperatingSystem):
         for key, value in values.items():
             buf = buf.replace('@%s@' % key, value)
 
-        fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.tempdir)
+        fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=self.tempdir)
         os.write(fd, buf)
         os.close(fd)
 

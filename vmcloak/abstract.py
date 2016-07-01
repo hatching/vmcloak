@@ -189,9 +189,10 @@ class OperatingSystem(object):
         if self.osdir is None:
             raise Exception('OSDir has to be provided for OS handler')
 
-    def configure(self, s):
+    def configure(self, tempdir, product):
         """Configure the setup with settings provided by the user."""
-        self.s = s
+        self.tempdir = tempdir
+        self.product = product
 
     def isofiles(self, outdir, tmp_dir=None):
         """Abstract method for writing additional files to the newly created
