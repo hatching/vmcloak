@@ -8,9 +8,10 @@ from setuptools import setup
 
 setup(
     name='VMCloak',
-    version="0.3.13",
+    version="0.4",
     author='Jurriaan Bremer',
     author_email="jbr@cuckoo.sh",
+    url='http://vmcloak.org/',
     packages=[
         'vmcloak',
         'vmcloak.data',
@@ -18,20 +19,17 @@ setup(
         'vmcloak.data.hwconf',
     ],
     scripts=[
-        'bin/vmcloak',
-        'bin/vmcloak-init',
-        'bin/vmcloak-snapshot',
-        'bin/vmcloak-install',
-        'bin/vmcloak-modify',
-        'bin/vmcloak-clone',
         'bin/vmcloak-gethwconf',
         'bin/vmcloak-iptables',
         'bin/vmcloak-killvbox',
-        'bin/vmcloak-register',
         'bin/vmcloak-removevms',
         'bin/vmcloak-vboxnet0',
     ],
-    url='http://vmcloak.org/',
+    entry_points={
+        "console_scripts": [
+            "vmcloak = vmcloak.main:main",
+        ],
+    },
     license='GPLv3',
     description='Automated Virtual Machine Generation and Cloaking '
                 'for Cuckoo Sandbox.',
@@ -43,9 +41,10 @@ setup(
         'vmcloak.data.win7': ['*.*'],
     },
     install_requires=[
-        'requests',
-        'sqlalchemy',
-        'sphinx',
+        'click',
         'jinja2',
+        'requests',
+        'sphinx',
+        'sqlalchemy',
     ],
 )
