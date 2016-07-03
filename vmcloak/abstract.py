@@ -323,7 +323,7 @@ class Dependency(object):
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 177 /f")
 
-        if self.h.name == "win7" or self.h.name == "win7x64":
+        if self.h.name == "win7":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
                            "/v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f")
