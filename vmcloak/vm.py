@@ -84,7 +84,7 @@ class VirtualBox(Machinery):
     def os_type(self, osversion):
         operating_systems = {
             'winxp': 'WindowsXP',
-            'win7': 'Windows7',
+            'win7x86': 'Windows7',
             'win7x64': 'Windows7_64',
         }
         return self._call('modifyvm', self.name,

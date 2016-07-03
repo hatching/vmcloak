@@ -59,8 +59,7 @@ def clone(name, outname):
 @main.command()
 @click.argument("name")
 @click.option("--winxp", is_flag=True, help="This is a Windows XP instance.")
-@click.option("--x64", is_flag=True, help="This is a 64-bit OS.")
-@click.option("--win7", is_flag=True, help="This is a Windows 7 instance.")
+@click.option("--win7x86", is_flag=True, help="This is a Windows 7 32-bit instance.")
 @click.option("--win7x64", is_flag=True, help="This is a Windows 7 64-bit instance.")
 @click.option("--product", help="Windows 7 product version.")
 @click.option("--vm", default="virtualbox", help="Virtual Machinery.")
@@ -79,7 +78,7 @@ def clone(name, outname):
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
-def init(name, winxp, x64, win7, win7x64, product, vm, iso_mount, serial_key,
+def init(name, winxp, win7x86, win7x64, product, vm, iso_mount, serial_key,
          ip, port, adapter, netmask, gateway, dns, cpus, ramsize, tempdir,
          resolution, vm_visible, debug, verbose):
     if verbose:
@@ -99,17 +98,16 @@ def init(name, winxp, x64, win7, win7x64, product, vm, iso_mount, serial_key,
         h = WindowsXP()
         osversion = "winxp"
         ramsize = ramsize or 1024
-    elif win7 and not x64:
+    elif win7x86:
         h = Windows7x86()
         ramsize = ramsize or 1024
-        osversion = "win7"
-    elif x64 or win7x64:
+        osversion = "win7x86"
+    elif win7x64:
         h = Windows7x64()
         ramsize = ramsize or 2048
-        x64 = True
         osversion = "win7x64"
     else:
-        log.error("Please provide either --winxp or --win7 or --win7x64.")
+        log.error("Please provide either --winxp or --win7x86 or --win7x64.")
         exit(1)
 
     if not os.path.isdir(iso_mount or h.mount) or \
@@ -213,7 +211,7 @@ def install(name, dependencies, vm_visible):
 
     if image.osversion == "winxp":
         h = WindowsXP()
-    elif image.osversion == "win7":
+    elif image.osversion == "win7x86":
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
@@ -315,7 +313,7 @@ def modify(name, vm_visible):
 
     if image.osversion == "winxp":
         h = WindowsXP()
-    elif image.osversion == "win7":
+    elif image.osversion == "win7x86":
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
@@ -379,7 +377,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
 
     if image.osversion == "winxp":
         h = WindowsXP()
-    elif image.osversion == "win7":
+    elif image.osversion == "win7x86":
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
