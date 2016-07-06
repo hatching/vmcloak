@@ -50,10 +50,9 @@ def main():
     parser.add_argument("--resolution", type=str, default="1024x768", help="Screen resolution.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     parser.add_argument("-d", "--debug", action="store_true", help="Install Virtual Machine in debug mode.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose logging.")
     args = parser.parse_args()
 
-    if args.verbose:
+    if args.debug:
         log.setLevel(logging.DEBUG)
 
     session = Session()

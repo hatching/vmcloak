@@ -27,7 +27,7 @@ def main():
     parser.add_argument("name", type=str, help="Name of the instance.")
     parser.add_argument("dependencies", type=str, nargs="*", help="Dependencies to install.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
-    parser.add_argument("-d", "--debug", action="store_true", help="Install Virtual Machine in debug mode.")
+    parser.add_argument("-d", "--debug", action="store_true", help="Install Dependency in debug mode.")
     args = parser.parse_args()
 
     if args.debug:
