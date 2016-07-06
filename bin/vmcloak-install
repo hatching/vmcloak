@@ -117,10 +117,8 @@ def main():
                     dd(h, m, a, image, dversion, settings).run()
 
                 # reboot the VM as we expect most dependencies to be related to KB installs
-                a.shutdown()
-                m.wait_for_state(shutdown=True)
-                time.sleep(1)
-                m.start_vm(visible=args.vm_visible)
+                a.reboot()
+                time.sleep(10)
                 wait_for_host(image.ipaddr, image.port)
 
             d(h, m, a, image, version, settings).run()
