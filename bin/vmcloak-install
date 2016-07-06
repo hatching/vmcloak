@@ -77,7 +77,7 @@ def main():
 
     wait_for_host(image.ipaddr, image.port)
 
-    a = Agent(image.ipaddr, image.port, log)
+    a = Agent(image.ipaddr, image.port)
     a.ping()
 
     settings = {}
