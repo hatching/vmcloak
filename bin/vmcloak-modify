@@ -11,6 +11,8 @@ from vmcloak.repository import Session, Image
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7
+from vmcloak.win81 import Windows81
+from vmcloak.win10 import Windows10
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak-modify")
@@ -40,6 +42,10 @@ def main():
         h = WindowsXP()
     elif image.osversion == "win7" or image.osversion == "win7x64":
         h = Windows7()
+    elif image.osversion == "win81" or image.osversion == "win81x86" or image.osversion == "win81x64":
+        h = Windows81()
+    elif image.osversion == "win10" or image.osversion == "win10x86" or image.osversion == "win10x64":
+        h = Windows10()
 
     m.create_vm()
     m.os_type(image.osversion)

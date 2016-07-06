@@ -12,6 +12,8 @@ import tempfile
 from vmcloak.dependencies import Python27
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
+from vmcloak.win81 import Windows81x86, Windows81x64
+from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.repository import image_path, Session, Image
 from vmcloak.vm import VirtualBox
 
@@ -23,8 +25,15 @@ def main():
     parser.add_argument("name", type=str, help="Name of the new instance.")
     parser.add_argument("--winxp", action="store_true", help="This is a Windows XP instance.")
     parser.add_argument("--win7", action="store_true", help="This is a Windows 7 instance.")
+    parser.add_argument("--win7x86", action="store_true", help="This is a Windows 7 instance.")
     parser.add_argument("--x64", action="store_true", help="This is a 64-bit OS.")
     parser.add_argument("--win7x64", action="store_true", help="This is a Windows 7 64-bit instance.")
+    parser.add_argument("--win81", action="store_true", help="This is a Windows 8.1 32-bit instance.")
+    parser.add_argument("--win81x86", action="store_true", help="This is a Windows 8.1 32-bit instance.")
+    parser.add_argument("--win81x64", action="store_true", help="This is a Windows 8.1 64-bit instance.")
+    parser.add_argument("--win10", action="store_true", help="This is a Windows 10 32-bit instance.")
+    parser.add_argument("--win10x86", action="store_true", help="This is a Windows 10 32-bit instance.")
+    parser.add_argument("--win10x64", action="store_true", help="This is a Windows 10 64-bit instance.")
     parser.add_argument("--product", type=str, help="Windows 7 product version.")
     parser.add_argument("--vm", type=str, default="virtualbox", help="Virtual Machinery.")
     parser.add_argument("--iso-mount", type=str, help="Mounted ISO Windows installer image.")
@@ -61,7 +70,7 @@ def main():
         h = WindowsXP()
         osversion = "winxp"
         ramsize = 1024
-    elif args.win7 and not args.x64:
+    elif args.win7 or args.win7x86:
         h = Windows7x86()
         ramsize = 1024
         osversion = "win7"
@@ -70,8 +79,26 @@ def main():
         ramsize = 2048
         args.x64 = True
         osversion = "win7x64"
+    elif args.win81x86 or args.win81:
+        h = Windows81x86()
+        ramsize = 2048
+        osversion = "win81x86"
+    elif args.win81x64:
+        h = Windows81x64()
+        ramsize = 2048
+        args.x64 = True
+        osversion = "win81x64"
+    elif args.win10x86 or args.win10:
+        h = Windows10x86()
+        ramsize = 2048
+        osversion = "win10x86"
+    elif args.win10x64:
+        h = Windows10x64()
+        ramsize = 2048
+        args.x64 = True
+        osversion = "win10x64"
     else:
-        log.error("Please provide either --winxp or --win7 or --win7x64.")
+        log.error("Please provide either --winxp or --win7x86 or --win7x64 or --win81x86 or --win81x64 or --win10x86 or --win10x64.")
         exit(1)
 
     if args.ramsize is not None:
@@ -100,6 +127,7 @@ def main():
         DEBUG="yes" if args.debug else "no",
         RESO_WIDTH=reso_width,
         RESO_HEIGHT=reso_height,
+        INTERFACE=h.interface,
     )
 
     bootstrap = tempfile.mkdtemp(dir=args.tempdir)
