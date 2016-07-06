@@ -59,16 +59,18 @@ def main():
     elif image.osversion == "win10x64":
         h = Windows10x64()
 
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(image.ramsize)
-    m.attach_hd(image.path, multi=False)
-    # Ensure the slot is at least allocated for by an empty drive.
-    m.detach_iso()
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
-    m.start_vm(visible=args.vm_visible)
+    if image.vm is "virtualbox":
+        m.create_vm()
+        m.os_type(image.osversion)
+        m.cpus(image.cpus)
+        m.mouse("usbtablet")
+        m.ramsize(image.ramsize)
+        m.attach_hd(image.path, multi=False)
+        # Ensure the slot is at least allocated for by an empty drive.
+        m.detach_iso()
+        m.hostonly(nictype=h.nictype, adapter=image.adapter)
+        m.start_vm(visible=args.vm_visible)
+
     wait_for_host(image.ipaddr, image.port)
 
     a = Agent(image.ipaddr, image.port)
@@ -126,12 +128,13 @@ def main():
             log.error("The dependency %s returned an error..", dependency)
             break
 
-    a.shutdown()
-    m.wait_for_state(shutdown=True)
+    if image.vm is "virtualbox":
+        a.shutdown()
+        m.wait_for_state(shutdown=True)
 
-    m.remove_hd()
-    m.compact_hd(image.path)
-    m.delete_vm()
+        m.remove_hd()
+        m.compact_hd(image.path)
+        m.delete_vm()
 
 if __name__ == "__main__":
     main()
