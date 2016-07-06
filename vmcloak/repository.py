@@ -13,6 +13,7 @@ conf_path = os.path.join(os.getenv("HOME"), ".vmcloak")
 image_path = os.path.join(conf_path, "image")
 vms_path = os.path.join(conf_path, "vms")
 deps_path = os.path.join(conf_path, "deps")
+iso_dst_path = os.path.join(conf_path, "iso")
 
 repository = os.path.join(conf_path, "repository.db")
 engine = create_engine("sqlite:///%s" % repository)
@@ -59,3 +60,6 @@ if not os.path.isdir(image_path):
 
 if not os.path.isdir(deps_path):
     os.mkdir(deps_path)
+
+if not os.path.isdir(iso_dst_path):
+    os.mkdir(iso_dst_path)

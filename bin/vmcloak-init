@@ -14,7 +14,7 @@ from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
-from vmcloak.repository import image_path, Session, Image
+from vmcloak.repository import image_path, iso_dst_path, Session, Image
 from vmcloak.vm import VirtualBox
 
 logging.basicConfig()
@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--dns", type=str, default="8.8.8.8", help="DNS Server.")
     parser.add_argument("--cpus", type=int, default=1, help="CPU count.")
     parser.add_argument("--ramsize", type=int, help="Memory size")
-    parser.add_argument("--tempdir", type=str, default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
+    parser.add_argument("--tempdir", type=str, default=iso_dst_path, help="Temporary directory to build the ISO file.")
     parser.add_argument("--resolution", type=str, default="1024x768", help="Screen resolution.")
     parser.add_argument("--vm-visible", action="store_true", help="Start the Virtual Machine in GUI mode.")
     parser.add_argument("-d", "--debug", action="store_true", help="Install Virtual Machine in debug mode.")
@@ -62,9 +62,8 @@ def main():
         log.error("Image already exists: %s", args.name)
         exit(1)
 
-    if args.vm != "virtualbox" and args.vm != "custom":
-        log.info("got vm %s" % args.vm)
-        log.error("Either VirtualBox or Custom Machinery is supported at this point.")
+    if args.vm != "virtualbox" and args.vm != "iso":
+        log.error("VirtualBox Machinery or iso is supported at this point.")
         exit(1)
         
     if args.winxp:
