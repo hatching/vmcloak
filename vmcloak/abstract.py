@@ -182,6 +182,9 @@ class OperatingSystem(object):
     # Additional arguments for genisoimage.
     genisoargs = []
 
+    # Interface name in Windows
+    interface = None
+    
     def __init__(self):
         self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
         self.path = os.path.join(self.data_path, self.name)
