@@ -202,6 +202,7 @@ def wait_for_host(ipaddr, port):
     # Wait for the Agent to come up with a timeout of 1 second.
     while True:
         try:
+            log.debug("Waiting for host %s : %s", ipaddr, port)
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
