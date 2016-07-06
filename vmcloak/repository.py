@@ -25,6 +25,7 @@ class Image(Base):
 
     id = Column(Integer, primary_key=True)
     mode = Column(String(16))
+    vm = Column(String(16))
     name = Column(String(64))
     path = Column(Text)
     osversion = Column(String(32))

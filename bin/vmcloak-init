@@ -62,10 +62,11 @@ def main():
         log.error("Image already exists: %s", args.name)
         exit(1)
 
-    if args.vm != "virtualbox":
-        log.error("Only the VirtualBox Machinery is supported at this point.")
+    if args.vm != "virtualbox" and args.vm != "custom":
+        log.info("got vm %s" % args.vm)
+        log.error("Either VirtualBox or Custom Machinery is supported at this point.")
         exit(1)
-
+        
     if args.winxp:
         h = WindowsXP()
         osversion = "winxp"
@@ -156,29 +157,32 @@ def main():
 
     shutil.rmtree(bootstrap)
 
-    m.create_vm()
-    m.os_type(osversion)
-    m.cpus(args.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(ramsize)
-    m.create_hd(hdd_path)
-    m.attach_iso(iso_path)
-    m.hostonly(nictype=h.nictype, adapter=args.adapter)
-
-    log.info("Starting the Virtual Machine %r to install Windows.", args.name)
-    m.start_vm(visible=args.vm_visible)
-
-    m.wait_for_state(shutdown=True)
-
-    m.detach_iso()
-    os.unlink(iso_path)
-
-    m.remove_hd()
-    m.compact_hd(hdd_path)
-    m.delete_vm()
+    if args.vm is "virtualbox":
+	    m.create_vm()
+	    m.os_type(osversion)
+	    m.cpus(args.cpus)
+	    m.mouse("usbtablet")
+	    m.ramsize(ramsize)
+	    m.create_hd(hdd_path)
+	    m.attach_iso(iso_path)
+	    m.hostonly(nictype=h.nictype, adapter=args.adapter)
+	
+	    log.info("Starting the Virtual Machine %r to install Windows.", args.name)
+	    m.start_vm(visible=args.vm_visible)
+	
+	    m.wait_for_state(shutdown=True)
+	
+	    m.detach_iso()
+	    os.unlink(iso_path)
+	
+	    m.remove_hd()
+	    m.compact_hd(hdd_path)
+	    m.delete_vm()
+    else:
+	    log.info("You can find your deployment ISO image from : %s" % iso_path)
 
     log.info("Added image %r to the repository.", args.name)
-    session.add(Image(name=args.name, path=hdd_path, osversion=osversion,
+    session.add(Image(name=args.name, vm="%s" % args.vm, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=args.ip, port=args.port, adapter=args.adapter,
                       netmask=args.netmask, gateway=args.gateway,
