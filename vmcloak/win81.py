@@ -18,11 +18,11 @@ class Windows81(OperatingSystem):
     mount = '/mnt/win81'
     nictype = '82540EM'
     osdir = os.path.join('sources', '$oem$', '$1')
+    interface = "Ethernet"
     genisoargs = [
         '-no-emul-boot', '-iso-level', '2', '-udf', '-J', '-l', '-D', '-N',
         '-joliet-long', '-relaxed-filenames',
     ]
-    interface = "Ethernet"
 
     # List of preferences when multiple Windows 8.1 types are available.
     preference = "pro", "enterprise", "home"

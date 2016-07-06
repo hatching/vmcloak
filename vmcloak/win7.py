@@ -18,11 +18,11 @@ class Windows7(OperatingSystem):
     mount = '/mnt/win7'
     nictype = '82540EM'
     osdir = os.path.join('sources', '$oem$', '$1')
+    interface = "Local Area Connection"
     genisoargs = [
         '-no-emul-boot', '-iso-level', '2', '-udf', '-J', '-l', '-D', '-N',
         '-joliet-long', '-relaxed-filenames',
     ]
-    interface = "Local Area Connection"
 
     # List of preferences when multiple Windows 7 types are available.
     preference = "professional", "homepremium", "ultimate", "homebasic"

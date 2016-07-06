@@ -80,10 +80,9 @@ class Agent(object):
 
     def static_ip(self, ipaddr, netmask, gateway, interface):
         """Change the IP address of this machine."""
-        command = \
-            "netsh interface ip set address " \
-            "name=\"%s\" static " \
-            "%s %s %s 1" % (interface, ipaddr, netmask, gateway)
+        command = (
+            "netsh interface ip set address name=\"%s\" static %s %s %s 1"
+        ) % (interface, ipaddr, netmask, gateway)
 
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),

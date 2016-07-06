@@ -179,12 +179,12 @@ class OperatingSystem(object):
     # Directory where to store the vmcloak bootstrap files.
     osdir = None
 
+    # Interface name in Windows
+    interface = None
+
     # Additional arguments for genisoimage.
     genisoargs = []
 
-    # Interface name in Windows
-    interface = None
-    
     def __init__(self):
         self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
         self.path = os.path.join(self.data_path, self.name)
