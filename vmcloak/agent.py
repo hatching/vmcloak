@@ -9,9 +9,10 @@ from StringIO import StringIO
 from vmcloak.misc import wait_for_host
 
 class Agent(object):
-    def __init__(self, ipaddr, port):
+    def __init__(self, ipaddr, port, log):
         self.ipaddr = ipaddr
         self.port = port
+        self.log = log
 
     def get(self, method, *args, **kwargs):
         """Wrapper around GET requests."""
@@ -109,6 +110,7 @@ class Agent(object):
 
     def click(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons."""
+        self.log.info("Clicking window %s button %s", window_title, button_name)
         self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
             window_title, button_name))
 
