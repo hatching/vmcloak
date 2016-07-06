@@ -75,13 +75,13 @@ class Windows10(OperatingSystem):
             else:
                 product = self.preference[0]
 
-        if self.s.product and self.s.product.lower() not in self.preference:
+        if self.product and self.product.lower() not in self.preference:
             log.error("The product version of Windows 10 that was specified "
                       "on the command-line is not known by us, ignoring it.")
-            self.s.product = None
+            self.product = None
 
         with open(os.path.join(outdir, 'autounattend.xml'), 'wb') as f:
-            f.write(self._autounattend_xml(self.s.product or product))
+            f.write(self._autounattend_xml(self.product or product))
 
     def set_serial_key(self, serial_key):
         if serial_key and not valid_serial_key(serial_key):

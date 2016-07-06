@@ -37,7 +37,7 @@ class Windows81(OperatingSystem):
             'PASSWORD': random_string(8, 16),
             "PRODUCT": product.upper(),
             "ARCH": self.ARCH,
-            "INTERFACE": self.interface
+            "INTERFACE": self.interface,
         }
 
         buf = open(os.path.join(self.path, 'autounattend.xml'), 'rb').read()
@@ -75,13 +75,13 @@ class Windows81(OperatingSystem):
             else:
                 product = self.preference[0]
 
-        if self.s.product and self.s.product.lower() not in self.preference:
+        if self.product and self.product.lower() not in self.preference:
             log.error("The product version of Windows 8.1 that was specified "
                       "on the command-line is not known by us, ignoring it.")
-            self.s.product = None
+            self.product = None
 
         with open(os.path.join(outdir, 'autounattend.xml'), 'wb') as f:
-            f.write(self._autounattend_xml(self.s.product or product))
+            f.write(self._autounattend_xml(self.product or product))
 
     def set_serial_key(self, serial_key):
         if serial_key and not valid_serial_key(serial_key):
