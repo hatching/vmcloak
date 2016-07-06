@@ -16,6 +16,7 @@ from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.repository import image_path, iso_dst_path, Session, Image
 from vmcloak.vm import VirtualBox
+from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak-init")
@@ -61,7 +62,7 @@ def main():
         log.error("Image already exists: %s", args.name)
         exit(1)
 
-    if args.vm != "virtualbox" and args.vm != "iso":
+    if args.vm not in VMCLOAK_VM_MODES:
         log.error("VirtualBox Machinery or iso is supported at this point.")
         exit(1)
         
