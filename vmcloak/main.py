@@ -21,6 +21,8 @@ from vmcloak.rand import random_string
 from vmcloak.repository import image_path, Session, Image, Snapshot
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
+from vmcloak.win81 import Windows81x86, Windows81x64
+from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.vm import VirtualBox
 
 logging.basicConfig()
@@ -61,6 +63,10 @@ def clone(name, outname):
 @click.option("--winxp", is_flag=True, help="This is a Windows XP instance.")
 @click.option("--win7x86", is_flag=True, help="This is a Windows 7 32-bit instance.")
 @click.option("--win7x64", is_flag=True, help="This is a Windows 7 64-bit instance.")
+@click.option("--win81x86", is_flag=True, help="This is a Windows 8.1 32-bit instance.")
+@click.option("--win81x64", is_flag=True, help="This is a Windows 8.1 64-bit instance.")
+@click.option("--win10x86", is_flag=True, help="This is a Windows 10 32-bit instance.")
+@click.option("--win10x64", is_flag=True, help="This is a Windows 10 64-bit instance.")
 @click.option("--product", help="Windows 7 product version.")
 @click.option("--vm", default="virtualbox", help="Virtual Machinery.")
 @click.option("--iso-mount", help="Mounted ISO Windows installer image.")
@@ -78,9 +84,10 @@ def clone(name, outname):
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
-def init(name, winxp, win7x86, win7x64, product, vm, iso_mount, serial_key,
-         ip, port, adapter, netmask, gateway, dns, cpus, ramsize, tempdir,
-         resolution, vm_visible, debug, verbose):
+def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
+         win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
+         netmask, gateway, dns, cpus, ramsize, tempdir, resolution,
+         vm_visible, debug, verbose):
     if verbose:
         log.setLevel(logging.DEBUG)
 
@@ -106,8 +113,27 @@ def init(name, winxp, win7x86, win7x64, product, vm, iso_mount, serial_key,
         h = Windows7x64()
         ramsize = ramsize or 2048
         osversion = "win7x64"
+    elif win81x86:
+        h = Windows81x86()
+        ramsize = ramsize or 2048
+        osversion = "win81x86"
+    elif win81x64:
+        h = Windows81x64()
+        ramsize = ramsize or 2048
+        osversion = "win81x64"
+    elif win10x86:
+        h = Windows10x86()
+        ramsize = ramsize or 2048
+        osversion = "win10x86"
+    elif win10x64:
+        h = Windows10x64()
+        ramsize = ramsize or 2048
+        osversion = "win10x64"
     else:
-        log.error("Please provide either --winxp or --win7x86 or --win7x64.")
+        log.error(
+            "Please provide one of --winxp, --win7x86, --win7x64, "
+            "--win81x86, --win81x64, --win10x86, --win10x64."
+        )
         exit(1)
 
     if not os.path.isdir(iso_mount or h.mount) or \
@@ -133,6 +159,7 @@ def init(name, winxp, win7x86, win7x64, product, vm, iso_mount, serial_key,
         DEBUG="yes" if debug else "no",
         RESO_WIDTH=reso_width,
         RESO_HEIGHT=reso_height,
+        INTERFACE=h.interface,
     )
 
     bootstrap = tempfile.mkdtemp(dir=tempdir)
@@ -215,6 +242,14 @@ def install(name, dependencies, vm_visible):
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
+    elif image.osversion == "win81x86":
+        h = Windows81x86()
+    elif image.osversion == "win81x64":
+        h = Windows81x64()
+    elif image.osversion == "win10x86":
+        h = Windows10x86()
+    elif image.osversion == "win10x64":
+        h = Windows10x64()
 
     m.create_vm()
     m.os_type(image.osversion)
@@ -317,6 +352,14 @@ def modify(name, vm_visible):
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
+    elif image.osversion == "win81x86":
+        h = Windows81x86()
+    elif image.osversion == "win81x64":
+        h = Windows81x64()
+    elif image.osversion == "win10x86":
+        h = Windows10x86()
+    elif image.osversion == "win10x64":
+        h = Windows10x64()
 
     m.create_vm()
     m.os_type(image.osversion)
@@ -381,6 +424,14 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         h = Windows7x86()
     elif image.osversion == "win7x64":
         h = Windows7x64()
+    elif image.osversion == "win81x86":
+        h = Windows81x86()
+    elif image.osversion == "win81x64":
+        h = Windows81x64()
+    elif image.osversion == "win10x86":
+        h = Windows10x86()
+    elif image.osversion == "win10x64":
+        h = Windows10x64()
 
     # From now on this image is multiattach.
     image.mode = "multiattach"
@@ -414,7 +465,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         a.resolution(width, height)
 
     a.remove("C:\\vmcloak")
-    a.static_ip(ipaddr, image.netmask, image.gateway)
+    a.static_ip(ipaddr, image.netmask, image.gateway, h.interface)
 
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
     m.stopvm()

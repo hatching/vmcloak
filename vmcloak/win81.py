@@ -12,20 +12,20 @@ from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
 
-class Windows7(OperatingSystem):
-    name = 'win7'
+class Windows81(OperatingSystem):
+    name = 'win81'
     service_pack = 2
-    mount = '/mnt/win7'
+    mount = '/mnt/win81'
     nictype = '82540EM'
     osdir = os.path.join('sources', '$oem$', '$1')
-    interface = "Local Area Connection"
+    interface = "Ethernet"
     genisoargs = [
         '-no-emul-boot', '-iso-level', '2', '-udf', '-J', '-l', '-D', '-N',
         '-joliet-long', '-relaxed-filenames',
     ]
 
-    # List of preferences when multiple Windows 7 types are available.
-    preference = "professional", "homepremium", "ultimate", "homebasic"
+    # List of preferences when multiple Windows 8.1 types are available.
+    preference = "pro", "enterprise", "home"
 
     ARCH = None
 
@@ -76,7 +76,7 @@ class Windows7(OperatingSystem):
                 product = self.preference[0]
 
         if self.product and self.product.lower() not in self.preference:
-            log.error("The product version of Windows 7 that was specified "
+            log.error("The product version of Windows 8.1 that was specified "
                       "on the command-line is not known by us, ignoring it.")
             self.product = None
 
@@ -90,11 +90,11 @@ class Windows7(OperatingSystem):
             return False
 
         # https://technet.microsoft.com/en-us/library/jj612867.aspx
-        self.serial_key = serial_key or '33PXH-7Y6KF-2VJC9-XBBR8-HVTHH'
+        self.serial_key = serial_key or 'GCRJD-8NW9H-F2CDX-CCM8D-9D6T9'
         return True
 
-class Windows7x64(Windows7):
+class Windows81x64(Windows81):
     ARCH = "amd64"
 
-class Windows7x86(Windows7):
+class Windows81x86(Windows81):
     ARCH = "x86"

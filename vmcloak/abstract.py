@@ -20,6 +20,10 @@ from vmcloak.repository import deps_path
 
 log = logging.getLogger(__name__)
 
+GENISOIMAGE_ERROR = (
+    "Warning: creating filesystem that does not conform to ISO-9660.\n"
+)
+
 class Machinery(object):
     FIELDS = {}
     vm_dir_required = True
@@ -175,6 +179,9 @@ class OperatingSystem(object):
     # Directory where to store the vmcloak bootstrap files.
     osdir = None
 
+    # Interface name in Windows
+    interface = None
+
     # Additional arguments for genisoimage.
     genisoargs = []
 
@@ -235,11 +242,15 @@ class OperatingSystem(object):
             isocreate, '-quiet', '-b', 'boot.img', '-o', newiso,
         ] + self.genisoargs + [outdir]
 
-        try:
-            # TODO Properly suppress the ISO-9660 warning.
-            subprocess.check_call(args)
-        except subprocess.CalledProcessError as e:
-            log.error('Error creating ISO file: %s', e)
+        p = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        out, err = p.communicate()
+        if p.wait() or out or err != GENISOIMAGE_ERROR:
+            log.error(
+                "Error creating ISO file (err=%d): %s %s",
+                p.wait(), out, err
+            )
             shutil.rmtree(outdir)
             return False
 
