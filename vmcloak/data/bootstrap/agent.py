@@ -20,7 +20,7 @@ import zipfile
 import SimpleHTTPServer
 import SocketServer
 
-AGENT_VERSION = "0.2"
+AGENT_VERSION = "0.3"
 AGENT_FEATURES = [
     "execpy",
 ]
@@ -302,6 +302,8 @@ def do_remove():
             os.chmod(request.form["path"], stat.S_IWRITE)
             os.remove(request.form["path"])
             message = "Successfully deleted file"
+        else:
+            return json_error(404, "Path provided does not exist")
     except:
         return json_exception("Error removing file or directory")
 
