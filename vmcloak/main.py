@@ -475,3 +475,56 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
                         port=image.port, hostname=hostname)
     session.add(snapshot)
     session.commit()
+
+@main.command()
+@click.argument("name")
+@click.argument("filepath", type=click.Path(writable=True))
+def export(name, filepath):
+    if not filepath.endswith((".ova", ".ovf")):
+        log.error("The exported file should be either .ova or .ovf")
+        exit(1)
+
+    session = Session()
+
+    image = session.query(Image).filter_by(name=name).first()
+    if not image:
+        log.error("Image not found: %s", name)
+        exit(1)
+
+    if image.mode != "normal":
+        log.error("You can't export this image as you have already made "
+                  "snapshots with it!")
+        log.error("Please vmcloak clone it and modify the clone.")
+        exit(1)
+
+    if image.osversion == "winxp":
+        h = WindowsXP()
+    elif image.osversion == "win7x86":
+        h = Windows7x86()
+    elif image.osversion == "win7x64":
+        h = Windows7x64()
+    elif image.osversion == "win81x86":
+        h = Windows81x86()
+    elif image.osversion == "win81x64":
+        h = Windows81x64()
+    elif image.osversion == "win10x86":
+        h = Windows10x86()
+    elif image.osversion == "win10x64":
+        h = Windows10x64()
+
+    m = VirtualBox(name=name)
+
+    m.create_vm()
+    m.os_type(image.osversion)
+    m.cpus(image.cpus)
+    m.mouse("usbtablet")
+    m.ramsize(image.ramsize)
+    m.attach_hd(image.path, multi=False)
+    m.detach_iso()
+    m.hostonly(nictype=h.nictype, adapter=image.adapter)
+
+    m.export(filepath)
+
+    m.remove_hd()
+    m.compact_hd(image.path)
+    m.delete_vm()

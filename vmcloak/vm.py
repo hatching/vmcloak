@@ -213,3 +213,13 @@ class VirtualBox(Machinery):
     def vrde(self, port, password):
         return self._call('modifyvm', self.name, vrde='on', vrdeport=port,
                           vrdeproperty='VNCPassword=%s' % password)
+
+    def export(self, filepath):
+        return self._call(
+            "export", self.name, "--output", filepath, "--vsys", "0",
+            product="VMCloak",
+            producturl="http://vmcloak.org/",
+            vendor="Cuckoo Sandbox",
+            vendorurl="http://cuckoosandbox.org/",
+            description="Cuckoo Sandbox Virtual Machine created by VMCloak",
+        )
