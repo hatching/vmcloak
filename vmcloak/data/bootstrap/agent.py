@@ -12,6 +12,7 @@ import re
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import traceback
 import zipfile
@@ -19,7 +20,10 @@ import zipfile
 import SimpleHTTPServer
 import SocketServer
 
-AGENT_VERSION = "0.1"
+AGENT_VERSION = "0.2"
+AGENT_FEATURES = [
+    "execpy",
+]
 
 class MiniHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     server_version = "Cuckoo Agent"
@@ -174,7 +178,9 @@ def json_success(message, **kwargs):
 
 @app.route("/")
 def get_index():
-    return json_success("Cuckoo Agent!", version=AGENT_VERSION)
+    return json_success(
+        "Cuckoo Agent!", version=AGENT_VERSION, features=AGENT_FEATURES
+    )
 
 @app.route("/status")
 def get_status():
@@ -318,6 +324,36 @@ def do_execute():
             subprocess.Popen(request.form["command"], shell=shell, cwd=cwd)
         else:
             p = subprocess.Popen(request.form["command"], shell=shell, cwd=cwd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            stdout, stderr = p.communicate()
+    except:
+        return json_exception("Error executing command")
+
+    return json_success("Successfully executed command",
+                        stdout=stdout, stderr=stderr)
+
+@app.route("/execpy", methods=["POST"])
+def do_execpy():
+    if "filepath" not in request.form:
+        return json_error(400, "No Python file has been provided")
+
+    # Execute the command asynchronously? As a shell command?
+    async = "async" in request.form
+
+    cwd = request.form.get("cwd")
+    stdout = stderr = None
+
+    args = [
+        sys.executable,
+        request.form["filepath"],
+    ]
+
+    try:
+        if async:
+            subprocess.Popen(args, cwd=cwd)
+        else:
+            p = subprocess.Popen(args, cwd=cwd,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             stdout, stderr = p.communicate()
