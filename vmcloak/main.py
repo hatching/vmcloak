@@ -260,8 +260,10 @@ def install(name, dependenciesin, vm_visible, debug):
     elif image.osversion == "win10x64":
         h = Windows10x64()
 
+    # FIXME : useless call to m
+    m = VirtualBox(name=name)
+
     if image.vm is "virtualbox":
-        m = VirtualBox(name=name)
         m.create_vm()
         m.os_type(image.osversion)
         m.cpus(image.cpus)
