@@ -191,7 +191,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 
     shutil.rmtree(bootstrap)
 
-    if vm is "virtualbox":
+    if vm == "virtualbox":
         m.create_vm()
         m.os_type(osversion)
         m.cpus(cpus)
@@ -235,6 +235,7 @@ def install(name, dependenciesin, vm_visible, debug):
     session = Session()
 
     image = session.query(Image).filter_by(name=name).first()
+
     if not image:
         log.error("Image not found: %s", name)
         exit(1)
@@ -263,7 +264,7 @@ def install(name, dependenciesin, vm_visible, debug):
     # FIXME : useless call to m
     m = VirtualBox(name=name)
 
-    if image.vm is "virtualbox":
+    if image.vm == "virtualbox":
         m.create_vm()
         m.os_type(image.osversion)
         m.cpus(image.cpus)
@@ -332,7 +333,7 @@ def install(name, dependenciesin, vm_visible, debug):
             log.error("The dependency %s returned an error..", dependency)
             break
 
-    if image.vm is "virtualbox":
+    if image.vm == "virtualbox":
         a.shutdown()
         m.wait_for_state(shutdown=True)
         m.remove_hd()
