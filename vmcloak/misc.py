@@ -6,7 +6,6 @@ import hashlib
 import importlib
 import json
 import logging
-import logging.handlers
 import os
 import pwd
 import shutil
@@ -17,7 +16,6 @@ from ConfigParser import ConfigParser
 
 from vmcloak.conf import Configuration
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.log import ConsoleHandler
 
 log = logging.getLogger(__name__)
 
@@ -277,13 +275,3 @@ def import_plugins(dirpath, module_prefix, namespace, class_):
         namespace[subclass.__name__] = subclass
         plugins.append(subclass)
     return plugins
-
-def init_logging():
-    """Initializes logging only to console."""
-    formatter = logging.Formatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s")
-
-    ch = ConsoleHandler()
-    ch.setFormatter(formatter)
-    log.addHandler(ch)
-
-    log.setLevel(logging.INFO)

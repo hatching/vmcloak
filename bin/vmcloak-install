@@ -11,7 +11,7 @@ import vmcloak.dependencies
 
 from vmcloak.agent import Agent
 from vmcloak.exceptions import DependencyError
-from vmcloak.misc import wait_for_host, init_logging
+from vmcloak.misc import wait_for_host
 from vmcloak.repository import Session, Image
 from vmcloak.vm import VirtualBox
 from vmcloak.winxp import WindowsXP
@@ -20,7 +20,7 @@ from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 
 logging.basicConfig()
-log = logging.getLogger()
+log = logging.getLogger("vmcloak-install")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -30,8 +30,6 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true", help="Install Dependency in debug mode.")
     args = parser.parse_args()
 
-    init_logging()
-    
     if args.debug:
         log.setLevel(logging.DEBUG)
     
