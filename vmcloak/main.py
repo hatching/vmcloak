@@ -28,6 +28,35 @@ from vmcloak.vm import VirtualBox
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
+def initvm(image):
+    m = VirtualBox(name=image.name)
+
+    if image.osversion == "winxp":
+        h = WindowsXP()
+    elif image.osversion == "win7x86":
+        h = Windows7x86()
+    elif image.osversion == "win7x64":
+        h = Windows7x64()
+    elif image.osversion == "win81x86":
+        h = Windows81x86()
+    elif image.osversion == "win81x64":
+        h = Windows81x64()
+    elif image.osversion == "win10x86":
+        h = Windows10x86()
+    elif image.osversion == "win10x64":
+        h = Windows10x64()
+
+    m.create_vm()
+    m.os_type(image.osversion)
+    m.cpus(image.cpus)
+    m.mouse("usbtablet")
+    m.ramsize(image.ramsize)
+    m.attach_hd(image.path, multi=False)
+    # Ensure the slot is at least allocated for by an empty drive.
+    m.detach_iso()
+    m.hostonly(nictype=h.nictype, adapter=image.adapter)
+    return m, h
+
 @click.group()
 def main():
     pass
@@ -234,32 +263,8 @@ def install(name, dependencies, vm_visible):
         log.error("Please vmcloak-clone it and update the clone.")
         exit(1)
 
-    m = VirtualBox(name=name)
+    m, h = initvm(image)
 
-    if image.osversion == "winxp":
-        h = WindowsXP()
-    elif image.osversion == "win7x86":
-        h = Windows7x86()
-    elif image.osversion == "win7x64":
-        h = Windows7x64()
-    elif image.osversion == "win81x86":
-        h = Windows81x86()
-    elif image.osversion == "win81x64":
-        h = Windows81x64()
-    elif image.osversion == "win10x86":
-        h = Windows10x86()
-    elif image.osversion == "win10x64":
-        h = Windows10x64()
-
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(image.ramsize)
-    m.attach_hd(image.path, multi=False)
-    # Ensure the slot is at least allocated for by an empty drive.
-    m.detach_iso()
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
     m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
 
@@ -344,31 +349,8 @@ def modify(name, vm_visible):
         log.error("Please vmcloak-clone it and modify the clone.")
         exit(1)
 
-    m = VirtualBox(name=name)
+    m, h = initvm(image)
 
-    if image.osversion == "winxp":
-        h = WindowsXP()
-    elif image.osversion == "win7x86":
-        h = Windows7x86()
-    elif image.osversion == "win7x64":
-        h = Windows7x64()
-    elif image.osversion == "win81x86":
-        h = Windows81x86()
-    elif image.osversion == "win81x64":
-        h = Windows81x64()
-    elif image.osversion == "win10x86":
-        h = Windows10x86()
-    elif image.osversion == "win10x64":
-        h = Windows10x64()
-
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(image.ramsize)
-    m.attach_hd(image.path, multi=False)
-    m.detach_iso()
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
     m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
 
@@ -416,34 +398,12 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         log.error("Image not found: %s", name)
         exit(1)
 
-    m = VirtualBox(name=vmname)
-
-    if image.osversion == "winxp":
-        h = WindowsXP()
-    elif image.osversion == "win7x86":
-        h = Windows7x86()
-    elif image.osversion == "win7x64":
-        h = Windows7x64()
-    elif image.osversion == "win81x86":
-        h = Windows81x86()
-    elif image.osversion == "win81x64":
-        h = Windows81x64()
-    elif image.osversion == "win10x86":
-        h = Windows10x86()
-    elif image.osversion == "win10x64":
-        h = Windows10x64()
-
     # From now on this image is multiattach.
     image.mode = "multiattach"
     session.commit()
 
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(cpus or image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(ramsize or image.ramsize)
-    m.attach_hd(image.path, multi=True)
-    m.hostonly(nictype=h.nictype, adapter=adapter or image.adapter)
+    m, h = initvm(image)
+
     m.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
@@ -497,31 +457,7 @@ def export(name, filepath):
         log.error("Please vmcloak clone it and modify the clone.")
         exit(1)
 
-    if image.osversion == "winxp":
-        h = WindowsXP()
-    elif image.osversion == "win7x86":
-        h = Windows7x86()
-    elif image.osversion == "win7x64":
-        h = Windows7x64()
-    elif image.osversion == "win81x86":
-        h = Windows81x86()
-    elif image.osversion == "win81x64":
-        h = Windows81x64()
-    elif image.osversion == "win10x86":
-        h = Windows10x86()
-    elif image.osversion == "win10x64":
-        h = Windows10x64()
-
-    m = VirtualBox(name=name)
-
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(image.ramsize)
-    m.attach_hd(image.path, multi=False)
-    m.detach_iso()
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
+    m, h = initvm(image)
 
     m.export(filepath)
 
