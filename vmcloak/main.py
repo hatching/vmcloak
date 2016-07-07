@@ -28,8 +28,8 @@ from vmcloak.vm import VirtualBox
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
-def initvm(image):
-    m = VirtualBox(name=image.name)
+def initvm(image, name=None):
+    m = VirtualBox(name=name or image.name)
 
     if image.osversion == "winxp":
         h = WindowsXP()
@@ -402,7 +402,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     image.mode = "multiattach"
     session.commit()
 
-    m, h = initvm(image)
+    m, h = initvm(image, name=vmname)
 
     m.start_vm(visible=vm_visible)
 
