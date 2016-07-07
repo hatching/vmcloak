@@ -65,7 +65,7 @@ def main():
     if args.vm not in VMCLOAK_VM_MODES:
         log.error("VirtualBox Machinery or iso is supported at this point.")
         exit(1)
-        
+
     if args.winxp:
         h = WindowsXP()
         osversion = "winxp"
