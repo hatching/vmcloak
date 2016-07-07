@@ -30,7 +30,7 @@ log = logging.getLogger("vmcloak")
 
 @click.group()
 def main():
-    print "TOPKEK"
+    pass
 
 @main.command()
 @click.argument("name")
