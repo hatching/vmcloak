@@ -3,10 +3,13 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import requests
+import logging
 
 from StringIO import StringIO
 
 from vmcloak.misc import wait_for_host
+
+log = logging.getLogger(__name__)
 
 class Agent(object):
     def __init__(self, ipaddr, port):
@@ -116,6 +119,7 @@ class Agent(object):
         """Identify a window by its title and click one of its buttons
         asynchronously. This is mostly used in cases where the click may or
         may not be required, leaving the clicking process hanging."""
+        log.debug("Clicking window '%s' button '%s'", window_title, button_name)
         self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
             window_title, button_name), async=True)
 

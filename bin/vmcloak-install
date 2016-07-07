@@ -20,7 +20,7 @@ from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 
 logging.basicConfig()
-log = logging.getLogger("vmcloak-install")
+log = logging.getLogger("vmcloak")
 
 def main():
     parser = argparse.ArgumentParser()

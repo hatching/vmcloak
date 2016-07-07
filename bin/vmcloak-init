@@ -19,7 +19,7 @@ from vmcloak.vm import VirtualBox
 from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
-log = logging.getLogger("vmcloak-init")
+log = logging.getLogger("vmcloak")
 
 def main():
     parser = argparse.ArgumentParser()
