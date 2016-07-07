@@ -17,7 +17,7 @@ class KB(Dependency):
         },
         {
             "version": "2729094",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2729094-v2-x86.msu",
             "sha1": "565e7f2a6562ace748c5b6165aa342a11c96aa98",
         },
@@ -29,7 +29,7 @@ class KB(Dependency):
         },
         {
             "version": "2731771",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2731771-x86.msu",
             "sha1": "86675d2fd327b328793dc179727ce0ce5107a72e",
         },
@@ -41,7 +41,7 @@ class KB(Dependency):
         },
         {
             "version": "2533623",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2533623-x86.msu",
             "sha1": "25becc0815f3e47b0ba2ae84480e75438c119859",
         },
@@ -53,7 +53,7 @@ class KB(Dependency):
         },
         {
             "version": "2670838",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2670838-x86.msu",
             "sha1": "984b8d122a688d917f81c04155225b3ef31f012e",
         },
@@ -65,7 +65,7 @@ class KB(Dependency):
         },
         {
             "version": "2786081",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2786081-x86.msu",
             "sha1": "70122aca48659bfb8a06bed08cb7047c0c45c5f4",
         },
@@ -77,7 +77,7 @@ class KB(Dependency):
         },
         {
             "version": "2639308",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2639308-x86.msu",
             "sha1": "96e09ef9caf3907a32315839086b9f576bb46459",
         },
@@ -89,7 +89,7 @@ class KB(Dependency):
         },
         {
             "version": "2834140",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2834140-v2-x86.msu",
             "sha1": "b57c05e9da2c66e1bb27868c92db177a1d62b2fb",
         },
@@ -101,7 +101,7 @@ class KB(Dependency):
         },
         {
             "version": "2882822",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2882822-x86.msu",
             "sha1": "7fab5b9ca9b5c2395b505d1234ee889941bfb151",
         },
@@ -113,7 +113,7 @@ class KB(Dependency):
         },
         {
             "version": "2888049",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/Windows6.1-KB2888049-x86.msu",
             "sha1": "65b4c7a5773fab177d20c8e49d773492e55e8d76",
         },

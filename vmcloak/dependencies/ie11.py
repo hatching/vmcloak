@@ -20,7 +20,7 @@ class IE11(Dependency):
         },
         {
             "version": "11",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/IE11-Windows6.1-x86-en-us.exe",
             "sha1": "fefdcdde83725e393d59f89bb5855686824d474e",
         },

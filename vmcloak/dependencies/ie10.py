@@ -20,7 +20,7 @@ class IE10(Dependency):
         },
         {
             "version": "10",
-            "target": "win7",
+            "target": "win7x86",
             "url": "http://cuckoo.sh/vmcloak/IE10-Windows6.1-x86-en-us.exe",
             "sha1": "e6552da75de95f6b1f7937c2bdb5fe14443dea2a",
         },
