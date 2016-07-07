@@ -13,10 +13,11 @@ import time
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.exceptions import DependencyError
-from vmcloak.misc import copytreelower, copytreeinto, sha1_file
+from vmcloak.misc import copytreelower, copytreeinto, sha1_file, ini_read
 from vmcloak.paths import get_path
-from vmcloak.rand import random_serial, random_uuid
+from vmcloak.rand import random_serial, random_uuid, random_string
 from vmcloak.repository import deps_path
+from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
 
@@ -170,6 +171,9 @@ class OperatingSystem(object):
     # Service Pack that is likely being used.
     service_pack = None
 
+    # Architecture this OS is aimed at (x86 or amd64).
+    arch = None
+
     # Default directory where the original ISO is mounted.
     mount = None
 
@@ -255,6 +259,84 @@ class OperatingSystem(object):
             return False
 
         shutil.rmtree(outdir)
+        return True
+
+class WindowsAutounattended(OperatingSystem):
+    """Abstract wrapper around Windows-based Operating Systems that use the
+    autounattend.xml file for automated installation, i.e., Windows 7+."""
+
+    nictype = "82540EM"
+    osdir = os.path.join("sources", "$oem$", "$1")
+    dummy_serial_key = None
+    genisoargs = [
+        "-no-emul-boot", "-iso-level", "2", "-udf", "-J", "-l", "-D", "-N",
+        "-joliet-long", "-relaxed-filenames",
+    ]
+
+    def _autounattend_xml(self, product):
+        values = {
+            "PRODUCTKEY": self.serial_key,
+            "COMPUTERNAME": random_string(8, 14),
+            "USERNAME": random_string(8, 12),
+            "PASSWORD": random_string(8, 16),
+            "PRODUCT": product.upper(),
+            "ARCH": self.arch,
+            "INTERFACE": self.interface,
+        }
+
+        buf = open(os.path.join(self.path, "autounattend.xml"), "rb").read()
+        for key, value in values.items():
+            buf = buf.replace("@%s@" % key, value)
+
+        return buf
+
+    def isofiles(self, outdir, tmp_dir=None):
+        products = []
+
+        product_ini = os.path.join(outdir, "sources", "product.ini")
+        mode, conf = ini_read(product_ini)
+
+        for line in conf.get("BuildInfo", []):
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            if key != "staged":
+                continue
+
+            for product in value.split(","):
+                products.append(product.lower())
+
+            break
+
+        for preference in self.preference:
+            if preference in products:
+                product = preference
+                break
+        else:
+            if products:
+                product = products[0]
+            else:
+                product = self.preference[0]
+
+        if self.product and self.product.lower() not in self.preference:
+            log.error(
+                "The product version of %s that was specified on the "
+                "command-line is not known by us, ignoring it.", self.name
+            )
+            self.product = None
+
+        with open(os.path.join(outdir, "autounattend.xml"), "wb") as f:
+            f.write(self._autounattend_xml(self.product or product))
+
+    def set_serial_key(self, serial_key):
+        if serial_key and not valid_serial_key(serial_key):
+            log.error("The provided serial key has an incorrect encoding.")
+            log.info("Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.")
+            return False
+
+        # https://technet.microsoft.com/en-us/library/jj612867.aspx
+        self.serial_key = serial_key or self.dummy_serial_key
         return True
 
 class Dependency(object):
