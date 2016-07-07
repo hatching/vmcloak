@@ -3,10 +3,13 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import requests
+import logging
 
 from StringIO import StringIO
 
 from vmcloak.misc import wait_for_host
+
+log = logging.getLogger()
 
 class Agent(object):
     def __init__(self, ipaddr, port):
@@ -109,6 +112,7 @@ class Agent(object):
 
     def click(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons."""
+        log.info("Clicking window %s button %s", window_title, button_name)
         self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
             window_title, button_name))
 
