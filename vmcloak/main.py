@@ -31,20 +31,17 @@ log = logging.getLogger("vmcloak")
 def initvm(image, name=None):
     m = VirtualBox(name=name or image.name)
 
-    if image.osversion == "winxp":
-        h = WindowsXP()
-    elif image.osversion == "win7x86":
-        h = Windows7x86()
-    elif image.osversion == "win7x64":
-        h = Windows7x64()
-    elif image.osversion == "win81x86":
-        h = Windows81x86()
-    elif image.osversion == "win81x64":
-        h = Windows81x64()
-    elif image.osversion == "win10x86":
-        h = Windows10x86()
-    elif image.osversion == "win10x64":
-        h = Windows10x64()
+    handlers = {
+        "winxp": WindowsXP,
+        "win7x86": Windows7x86,
+        "win7x64": Windows7x64,
+        "win81x86": Windows81x86,
+        "win81x64": Windows81x64,
+        "win10x86": Windows10x86,
+        "win10x64": Windows10x64,
+    }
+
+    h = handlers[image.osversion]
 
     m.create_vm()
     m.os_type(image.osversion)
