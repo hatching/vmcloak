@@ -1,4 +1,7 @@
-# Silent install of Firefox 41
+# Copyright (C) 2014-2016 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+# Firefox Dependency submitted by Jason Lewis.
 # https://download-installer.cdn.mozilla.net/pub/firefox/releases/41.0.2/win32/en-US/Firefox%20Setup%2041.0.2.exe
 # file was renamed Firefox_Setup_41.0.2.exe to avoid issues with spaces.
 

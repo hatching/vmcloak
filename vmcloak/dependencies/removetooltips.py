@@ -1,3 +1,8 @@
+# Copyright (C) 2014-2016 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+# Chrome Dependency submitted by Jason Lewis.
+
 from vmcloak.abstract import Dependency
 
 class RemoveTooltips(Dependency):
