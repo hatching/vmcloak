@@ -16,7 +16,7 @@ import vmcloak.dependencies
 from vmcloak.agent import Agent
 from vmcloak.dependencies import Python27
 from vmcloak.exceptions import DependencyError
-from vmcloak.misc import wait_for_host, register_cuckoo
+from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.rand import random_string
 from vmcloak.repository import image_path, Session, Image, Snapshot
 from vmcloak.winxp import WindowsXP
@@ -54,9 +54,10 @@ def initvm(image, name=None):
     m.hostonly(nictype=h.nictype, adapter=image.adapter)
     return m, h
 
-@click.group()
-def main():
-    pass
+@click.group(invoke_without_command=True)
+@click.option("-u", "--user", help="Drop privileges to user.")
+def main(user):
+    user and drop_privileges(user)
 
 @main.command()
 @click.argument("name")

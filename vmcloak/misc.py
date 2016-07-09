@@ -6,13 +6,19 @@ import hashlib
 import importlib
 import logging
 import os
-import pwd
 import shutil
 import socket
 import stat
 import subprocess
+import sys
 
 from ConfigParser import ConfigParser
+
+try:
+    import pwd
+    HAVE_PWD = True
+except ImportError:
+    HAVE_PWD = False
 
 log = logging.getLogger(__name__)
 
@@ -200,6 +206,24 @@ def wait_for_host(ipaddr, port):
             break
         except socket.error:
             pass
+
+def drop_privileges(user):
+    if not HAVE_PWD:
+        sys.exit(
+            "This Operating System does not support the pwd module, please "
+            "don't use privilege dropping."
+        )
+
+    try:
+        user = pwd.getpwnam(user)
+        os.setgroups((user.pw_gid,))
+        os.setgid(user.pw_gid)
+        os.setuid(user.pw_uid)
+        os.environ["HOME"] = user.pw_dir
+    except KeyError:
+        sys.exit("Invalid user specified to drop privileges to: %s" % user)
+    except OSError as e:
+        sys.exit("Failed to drop privileges: %s" % e)
 
 def import_plugins(dirpath, module_prefix, namespace, class_):
     """Import plugins of type `class` located at `dirpath` into the
