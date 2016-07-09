@@ -77,3 +77,59 @@ def test_win7x64():
 
     image = session.query(Image).filter_by(name=name).first()
     os.remove(image.path)
+
+def test_win81x64():
+    ip, port = "192.168.56.105", 13339
+
+    name, snapshot = genname("win81x64"), genname("win81x64-snapshot")
+    call(
+        main.init, name, "--win81x64", "--port", port, "--tempdir", dirpath,
+    )
+    call(main.snapshot, name, snapshot, ip)
+
+    m = vm.VirtualBox(snapshot)
+    m.restore_snapshot()
+    m.start_vm()
+
+    misc.wait_for_host(ip, port)
+
+    a = agent.Agent(ip, port)
+    assert a.environ()["SYSTEMDRIVE"] == "C:"
+
+    a.shutdown()
+    m.wait_for_state(shutdown=True)
+
+    m.delete_snapshot("vmcloak")
+    m.remove_hd()
+    m.delete_vm()
+
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
+
+def test_win10x64():
+    ip, port = "192.168.56.106", 13340
+
+    name, snapshot = genname("win10x64"), genname("win10x64-snapshot")
+    call(
+        main.init, name, "--win10x64", "--port", port, "--tempdir", dirpath,
+    )
+    call(main.snapshot, name, snapshot, ip)
+
+    m = vm.VirtualBox(snapshot)
+    m.restore_snapshot()
+    m.start_vm()
+
+    misc.wait_for_host(ip, port)
+
+    a = agent.Agent(ip, port)
+    assert a.environ()["SYSTEMDRIVE"] == "C:"
+
+    a.shutdown()
+    m.wait_for_state(shutdown=True)
+
+    m.delete_snapshot("vmcloak")
+    m.remove_hd()
+    m.delete_vm()
+
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
