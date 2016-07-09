@@ -2,12 +2,16 @@ import json
 import os.path
 import tempfile
 
-import vmcloak
+from vmcloak import main, misc, agent, vm
+from vmcloak.repository import Session, Image
 
 dirpath = tempfile.mkdtemp()
 
 # To be populated by the user of the unittests.
 config = json.load(open(os.path.expanduser("~/.vmcloak/config.json"), "rb"))
+
+# Database session.
+session = Session()
 
 def call(function, *args):
     """Invokes click command."""
@@ -21,16 +25,55 @@ def test_winxp():
 
     name, snapshot = genname("winxp"), genname("winxp-snapshot")
     call(
-        vmcloak.main.init, name, "--winxp", "--port", port,
+        main.init, name, "--winxp", "--port", port,
         "--tempdir", dirpath, "--serial-key", config["winxp"]["serialkey"]
     )
-    call(vmcloak.main.snapshot, name, snapshot, ip)
+    call(main.snapshot, name, snapshot, ip)
 
-    m = vmcloak.vm.VirtualBox(snapshot)
+    m = vm.VirtualBox(snapshot)
     m.restore_snapshot()
     m.start_vm()
 
-    vmcloak.misc.wait_for_host(ip, port)
+    misc.wait_for_host(ip, port)
 
-    a = vmcloak.agent.Agent(ip, port)
-    print a.environ()
+    # Very basic integrity checking of the VM.
+    a = agent.Agent(ip, port)
+    assert a.environ()["SYSTEMDRIVE"] == "C:"
+
+    a.shutdown()
+    m.wait_for_state(shutdown=True)
+
+    m.delete_snapshot("vmcloak")
+    m.remove_hd()
+    m.delete_vm()
+
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
+
+def test_win7x64():
+    ip, port = "192.168.56.104", 13338
+
+    name, snapshot = genname("win7x64"), genname("win7x64-snapshot")
+    call(
+        main.init, name, "--win7x64", "--port", port, "--tempdir", dirpath,
+    )
+    call(main.snapshot, name, snapshot, ip)
+
+    m = vm.VirtualBox(snapshot)
+    m.restore_snapshot()
+    m.start_vm()
+
+    misc.wait_for_host(ip, port)
+
+    a = agent.Agent(ip, port)
+    assert a.environ()["SYSTEMDRIVE"] == "C:"
+
+    a.shutdown()
+    m.wait_for_state(shutdown=True)
+
+    m.delete_snapshot("vmcloak")
+    m.remove_hd()
+    m.delete_vm()
+
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
