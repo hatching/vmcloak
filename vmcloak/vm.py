@@ -207,6 +207,9 @@ class VirtualBox(Machinery):
         else:
             return self._call("snapshot", self.name, "restorecurrent")
 
+    def delete_snapshot(self, label):
+        return self._call("snapshot", self.name, "delete", label)
+
     def stopvm(self):
         return self._call('controlvm', self.name, 'poweroff')
 
