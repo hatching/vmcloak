@@ -293,8 +293,10 @@ def install(name, dependencies, vm_visible):
             log.info("Installing dependency %s..", dependency)
 
         try:
+            # TODO Recursive install function.
             d = vmcloak.dependencies.names[dependency]
-            # check if there are any "childs" for dependencies
+
+            # Check if there are any "childs" for dependencies.
             if d.depends:
                 depends = d.depends
                 if isinstance(depends, basestring):
@@ -306,11 +308,12 @@ def install(name, dependencies, vm_visible):
                     else:
                         dversion = None
 
-                    # install dependency child before dependency itself
+                    # Install dependency child before dependency itself.
                     dd = vmcloak.dependencies.names[depend]
                     dd(h, m, a, image, dversion, settings).run()
 
-                # reboot the VM as we expect most dependencies to be related to KB installs
+                # Reboot the VM as we expect most dependencies to be related
+                # to KB installs.
                 a.shutdown()
                 m.wait_for_state(shutdown=True)
                 time.sleep(1)
