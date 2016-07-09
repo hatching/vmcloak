@@ -1,3 +1,13 @@
+0.4, TBD
+
+    New: Windows 8.1 and Windows 10 support (thanks razu).
+    New: .NET 4.5.1 and 4.6.1 support (thanks razu).
+    New: Improved command-line interface through the click library.
+    New: Export .ova/.ovf functionality.
+    New: Basic unittests for each supported Operating System.
+    Tweak: Upgrade to Cuckoo Agent 0.3 featuring two bugfixes.
+    Tweak: Prune superfluous warning thrown by genisoimage.
+
 0.3.13, June 28th 2016
 
     New: 32-bit and 64-bit IE9, IE10, and IE11 dependencies (thanks razu).
