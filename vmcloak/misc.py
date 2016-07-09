@@ -34,7 +34,7 @@ def copytreelower(srcdir, dstdir):
     # directory is "/mnt/winxp" then we slice up to "/mnt/winxp/", thus we
     # require one extra character for the slash. When the source directory is
     # "/mnt/winxp/" then of course we don't an extra character for the slice.
-    prefix = len(srcdir) + (not srcdir.endswith('/'))
+    prefix = len(srcdir) + (not srcdir.endswith("/"))
     for dirpath, dirnames, filenames in os.walk(srcdir):
         for dirname in dirnames:
             os.mkdir(os.path.join(dstdir,
@@ -60,8 +60,8 @@ def copytreeinto(srcdir, dstdir):
 
     """
     if os.path.isfile(dstdir):
-        raise Exception('Cannot create directory if there is already '
-                        'a file: %s' % dstdir)
+        raise Exception("Cannot create directory if there is already "
+                        "a file: %s" % dstdir)
 
     if not os.path.isdir(dstdir):
         os.mkdir(dstdir)
@@ -79,39 +79,39 @@ def ini_read(path):
     ret, section = {}, None
 
     if os.path.exists(path):
-        buf = open(path, 'rb').read()
+        buf = open(path, "rb").read()
     else:
-        buf = ''
+        buf = ""
 
     # UTF-16 Byte Order Mark ("BOM")
-    mode = 'utf16' if buf[:2] == '\xff\xfe' else 'latin1'
+    mode = "utf16" if buf[:2] == "\xff\xfe" else "latin1"
     buf = buf.decode(mode)
 
-    for line in buf.split('\n'):
+    for line in buf.split("\n"):
         line = line.strip()
-        if not line or line[0] == ';':
+        if not line or line[0] == ";":
             continue
 
-        if line[0] == '[' and ']' in line:
-            section = line[1:line.index(']')]
+        if line[0] == "[" and "]" in line:
+            section = line[1:line.index("]")]
             ret[section] = []
             continue
 
-        if '=' not in line:
+        if "=" not in line:
             ret[section].append(line)
         else:
-            a, b = line.split('=', 1)
-            ret[section].append('%s=%s' % (a.strip(), b.strip()))
+            a, b = line.split("=", 1)
+            ret[section].append("%s=%s" % (a.strip(), b.strip()))
     return mode, ret
 
 def ini_write(path, mode, data):
-    lines = ['']
+    lines = [""]
     for key in sorted(data.keys()):
-        lines.append('[%s]' % key)
+        lines.append("[%s]" % key)
         for value in sorted(data[key]):
             lines.append(value)
-        lines.append('')
-    open(path, 'wb').write('\r\n'.join(lines).encode(mode))
+        lines.append("")
+    open(path, "wb").write("\r\n".join(lines).encode(mode))
 
 def ini_add(data, section, value):
     if section not in data:
@@ -136,7 +136,7 @@ def ini_merge(data, ini2, overwrite=True):
                 data[section] = [value]
                 continue
 
-            off = value.find('=')
+            off = value.find("=")
             # If this line is not a key = value entry, then
             # we take the entire line.
             if off < 0:
@@ -162,7 +162,7 @@ def ini_read_dict(path):
 def sha1_file(path):
     """Calculate the sha1 hash of a file."""
     h = hashlib.sha1()
-    f = open(path, 'rb')
+    f = open(path, "rb")
 
     while True:
         buf = f.read(1024*1024)
@@ -174,28 +174,28 @@ def sha1_file(path):
     return h.hexdigest()
 
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
-    log.debug('Registering the Virtual Machine with Cuckoo.')
+    log.debug("Registering the Virtual Machine with Cuckoo.")
     try:
-        machine_py = os.path.join(cuckoo_dirpath, 'utils', 'machine.py')
+        machine_py = os.path.join(cuckoo_dirpath, "utils", "machine.py")
         args = [
-            machine_py, '--add',
-            '--ip', hostonly_ip,
-            '--platform', 'windows',
-            '--tags', tags or "",
-            '--snapshot', 'vmcloak',
+            machine_py, "--add",
+            "--ip", hostonly_ip,
+            "--platform", "windows",
+            "--tags", tags or "",
+            "--snapshot", "vmcloak",
             vmname,
         ]
 
         if rdp_port:
-            args += ['--rdp_port', '%s' % rdp_port]
+            args += ["--rdp_port", "%s" % rdp_port]
 
         subprocess.check_call(args, cwd=cuckoo_dirpath)
         return True
     except OSError as e:
-        log.error('Is $CUCKOO/utils/machine.py executable? -> %s', e)
+        log.error("Is $CUCKOO/utils/machine.py executable? -> %s", e)
         return False
     except subprocess.CalledProcessError as e:
-        log.error('Error registering the VM: %s.', e)
+        log.error("Error registering the VM: %s.", e)
         return False
 
 def wait_for_host(ipaddr, port):

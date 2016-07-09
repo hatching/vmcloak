@@ -131,14 +131,14 @@ class Machinery(object):
 
         def _init_vm(path, fields):
             for key, value in fields.items():
-                key = path + '/' + key
+                key = path + "/" + key
                 if isinstance(value, dict):
                     _init_vm(key, value)
                 else:
                     if isinstance(value, tuple):
                         k, v = value
                         if k not in hwconf or not hwconf[k]:
-                            value = 'To be filled by O.E.M.'
+                            value = "To be filled by O.E.M."
                         else:
                             if k not in config:
                                 config[k] = random.choice(hwconf[k])
@@ -147,22 +147,22 @@ class Machinery(object):
 
                             # Some values have to be generated randomly.
                             if value is not None:
-                                if value.startswith('<SERIAL>'):
+                                if value.startswith("<SERIAL>"):
                                     length = int(value.split()[-1])
                                     value = random_serial(length)
-                                elif value.startswith('<UUID>'):
+                                elif value.startswith("<UUID>"):
                                     value = random_uuid()
 
                     if value is None:
                         value = "To be filled by O.E.M."
 
-                    log.debug('Setting %r to %r.', key, value)
+                    log.debug("Setting %r to %r.", key, value)
                     ret = self.set_field(key, value)
                     if ret:
                         log.debug(ret)
 
         config = {}
-        _init_vm('', self.FIELDS)
+        _init_vm("", self.FIELDS)
 
 class OperatingSystem(object):
     # Short name for this OS.
@@ -190,15 +190,15 @@ class OperatingSystem(object):
     genisoargs = []
 
     def __init__(self):
-        self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
+        self.data_path = os.path.join(VMCLOAK_ROOT, "data")
         self.path = os.path.join(self.data_path, self.name)
         self.serial_key = None
 
         if self.name is None:
-            raise Exception('Name has to be provided for OS handler')
+            raise Exception("Name has to be provided for OS handler")
 
         if self.osdir is None:
-            raise Exception('OSDir has to be provided for OS handler')
+            raise Exception("OSDir has to be provided for OS handler")
 
     def configure(self, tempdir, product):
         """Configure the setup with settings provided by the user."""
@@ -222,28 +222,28 @@ class OperatingSystem(object):
         copytreelower(mount, outdir)
 
         # Copy the boot image.
-        shutil.copy(os.path.join(self.path, 'boot.img'), outdir)
+        shutil.copy(os.path.join(self.path, "boot.img"), outdir)
 
         # Allow the OS handler to write additional files.
         self.isofiles(outdir, tmp_dir)
 
-        os.makedirs(os.path.join(outdir, self.osdir, 'vmcloak'))
+        os.makedirs(os.path.join(outdir, self.osdir, "vmcloak"))
 
-        data_bootstrap = os.path.join(self.data_path, 'bootstrap')
+        data_bootstrap = os.path.join(self.data_path, "bootstrap")
         for fname in os.listdir(data_bootstrap):
             shutil.copy(os.path.join(data_bootstrap, fname),
-                        os.path.join(outdir, self.osdir, 'vmcloak', fname))
+                        os.path.join(outdir, self.osdir, "vmcloak", fname))
 
         copytreeinto(bootstrap, os.path.join(outdir, self.osdir))
 
-        isocreate = get_path('genisoimage')
+        isocreate = get_path("genisoimage")
         if not isocreate:
-            log.error('Either genisoimage or mkisofs is required!')
+            log.error("Either genisoimage or mkisofs is required!")
             shutil.rmtree(outdir)
             return False
 
         args = [
-            isocreate, '-quiet', '-b', 'boot.img', '-o', newiso,
+            isocreate, "-quiet", "-b", "boot.img", "-o", newiso,
         ] + self.genisoargs + [outdir]
 
         p = subprocess.Popen(
