@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -58,6 +58,11 @@ class Agent(object):
         """Rename a file or directory."""
         self.post("/rename", path=path)
 
+    def extract(self, dirpath, zipfile):
+        """Extract a zip file to folder."""
+        zipfile = open(zipfile, "rb")
+        self.postfile("/extract", {"zipfile": zipfile}, dirpath=dirpath)
+
     def shutdown(self):
         """Power off the machine."""
         self.execute("shutdown -s -t 0", async=True)
@@ -83,12 +88,12 @@ class Agent(object):
         # self.execute(cmdline % args, shell=True)
         self.execute(cmdline % args)
 
-    def static_ip(self, ipaddr, netmask, gateway):
+    def static_ip(self, ipaddr, netmask, gateway, interface):
         """Change the IP address of this machine."""
-        command = \
-            "netsh interface ip set address " \
-            "name=\"Local Area Connection\" static " \
-            "%s %s %s 1" % (ipaddr, netmask, gateway)
+        command = (
+            "netsh interface ip set address name=\"%s\" static %s %s %s 1"
+        ) % (interface, ipaddr, netmask, gateway)
+
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
                           data={"command": command}, timeout=5)

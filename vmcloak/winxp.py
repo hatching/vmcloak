@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -14,41 +14,41 @@ from vmcloak.verify import valid_serial_key
 log = logging.getLogger(__name__)
 
 class WindowsXP(OperatingSystem):
-    name = 'winxp'
+    name = "winxp"
     service_pack = 3
-    mount = '/mnt/winxp'
-    nictype = 'Am79C973'
-    osdir = os.path.join('$oem$', '$1')
+    mount = "/mnt/winxp"
+    nictype = "Am79C973"
+    osdir = os.path.join("$oem$", "$1")
     genisoargs = [
-        '-no-emul-boot', '-boot-load-seg', '1984', '-boot-load-size', '4',
-        '-iso-level', '2', '-J', '-l', '-D', '-N', '-joliet-long',
-        '-relaxed-filenames',
+        "-no-emul-boot", "-boot-load-seg", "1984", "-boot-load-size", "4",
+        "-iso-level", "2", "-J", "-l", "-D", "-N", "-joliet-long",
+        "-relaxed-filenames",
     ]
+    interface = "Local Area Connection"
 
     def _winnt_sif(self):
-        s = self.s
         values = {
-            'PRODUCTKEY': self.serial_key,
-            'COMPUTERNAME': random_string(8, 16),
-            'FULLNAME': '%s %s' % (random_string(4, 8), random_string(4, 10)),
-            'ORGANIZATION': '',
-            'WORKGROUP': random_string(4, 8),
-            # 'KBLAYOUT': s.keyboard_layout,
-            'KBLAYOUT': 'US',
+            "PRODUCTKEY": self.serial_key,
+            "COMPUTERNAME": random_string(8, 16),
+            "FULLNAME": "%s %s" % (random_string(4, 8), random_string(4, 10)),
+            "ORGANIZATION": "",
+            "WORKGROUP": random_string(4, 8),
+            # "KBLAYOUT": s.keyboard_layout,
+            "KBLAYOUT": "US",
         }
 
-        buf = open(os.path.join(self.path, 'winnt.sif'), 'rb').read()
+        buf = open(os.path.join(self.path, "winnt.sif"), "rb").read()
         for key, value in values.items():
-            buf = buf.replace('@%s@' % key, value)
+            buf = buf.replace("@%s@" % key, value)
 
-        fd, winntsif = tempfile.mkstemp(suffix='.sif', dir=s.tempdir)
+        fd, winntsif = tempfile.mkstemp(suffix=".sif", dir=self.tempdir)
         os.write(fd, buf)
         os.close(fd)
 
         return winntsif
 
     def isofiles(self, outdir, tmp_dir=None):
-        dst_winnt = os.path.join(outdir, 'i386', 'winnt.sif')
+        dst_winnt = os.path.join(outdir, "i386", "winnt.sif")
 
         winnt_sif = self._winnt_sif()
 
@@ -60,19 +60,19 @@ class WindowsXP(OperatingSystem):
 
         # There are a couple of optional values that should be set if they have
         # not already been set.
-        winnt_opt_sif = os.path.join(self.path, 'winnt-opt.sif')
+        winnt_opt_sif = os.path.join(self.path, "winnt-opt.sif")
         ini_merge(winnt, winnt_opt_sif, overwrite=False)
 
         ini_write(dst_winnt, mode, winnt)
 
     def set_serial_key(self, serial_key):
         if not serial_key:
-            log.error('No serial key has been provided - please do so!')
+            log.error("No serial key has been provided - please do so!")
             return False
 
         if not valid_serial_key(serial_key):
-            log.error('The provided serial key has an incorrect encoding.')
-            log.info('Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.')
+            log.error("The provided serial key has an incorrect encoding.")
+            log.info("Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.")
             return False
 
         self.serial_key = serial_key

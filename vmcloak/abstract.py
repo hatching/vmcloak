@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -13,12 +13,17 @@ import time
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.exceptions import DependencyError
-from vmcloak.misc import copytreelower, copytreeinto, sha1_file
+from vmcloak.misc import copytreelower, copytreeinto, sha1_file, ini_read
 from vmcloak.paths import get_path
-from vmcloak.rand import random_serial, random_uuid
+from vmcloak.rand import random_serial, random_uuid, random_string
 from vmcloak.repository import deps_path
+from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
+
+GENISOIMAGE_ERROR = (
+    "Warning: creating filesystem that does not conform to ISO-9660.\n"
+)
 
 class Machinery(object):
     FIELDS = {}
@@ -126,14 +131,14 @@ class Machinery(object):
 
         def _init_vm(path, fields):
             for key, value in fields.items():
-                key = path + '/' + key
+                key = path + "/" + key
                 if isinstance(value, dict):
                     _init_vm(key, value)
                 else:
                     if isinstance(value, tuple):
                         k, v = value
                         if k not in hwconf or not hwconf[k]:
-                            value = 'To be filled by O.E.M.'
+                            value = "To be filled by O.E.M."
                         else:
                             if k not in config:
                                 config[k] = random.choice(hwconf[k])
@@ -142,22 +147,22 @@ class Machinery(object):
 
                             # Some values have to be generated randomly.
                             if value is not None:
-                                if value.startswith('<SERIAL>'):
+                                if value.startswith("<SERIAL>"):
                                     length = int(value.split()[-1])
                                     value = random_serial(length)
-                                elif value.startswith('<UUID>'):
+                                elif value.startswith("<UUID>"):
                                     value = random_uuid()
 
                     if value is None:
                         value = "To be filled by O.E.M."
 
-                    log.debug('Setting %r to %r.', key, value)
+                    log.debug("Setting %r to %r.", key, value)
                     ret = self.set_field(key, value)
                     if ret:
                         log.debug(ret)
 
         config = {}
-        _init_vm('', self.FIELDS)
+        _init_vm("", self.FIELDS)
 
 class OperatingSystem(object):
     # Short name for this OS.
@@ -165,6 +170,9 @@ class OperatingSystem(object):
 
     # Service Pack that is likely being used.
     service_pack = None
+
+    # Architecture this OS is aimed at (x86 or amd64).
+    arch = None
 
     # Default directory where the original ISO is mounted.
     mount = None
@@ -175,23 +183,27 @@ class OperatingSystem(object):
     # Directory where to store the vmcloak bootstrap files.
     osdir = None
 
+    # Interface name in Windows
+    interface = None
+
     # Additional arguments for genisoimage.
     genisoargs = []
 
     def __init__(self):
-        self.data_path = os.path.join(VMCLOAK_ROOT, 'data')
+        self.data_path = os.path.join(VMCLOAK_ROOT, "data")
         self.path = os.path.join(self.data_path, self.name)
         self.serial_key = None
 
         if self.name is None:
-            raise Exception('Name has to be provided for OS handler')
+            raise Exception("Name has to be provided for OS handler")
 
         if self.osdir is None:
-            raise Exception('OSDir has to be provided for OS handler')
+            raise Exception("OSDir has to be provided for OS handler")
 
-    def configure(self, s):
+    def configure(self, tempdir, product):
         """Configure the setup with settings provided by the user."""
-        self.s = s
+        self.tempdir = tempdir
+        self.product = product
 
     def isofiles(self, outdir, tmp_dir=None):
         """Abstract method for writing additional files to the newly created
@@ -210,45 +222,129 @@ class OperatingSystem(object):
         copytreelower(mount, outdir)
 
         # Copy the boot image.
-        shutil.copy(os.path.join(self.path, 'boot.img'), outdir)
+        shutil.copy(os.path.join(self.path, "boot.img"), outdir)
 
         # Allow the OS handler to write additional files.
         self.isofiles(outdir, tmp_dir)
 
-        os.makedirs(os.path.join(outdir, self.osdir, 'vmcloak'))
+        os.makedirs(os.path.join(outdir, self.osdir, "vmcloak"))
 
-        data_bootstrap = os.path.join(self.data_path, 'bootstrap')
+        data_bootstrap = os.path.join(self.data_path, "bootstrap")
         for fname in os.listdir(data_bootstrap):
             shutil.copy(os.path.join(data_bootstrap, fname),
-                        os.path.join(outdir, self.osdir, 'vmcloak', fname))
+                        os.path.join(outdir, self.osdir, "vmcloak", fname))
 
         copytreeinto(bootstrap, os.path.join(outdir, self.osdir))
 
-        isocreate = get_path('genisoimage')
+        isocreate = get_path("genisoimage")
         if not isocreate:
-            log.error('Either genisoimage or mkisofs is required!')
+            log.error("Either genisoimage or mkisofs is required!")
             shutil.rmtree(outdir)
             return False
 
         args = [
-            isocreate, '-quiet', '-b', 'boot.img', '-o', newiso,
+            isocreate, "-quiet", "-b", "boot.img", "-o", newiso,
         ] + self.genisoargs + [outdir]
 
-        try:
-            # TODO Properly suppress the ISO-9660 warning.
-            subprocess.check_call(args)
-        except subprocess.CalledProcessError as e:
-            log.error('Error creating ISO file: %s', e)
+        p = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        out, err = p.communicate()
+        if p.wait() or out or err != GENISOIMAGE_ERROR:
+            log.error(
+                "Error creating ISO file (err=%d): %s %s",
+                p.wait(), out, err
+            )
             shutil.rmtree(outdir)
             return False
 
         shutil.rmtree(outdir)
         return True
 
+class WindowsAutounattended(OperatingSystem):
+    """Abstract wrapper around Windows-based Operating Systems that use the
+    autounattend.xml file for automated installation, i.e., Windows 7+."""
+
+    nictype = "82540EM"
+    osdir = os.path.join("sources", "$oem$", "$1")
+    dummy_serial_key = None
+    genisoargs = [
+        "-no-emul-boot", "-iso-level", "2", "-udf", "-J", "-l", "-D", "-N",
+        "-joliet-long", "-relaxed-filenames",
+    ]
+
+    def _autounattend_xml(self, product):
+        values = {
+            "PRODUCTKEY": self.serial_key,
+            "COMPUTERNAME": random_string(8, 14),
+            "USERNAME": random_string(8, 12),
+            "PASSWORD": random_string(8, 16),
+            "PRODUCT": product.upper(),
+            "ARCH": self.arch,
+            "INTERFACE": self.interface,
+        }
+
+        buf = open(os.path.join(self.path, "autounattend.xml"), "rb").read()
+        for key, value in values.items():
+            buf = buf.replace("@%s@" % key, value)
+
+        return buf
+
+    def isofiles(self, outdir, tmp_dir=None):
+        products = []
+
+        product_ini = os.path.join(outdir, "sources", "product.ini")
+        mode, conf = ini_read(product_ini)
+
+        for line in conf.get("BuildInfo", []):
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            if key != "staged":
+                continue
+
+            for product in value.split(","):
+                products.append(product.lower())
+
+            break
+
+        for preference in self.preference:
+            if preference in products:
+                product = preference
+                break
+        else:
+            if products:
+                product = products[0]
+            else:
+                product = self.preference[0]
+
+        if self.product and self.product.lower() not in self.preference:
+            log.error(
+                "The product version of %s that was specified on the "
+                "command-line is not known by us, ignoring it.", self.name
+            )
+            self.product = None
+
+        with open(os.path.join(outdir, "autounattend.xml"), "wb") as f:
+            f.write(self._autounattend_xml(self.product or product))
+
+    def set_serial_key(self, serial_key):
+        if serial_key and not valid_serial_key(serial_key):
+            log.error("The provided serial key has an incorrect encoding.")
+            log.info("Example encoding, AAAAA-BBBBB-CCCCC-DDDDD-EEEEE.")
+            return False
+
+        # https://technet.microsoft.com/en-us/library/jj612867.aspx
+        self.serial_key = serial_key or self.dummy_serial_key
+        return True
+
 class Dependency(object):
     """Dependency instance. Each software has its own dependency class which
     informs VMCloak on how to install that particular piece of software."""
     name = None
+    default = None
+    depends = None
     exes = []
 
     def __init__(self, h=None, m=None, a=None, i=None,
@@ -257,9 +353,10 @@ class Dependency(object):
         self.m = m
         self.a = a
         self.i = i
-        self.version = version
+        self.version = version or self.default
         self.settings = settings
         self.exe = None
+        self.filename = None
 
         self.init()
 
@@ -274,7 +371,7 @@ class Dependency(object):
             if "target" in exe and exe["target"] != i.osversion:
                 continue
 
-            if "version" in exe and exe["version"] != version:
+            if "version" in exe and exe["version"] != self.version:
                 continue
 
             self.exe = exe
@@ -286,6 +383,7 @@ class Dependency(object):
 
         # Download the dependency (if there is any to download).
         if self.exe:
+            self.filename = os.path.basename(self.exe["url"])
             self.download()
 
         if self.check() is False:
@@ -312,11 +410,16 @@ class Dependency(object):
         raise NotImplementedError
 
     def disable_autorun(self):
-        """Disables AutoRun under Windows XP."""
+        """Disables AutoRun under Windows XP and Windows 7."""
         if self.h.name == "winxp":
             self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
                            "Windows\\CurrentVersion\\Policies\\Explorer "
-                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 177")
+                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 177 /f")
+
+        if self.h.name == "win7":
+            self.a.execute("reg add HKEY_LOCAL_MACHINE\\Software\\Microsoft\\"
+                           "Windows\\CurrentVersion\\Policies\\Explorer "
+                           "/v NoDriveTypeAutoRun /t REG_DWORD /d 255 /f")
 
     def upload_dependency(self, filepath):
         """Upload this dependency to the specified filepath."""

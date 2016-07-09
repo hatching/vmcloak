@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -11,17 +11,17 @@ from ctypes import windll, Structure, POINTER, sizeof
 # http://msdn.microsoft.com/en-us/library/windows/desktop/dd183565(v=vs.85).aspx
 class _DevMode(Structure):
     _fields_ = [
-        ('dmDeviceName', c_char * 32),
-        ('unused1', c_ushort * 2),
-        ('dmSize', c_ushort),
-        ('unused2', c_ushort),
-        ('unused3', c_uint * 8),
-        ('dmFormName', c_char * 32),
-        ('dmLogPixels', c_ushort),
-        ('dmBitsPerPel', c_ushort),
-        ('dmPelsWidth', c_uint),
-        ('dmPelsHeight', c_uint),
-        ('unused2', c_uint * 10),
+        ("dmDeviceName", c_char * 32),
+        ("unused1", c_ushort * 2),
+        ("dmSize", c_ushort),
+        ("unused2", c_ushort),
+        ("unused3", c_uint * 8),
+        ("dmFormName", c_char * 32),
+        ("dmLogPixels", c_ushort),
+        ("dmBitsPerPel", c_ushort),
+        ("dmPelsWidth", c_uint),
+        ("dmPelsHeight", c_uint),
+        ("unused2", c_uint * 10),
     ]
 
 EnumDisplaySettings = windll.user32.EnumDisplaySettingsA

@@ -1,3 +1,42 @@
+0.4, TBD
+
+    New: Windows 8.1 and Windows 10 support (thanks razu).
+    New: .NET 4.5.1 and 4.6.1 support (thanks razu).
+    New: Improved command-line interface through the click library.
+    New: Export .ova/.ovf functionality.
+    New: Basic unittests for each supported Operating System.
+    Tweak: Upgrade to Cuckoo Agent 0.3 featuring two bugfixes.
+    Tweak: Prune superfluous warning thrown by genisoimage.
+
+0.3.13, June 28th 2016
+
+    New: 32-bit and 64-bit IE9, IE10, and IE11 dependencies (thanks razu).
+    New: Windows 7 upgrade to SP1 dependency (thanks razu).
+    Tweak: By default use pythonw.exe to hide the Cuckoo Agent (thanks razu).
+    New: Change the Desktop wallpaper with a doge default (thanks razu).
+    New: More versions for Adobe PDF Reader.
+    New: CuteFTP dependency (thanks razu).
+    New: Silverlight dependency (thanks razu).
+
+0.3.12, June 13th 2016
+
+    Bugfix: vmcloak init --winxp was broken (thanks Daniel Teixeira).
+    Tweak: Default version for flash if none is provided.
+    New: Office 2010 support (thanks razu).
+    Bugfix: Don't hang if registry key already exists (thanks razu).
+    Bugfix: Resolve logon issue after a couple of reboots (thanks razu).
+    New: Various Adobe PDF Reader-related registry keys (thanks razu).
+    New: WinRAR Dependency (thanks razu).
+    New: Extract Dependency for dropping files on the VM (thanks razu).
+
+0.3.11, May 28th 2016
+
+    New: Support for 32-bit Windows 7 (thanks Lane Huff, slackr).
+    Bugfix: Issues with VirtualBox 5-series (thanks razu).
+    New: Disable autorun for Windows 7 (thanks razu).
+    New: Add --ramsize flag to vmcloak-init (thanks razu).
+    New: Adobe Flash player dependencies (thanks razu).
+
 0.3.10, February 26th 2016
 
     Tweak: Fixed logging in vmcloak-register (thanks justaguy).

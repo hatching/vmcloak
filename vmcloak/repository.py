@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -35,6 +35,7 @@ class Image(Base):
     netmask = Column(String(32))
     gateway = Column(String(32))
     cpus = Column(Integer)
+    ramsize = Column(Integer)
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""

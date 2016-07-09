@@ -1,5 +1,8 @@
-#silent install of chrome. installer is the standalone version
-#https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi
+# Copyright (C) 2014-2016 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+# Chrome Dependency submitted by Jason Lewis.
+# https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise.msi
 
 from vmcloak.abstract import Dependency
 
