@@ -10,7 +10,7 @@ class Windows10(WindowsAutounattended):
     mount = "/mnt/win10"
     interface = "Ethernet"
 
-    # List of preferences when multiple Windows 8.1 types are available.
+    # List of preferences when multiple Windows 10 types are available.
     preference = "pro", "enterprise", "home"
 
     dummy_serial_key = "W269N-WFGWX-YVC9B-4J6C9-T83GX"

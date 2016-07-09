@@ -7,10 +7,11 @@
 
 from vmcloak.abstract import Dependency
 
-class Firefox_41(Dependency):
-    name = "firefox_41"
+class Firefox(Dependency):
+    name = "firefox"
     exes = [
         {
+            "version": "41.0.2",
             "url": "http://cuckoo.sh/vmcloak/Firefox_Setup_41.0.2.exe",
             "sha1": "c5118ca76f0cf6ecda5d2b9292bf191525c9627a",
         },
@@ -20,3 +21,7 @@ class Firefox_41(Dependency):
         self.upload_dependency("C:\\Firefox_Setup_41.0.2.exe")
         self.a.execute("C:\\Firefox_Setup_41.0.2.exe -ms")
         self.a.remove("C:\\Firefox_Setup_41.0.2.exe")
+
+class Firefox41(Firefox, Dependency):
+    """Backwards compatibility"""
+    name = "firefox_41"
