@@ -4,7 +4,6 @@
 
 import hashlib
 import importlib
-import json
 import logging
 import os
 import pwd
@@ -12,10 +11,8 @@ import shutil
 import socket
 import stat
 import subprocess
-from ConfigParser import ConfigParser
 
-from vmcloak.conf import Configuration
-from vmcloak.constants import VMCLOAK_ROOT
+from ConfigParser import ConfigParser
 
 log = logging.getLogger(__name__)
 
@@ -170,26 +167,6 @@ def sha1_file(path):
 
     return h.hexdigest()
 
-def read_birds():
-    path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
-    birds = {}
-
-    if os.path.isfile(path):
-        birds = json.load(open(path, 'rb'))
-
-    return birds
-
-def read_bird(name):
-    return read_birds().get(name)
-
-def add_bird(name, vmtype, hdd_path):
-    path = os.path.join(os.getenv('HOME'), '.vmcloak', 'birds.json')
-
-    birds = read_birds()
-    birds[name] = dict(vmtype=vmtype, hdd_path=hdd_path)
-
-    open(path, 'wb').write(json.dumps(birds))
-
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
     log.debug('Registering the Virtual Machine with Cuckoo.')
     try:
@@ -223,39 +200,6 @@ def wait_for_host(ipaddr, port):
             break
         except socket.error:
             pass
-
-def resolve_parameters(args, defaults, types, drop_user=False):
-    s = Configuration()
-
-    if args.recommended_settings:
-        s.from_file(os.path.join(VMCLOAK_ROOT, 'data', 'recommended.ini'))
-
-    for settings in args.settings:
-        s.from_file(settings)
-
-    s.from_args(args)
-    s.from_defaults(defaults)
-    s.apply_types(types)
-
-    if s.user and not drop_user:
-        try:
-            user = pwd.getpwnam(s.user)
-            os.setgroups((user.pw_gid,))
-            os.setgid(user.pw_gid)
-            os.setuid(user.pw_uid)
-            os.environ['HOME'] = user.pw_dir
-        except KeyError:
-            raise Exception('Invalid user specified to drop '
-                            'privileges to: %s' % s.user)
-        except OSError as e:
-            raise Exception('Failed to drop privileges: %s' % e)
-
-        # Resolve the parameters again, but this time without applying the
-        # user argument. This way paths that use os.getenv('HOME') will be
-        # correct.
-        return resolve_parameters(args, defaults, types, drop_user=True)
-
-    return s
 
 def import_plugins(dirpath, module_prefix, namespace, class_):
     """Import plugins of type `class` located at `dirpath` into the
