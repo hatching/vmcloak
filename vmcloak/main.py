@@ -455,7 +455,7 @@ def export(name, filepath):
     if image.mode != "normal":
         log.error("You can't export this image as you have already made "
                   "snapshots with it!")
-        log.error("Please vmcloak clone it and modify the clone.")
+        log.error("Please vmcloak clone it and export the clone.")
         exit(1)
 
     m, h = initvm(image)
