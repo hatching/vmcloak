@@ -12,9 +12,6 @@ import stat
 import subprocess
 import sys
 
-from ConfigParser import ConfigParser
-
-from vmcloak.conf import Configuration
 from vmcloak.constants import VMCLOAK_ROOT
 
 try:
@@ -205,7 +202,7 @@ def wait_for_host(ipaddr, port):
     # Wait for the Agent to come up with a timeout of 1 second.
     while True:
         try:
-            log.debug("Waiting for host %s : %s", ipaddr, port)
+            log.debug("Waiting for host %s", ipaddr)
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
