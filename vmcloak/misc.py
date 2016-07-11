@@ -14,6 +14,9 @@ import sys
 
 from ConfigParser import ConfigParser
 
+from vmcloak.conf import Configuration
+from vmcloak.constants import VMCLOAK_ROOT
+
 try:
     import pwd
     HAVE_PWD = True
