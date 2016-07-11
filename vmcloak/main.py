@@ -254,10 +254,10 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 
 @main.command()
 @click.argument("name")
-@click.argument("dependenciesin", nargs=-1)
+@click.argument("dependencies", nargs=-1)
 @click.option("--vm-visible", is_flag=True)
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
-def install(name, dependenciesin, vm_visible, debug):
+def install(name, dependencies, vm_visible, debug):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -285,20 +285,20 @@ def install(name, dependenciesin, vm_visible, debug):
     a.ping()
 
     settings = {}
-    dependencies = []
+    deps = []
 
     # First we fetch the configuration settings off of the arguments.
-    for dependency in dependenciesin:
+    for dependency in dependencies:
         if "." in dependency and "=" in dependency:
             key, value = dependency.split("=", 1)
             settings[key.strip()] = value.strip()
         elif ":" in dependency:
             dependency, version = dependency.split(":", 1)
-            dependencies.append((dependency, version))
+            deps.append((dependency, version))
         else:
-            dependencies.append((dependency, None))
+            deps.append((dependency, None))
 
-    for dependency, version in dependencies:
+    for dependency, version in deps:
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
             break
