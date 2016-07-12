@@ -25,8 +25,7 @@ echo Installing the Agent.
 copy C:\vmcloak\agent.py C:\agent.py
 if "%DEBUG%" == "yes" (
     set PYTHON=C:\Python27\Python.exe
-)
-else (
+) else (
     set PYTHON=C:\Python27\Pythonw.exe
 )
 
