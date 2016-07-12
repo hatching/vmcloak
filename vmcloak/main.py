@@ -17,6 +17,7 @@ from vmcloak.agent import Agent
 from vmcloak.dependencies import Python27
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
+from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import image_path, Session, Image, Snapshot
 from vmcloak.winxp import WindowsXP
@@ -380,29 +381,8 @@ def register(vmname, cuckoo, tags):
     # But those options will require various changes in Cuckoo as well.
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
-@main.command()
-@click.argument("name")
-@click.argument("vmname")
-@click.argument("ipaddr", required=False, default="192.168.56.101")
-@click.option("--resolution", help="Screen resolution.")
-@click.option("--ramsize", type=int, help="Amount of virtual memory to assign.")
-@click.option("--cpus", type=int, help="Amount of CPUs to assign.")
-@click.option("--hostname", default=random_string(8, 16), help="Hostname for this VM.")
-@click.option("--adapter", help="Hostonly adapter for this VM.")
-@click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
-def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible):
-    session = Session()
-
-    image = session.query(Image).filter_by(name=name).first()
-    if not image:
-        log.error("Image not found: %s", name)
-        exit(1)
-
-    # From now on this image is multiattach.
-    image.mode = "multiattach"
-    session.commit()
-
+def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
+                hostname, adapter, vm_visible):
     m, h = initvm(image, name=vmname)
 
     m.start_vm(visible=vm_visible)
@@ -434,7 +414,59 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     # Create a database entry for this snapshot.
     snapshot = Snapshot(image_id=image.id, vmname=vmname, ipaddr=ipaddr,
                         port=image.port, hostname=hostname)
-    session.add(snapshot)
+    return snapshot
+
+@main.command()
+@click.argument("name")
+@click.argument("vmname")
+@click.argument("ipaddr", required=False, default="192.168.56.101")
+@click.option("--resolution", help="Screen resolution.")
+@click.option("--ramsize", type=int, help="Amount of virtual memory to assign.")
+@click.option("--cpus", type=int, help="Amount of CPUs to assign.")
+@click.option("--hostname", default=random_string(8, 16), help="Hostname for this VM.")
+@click.option("--adapter", help="Hostonly adapter for this VM.")
+@click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
+@click.option("--count", type=int, help="The amount of snapshots to make.")
+def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
+             adapter, vm_visible, count):
+    session = Session()
+
+    image = session.query(Image).filter_by(name=name).first()
+    if not image:
+        log.error("Image not found: %s", name)
+        exit(1)
+
+    # From now on this image is multiattach.
+    image.mode = "multiattach"
+    session.commit()
+
+    if not count:
+        snapshot = do_snapshot(
+            image, vmname, ipaddr, resolution, ramsize, cpus,
+            hostname, adapter, vm_visible
+        )
+        session.add(snapshot)
+    else:
+        if hostname:
+            log.error(
+                "You specified a hostname, but this is not supported when "
+                "creating multiple snapshots at once."
+            )
+            exit(1)
+
+        for x in xrange(count):
+            snapshot = do_snapshot(
+                image, "%s%d" % (vmname, x + 1), ipaddr, resolution,
+                ramsize, cpus, hostname, adapter, vm_visible
+            )
+            session.add(snapshot)
+
+            # TODO Implement some limits to make sure that the IP address does
+            # not "exceed" its provided subnet (and thus also require the user
+            # to specify an IP range, rather than an IP address).
+            ipaddr = ipaddr_increase(ipaddr)
+            hostname = random_string(8, 16)
+
     session.commit()
 
 @main.command()
