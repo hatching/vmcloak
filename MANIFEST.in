@@ -1,1 +1,2 @@
-recursive-include vmcloak *.*
+graft vmcloak
+recursive-exclude * *.pyc *.pyo
