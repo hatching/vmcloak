@@ -368,7 +368,7 @@ def modify(name, vm_visible):
 @main.command()
 @click.argument("vmname")
 @click.argument("cuckoo")
-@click.argument("tags")
+@click.argument("tags", required=False, default="")
 def register(vmname, cuckoo, tags):
     session = Session()
 
