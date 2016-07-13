@@ -20,6 +20,10 @@ def call(function, *args):
 def genname(osversion):
     return "%s-%s" % (osversion, os.path.basename(dirpath))
 
+def test_ipaddr_increase():
+    assert misc.ipaddr_increase("1.2.3.4") == "1.2.3.5"
+    assert misc.ipaddr_increase("192.168.56.101") == "192.168.56.102"
+
 def test_winxp():
     ip, port = "192.168.56.103", 13337
 
@@ -46,6 +50,47 @@ def test_winxp():
     m.delete_snapshot("vmcloak")
     m.remove_hd()
     m.delete_vm()
+
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
+
+def test_winxp_many():
+    ip, port, count = "192.168.56.103", 13337, 10
+
+    name, snapshot = genname("winxp"), genname("winxp-snapshot")
+    call(
+        main.init, name, "--winxp", "--port", port,
+        "--tempdir", dirpath, "--serial-key", config["winxp"]["serialkey"]
+    )
+    call(main.snapshot, name, snapshot, ip, "--count", count)
+
+    snapshots = []
+    for x in range(count):
+        snapshots.append([
+            "%s%d" % (snapshot, x + 1),
+            ip, port,
+        ])
+
+        ip = misc.ipaddr_increase(ip)
+
+    # We have to remove the VMs in reverse because of VirtualBox dependencies.
+    for snapshot, ip, port in snapshots[::-1]:
+        m = vm.VirtualBox(snapshot)
+        m.restore_snapshot()
+        m.start_vm()
+
+        misc.wait_for_host(ip, port)
+
+        # Very basic integrity checking of the VM.
+        a = agent.Agent(ip, port)
+        assert a.environ()["SYSTEMDRIVE"] == "C:"
+
+        a.shutdown()
+        m.wait_for_state(shutdown=True)
+
+        m.delete_snapshot("vmcloak")
+        m.remove_hd()
+        m.delete_vm()
 
     image = session.query(Image).filter_by(name=name).first()
     os.remove(image.path)
