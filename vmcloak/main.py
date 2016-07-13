@@ -220,7 +220,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         exit(1)
 
     shutil.rmtree(bootstrap)
-    
+
     if vm == "virtualbox":
         m.create_vm()
         m.os_type(osversion)
@@ -277,7 +277,7 @@ def install(name, dependencies, vm_visible, debug):
 
     m, h = initvm(image)
 
-    if image.vm == "virtualbox": 
+    if image.vm == "virtualbox":
         m.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
