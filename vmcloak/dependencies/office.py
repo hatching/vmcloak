@@ -34,7 +34,7 @@ class Office(Dependency):
 
     def run(self):
         
-        if self.i.vm is "virtualbox":
+        if self.i.vm == "virtualbox":
             self.disable_autorun()
             self.m.attach_iso(self.isopath)
 
@@ -46,7 +46,7 @@ class Office(Dependency):
 
         self.a.remove("C:\\config.xml")
         
-        if self.i.vm is "virtualbox":
+        if self.i.vm == "virtualbox":
             self.m.detach_iso()
 
 class Office2007(Office, Dependency):
