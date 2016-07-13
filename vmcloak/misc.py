@@ -12,7 +12,7 @@ import stat
 import subprocess
 import sys
 
-from vmcloak.constants import VMCLOAK_ROOT
+from ConfigParser import ConfigParser
 
 try:
     import pwd
