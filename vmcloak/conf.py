@@ -11,33 +11,6 @@ from vmcloak.constants import VMCLOAK_ROOT
 log = logging.getLogger(__name__)
 HWCONF_PATH = os.path.join(VMCLOAK_ROOT, "data", "hwconf")
 
-def vboxmanage_path(s):
-    if os.path.isfile(s.vboxmanage):
-        return s.vboxmanage
-
-    if not s.cuckoo or not os.path.isdir(s.cuckoo):
-        log.error("Please provide your Cuckoo root directory.")
-        log.info("Or provide the path to the VBoxManage executable.")
-        return
-
-    conf_path = os.path.join(s.cuckoo, "conf", "virtualbox.conf")
-
-    try:
-        from lib.cuckoo.common.config import Config
-        vboxmanage = Config(conf_path).virtualbox.path
-    except:
-        log.error("Unable to locate VBoxManage path, please "
-                  "configure $CUCKOO/conf/virtualbox.conf properly.")
-        exit(1)
-
-    if not vboxmanage or not os.path.isfile(vboxmanage):
-        log.error("The configured VBoxManage path in Cuckoo does not "
-                  "exist, please configure $CUCKOO/conf/virtualbox.conf "
-                  "properly.")
-        exit(1)
-
-    return vboxmanage
-
 def load_hwconf(profile, dirpath=HWCONF_PATH):
     ret = {}
 
