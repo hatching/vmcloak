@@ -19,18 +19,18 @@ from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
-from vmcloak.repository import image_path, Session, Image, Snapshot
+from vmcloak.repository import image_path, Session, Image, Snapshot, iso_dst_path
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.vm import VirtualBox
+from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
 def initvm(image, name=None):
-    m = VirtualBox(name=name or image.name)
 
     handlers = {
         "winxp": WindowsXP,
@@ -43,16 +43,20 @@ def initvm(image, name=None):
     }
 
     h = handlers[image.osversion]
+    m = None
 
-    m.create_vm()
-    m.os_type(image.osversion)
-    m.cpus(image.cpus)
-    m.mouse("usbtablet")
-    m.ramsize(image.ramsize)
-    m.attach_hd(image.path, multi=False)
-    # Ensure the slot is at least allocated for by an empty drive.
-    m.detach_iso()
-    m.hostonly(nictype=h.nictype, adapter=image.adapter)
+    if image.vm == "virtualbox":
+        m = VirtualBox(name=name or image.name)
+        m.create_vm()
+        m.os_type(image.osversion)
+        m.cpus(image.cpus)
+        m.mouse("usbtablet")
+        m.ramsize(image.ramsize)
+        m.attach_hd(image.path, multi=False)
+        # Ensure the slot is at least allocated for by an empty drive.
+        m.detach_iso()
+        m.hostonly(nictype=h.nictype, adapter=image.adapter)
+
     return m, h
 
 @click.group(invoke_without_command=True)
@@ -107,7 +111,7 @@ def clone(name, outname):
 @click.option("--dns", default="8.8.8.8", help="DNS Server.")
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
-@click.option("--tempdir", default=tempfile.gettempdir(), help="Temporary directory to build the ISO file.")
+@click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
@@ -117,6 +121,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          netmask, gateway, dns, cpus, ramsize, tempdir, resolution,
          vm_visible, debug, verbose):
     if verbose:
+        log.setLevel(logging.INFO)
+    if debug:
         log.setLevel(logging.DEBUG)
 
     session = Session()
@@ -125,8 +131,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         log.error("Image already exists: %s", name)
         exit(1)
 
-    if vm != "virtualbox":
-        log.error("Only the VirtualBox Machinery is supported at this point.")
+    if vm not in VMCLOAK_VM_MODES:
+        log.error("Only VirtualBox Machinery or iso is supported at this point.")
         exit(1)
 
     if winxp:
@@ -214,41 +220,48 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         exit(1)
 
     shutil.rmtree(bootstrap)
+    
+    if vm == "virtualbox":
+        m.create_vm()
+        m.os_type(osversion)
+        m.cpus(cpus)
+        m.mouse("usbtablet")
+        m.ramsize(ramsize)
+        m.create_hd(hdd_path)
+        m.attach_iso(iso_path)
+        m.hostonly(nictype=h.nictype, adapter=adapter)
 
-    m.create_vm()
-    m.os_type(osversion)
-    m.cpus(cpus)
-    m.mouse("usbtablet")
-    m.ramsize(ramsize)
-    m.create_hd(hdd_path)
-    m.attach_iso(iso_path)
-    m.hostonly(nictype=h.nictype, adapter=adapter)
+        log.info("Starting the Virtual Machine %r to install Windows.", name)
+        m.start_vm(visible=vm_visible)
 
-    log.info("Starting the Virtual Machine %r to install Windows.", name)
-    m.start_vm(visible=vm_visible)
+        m.wait_for_state(shutdown=True)
 
-    m.wait_for_state(shutdown=True)
+        m.detach_iso()
+        os.unlink(iso_path)
 
-    m.detach_iso()
-    os.unlink(iso_path)
-
-    m.remove_hd()
-    m.compact_hd(hdd_path)
-    m.delete_vm()
+        m.remove_hd()
+        m.compact_hd(hdd_path)
+        m.delete_vm()
+    else:
+        log.info("You can find your deployment ISO image from : %s" % iso_path)
 
     log.info("Added image %r to the repository.", name)
     session.add(Image(name=name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
                       netmask=netmask, gateway=gateway,
-                      cpus=cpus, ramsize=ramsize))
+                      cpus=cpus, ramsize=ramsize, vm="%s" % vm))
     session.commit()
 
 @main.command()
 @click.argument("name")
 @click.argument("dependencies", nargs=-1)
 @click.option("--vm-visible", is_flag=True)
-def install(name, dependencies, vm_visible):
+@click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
+def install(name, dependencies, vm_visible, debug):
+    if debug:
+        log.setLevel(logging.DEBUG)
+
     session = Session()
 
     image = session.query(Image).filter_by(name=name).first()
@@ -264,14 +277,16 @@ def install(name, dependencies, vm_visible):
 
     m, h = initvm(image)
 
-    m.start_vm(visible=vm_visible)
+    if image.vm == "virtualbox": 
+        m.start_vm(visible=vm_visible)
+
     wait_for_host(image.ipaddr, image.port)
 
     a = Agent(image.ipaddr, image.port)
     a.ping()
 
     settings = {}
-    dependencies = []
+    deps = []
 
     # First we fetch the configuration settings off of the arguments.
     for dependency in dependencies:
@@ -280,11 +295,11 @@ def install(name, dependencies, vm_visible):
             settings[key.strip()] = value.strip()
         elif ":" in dependency:
             dependency, version = dependency.split(":", 1)
-            dependencies.append((dependency, version))
+            deps.append((dependency, version))
         else:
-            dependencies.append((dependency, None))
+            deps.append((dependency, None))
 
-    for dependency, version in dependencies:
+    for dependency, version in deps:
         if dependency not in vmcloak.dependencies.names:
             log.error("Unknown dependency %s..", dependency)
             break
@@ -316,10 +331,8 @@ def install(name, dependencies, vm_visible):
 
                 # Reboot the VM as we expect most dependencies to be related
                 # to KB installs.
-                a.shutdown()
-                m.wait_for_state(shutdown=True)
-                time.sleep(1)
-                m.start_vm(visible=vm_visible)
+                a.reboot()
+                time.sleep(10)
                 wait_for_host(image.ipaddr, image.port)
 
             d(h, m, a, image, version, settings).run()
@@ -327,12 +340,15 @@ def install(name, dependencies, vm_visible):
             log.error("The dependency %s returned an error..", dependency)
             break
 
-    a.shutdown()
-    m.wait_for_state(shutdown=True)
+    if image.vm == "virtualbox":
+        a.shutdown()
+        m.wait_for_state(shutdown=True)
 
-    m.remove_hd()
-    m.compact_hd(image.path)
-    m.delete_vm()
+        m.remove_hd()
+        m.compact_hd(image.path)
+        m.delete_vm()
+    else:
+        a.reboot()
 
 @main.command()
 @click.argument("name")
