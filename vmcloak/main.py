@@ -423,7 +423,7 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--resolution", help="Screen resolution.")
 @click.option("--ramsize", type=int, help="Amount of virtual memory to assign.")
 @click.option("--cpus", type=int, help="Amount of CPUs to assign.")
-@click.option("--hostname", default=random_string(8, 16), help="Hostname for this VM.")
+@click.option("--hostname", help="Hostname for this VM.")
 @click.option("--adapter", help="Hostonly adapter for this VM.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--count", type=int, help="The amount of snapshots to make.")
@@ -443,7 +443,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     if not count:
         snapshot = do_snapshot(
             image, vmname, ipaddr, resolution, ramsize, cpus,
-            hostname, adapter, vm_visible
+            hostname or random_string(8, 16), adapter, vm_visible
         )
         session.add(snapshot)
     else:
