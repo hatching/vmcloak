@@ -9,6 +9,7 @@ import os
 import shutil
 import socket
 import stat
+import struct
 import subprocess
 import sys
 
@@ -242,3 +243,8 @@ def import_plugins(dirpath, module_prefix, namespace, class_):
         namespace[subclass.__name__] = subclass
         plugins.append(subclass)
     return plugins
+
+def ipaddr_increase(ipaddr):
+    """Increases the IP address."""
+    addr = struct.unpack(">I", socket.inet_aton(ipaddr))[0]
+    return socket.inet_ntoa(struct.pack(">I", addr + 1))
