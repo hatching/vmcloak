@@ -232,3 +232,12 @@ class VirtualBox(Machinery):
             vendorurl="http://cuckoosandbox.org/",
             description="Cuckoo Sandbox Virtual Machine created by VMCloak",
         )
+
+    def list_runningvms(self):
+        lines = self._call("list", "runningvms")
+        for line in lines.split("\n"):
+            if line.startswith('"{0}'.format(self.name)):
+                log.debug("VM {0} is already running".format(self.name))
+                return True
+
+        return False

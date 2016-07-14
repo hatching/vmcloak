@@ -47,6 +47,9 @@ def initvm(image, name=None):
 
     if image.vm == "virtualbox":
         m = VirtualBox(name=name or image.name)
+        if m.list_runningvms():
+            return m, h
+
         m.create_vm()
         m.os_type(image.osversion)
         m.cpus(image.cpus)
@@ -277,7 +280,7 @@ def install(name, dependencies, vm_visible, debug):
 
     m, h = initvm(image)
 
-    if image.vm == "virtualbox":
+    if image.vm == "virtualbox" and not m.list_runningvms():
         m.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
