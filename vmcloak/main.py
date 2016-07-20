@@ -30,7 +30,7 @@ from vmcloak.constants import VMCLOAK_VM_MODES
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
-def initvm(image, name=None):
+def initvm(image, name=None, multi=False):
     handlers = {
         "winxp": WindowsXP,
         "win7x86": Windows7x86,
@@ -51,7 +51,7 @@ def initvm(image, name=None):
         m.cpus(image.cpus)
         m.mouse("usbtablet")
         m.ramsize(image.ramsize)
-        m.attach_hd(image.path, multi=False)
+        m.attach_hd(image.path, multi=multi)
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
@@ -398,7 +398,7 @@ def register(vmname, cuckoo, tags):
 
 def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
                 hostname, adapter, vm_visible):
-    m, h = initvm(image, name=vmname)
+    m, h = initvm(image, name=vmname, multi=True)
 
     m.start_vm(visible=vm_visible)
 
