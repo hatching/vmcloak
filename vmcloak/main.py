@@ -512,3 +512,32 @@ def export(name, filepath):
     m.remove_hd()
     m.compact_hd(image.path)
     m.delete_vm()
+
+def list_dependencies():
+    print "Name", "version", "target", "sha1"
+    print
+    for name, d in sorted(vmcloak.dependencies.names.items()):
+        if d.exes:
+            versionlen = max(len(exe.get("version", "None")) for exe in d.exes)
+        else:
+            versionlen = 4
+
+        print name
+        for exe in d.exes:
+            v = exe.get("version", "None")
+            print "   ",
+            print exe.get("version", "None") + " "*(versionlen - len(v)),
+            print exe.get("target"), exe["sha1"]
+        print
+
+@main.group("list")
+def _list():
+    pass
+
+@_list.command("dependencies")
+def _list_dependencies():
+    list_dependencies()
+
+@_list.command("deps")
+def _list_deps():
+    list_dependencies()
