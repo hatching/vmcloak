@@ -7,7 +7,7 @@ import time
 from vmcloak.abstract import Dependency
 
 class KB(Dependency):
-    name = "KB"
+    name = "kb"
     exes = [
         {
             "version": "2729094",
