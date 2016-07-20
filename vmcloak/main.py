@@ -446,6 +446,15 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
              adapter, vm_visible, count):
     session = Session()
 
+    if adapter:
+        log.error(
+            "Specifying a different adapter is not yet supported for "
+            "snapshots (this will require detaching the current adapter and "
+            "attaching a new one after the static IP address has been "
+            "updated or so)."
+        )
+        exit(1)
+
     image = session.query(Image).filter_by(name=name).first()
     if not image:
         log.error("Image not found: %s", name)
