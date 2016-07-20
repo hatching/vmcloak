@@ -33,7 +33,6 @@ class Office(Dependency):
             return False
 
     def run(self):
-
         if self.i.vm == "virtualbox":
             self.disable_autorun()
             self.m.attach_iso(self.isopath)

@@ -31,7 +31,6 @@ logging.basicConfig()
 log = logging.getLogger("vmcloak")
 
 def initvm(image, name=None):
-
     handlers = {
         "winxp": WindowsXP,
         "win7x86": Windows7x86,
