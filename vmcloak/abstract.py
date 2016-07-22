@@ -374,6 +374,9 @@ class Dependency(object):
             if "version" in exe and exe["version"] != self.version:
                 continue
 
+            if "arch" in exe and exe["arch"] != h.arch:
+                continue
+
             self.exe = exe
             break
         else:
