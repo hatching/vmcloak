@@ -15,6 +15,7 @@ class VcRedist(Dependency):
         "2010": "/passive /norestart",
         "2012": "/passive /norestart",
         "2013": "/passive /norestart",
+        "2015": "/passive /norestart",
     }
 
     exes = [
@@ -77,7 +78,19 @@ class VcRedist(Dependency):
             "arch": "amd64",
             "url": "http://cuckoo.sh/vmcloak/vcredist_2013_x64.exe",
             "sha1": "8bf41ba9eef02d30635a10433817dbb6886da5a2"
-        }
+        },
+        {
+            "version": "2015",
+            "arch": "x86",
+            "url": "http://cuckoo.sh/vmcloak/vcredist_2015_x86.exe",
+            "sha1": "bfb74e498c44d3a103ca3aa2831763fb417134d1"
+        },
+        {
+            "version": "2015",
+            "arch": "amd64",
+            "url": "http://cuckoo.sh/vmcloak/vcredist_2015_x64.exe",
+            "sha1": "3155cb0f146b927fcc30647c1a904cd162548c8c"
+        },
     ]
 
     def run(self):
