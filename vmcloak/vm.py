@@ -175,6 +175,7 @@ class VirtualBox(Machinery):
             "nictype%d" % index: nictype,
             "nicpromisc%d" % index: "allow-all",
             "hostonlyadapter%d" % index: adapter,
+            "cableconnected%d" % index: "on",
         }
         self._call("modifyvm", self.name, **nic)
         return self.modify_mac(macaddr, index)
