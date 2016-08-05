@@ -43,7 +43,7 @@ class Java(Dependency):
             self.a.upload("C:\\config.cfg", config)
             self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", async=True)
         
-        # Wait until java7.exe & javaw.exe are no longer running.
+        # Wait until java.exe & javaw.exe are no longer running.
         self.wait_process_exit("java.exe")
         self.wait_process_exit("javaw.exe")
 
