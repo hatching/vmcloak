@@ -324,6 +324,11 @@ def install(name, dependencies, vm_visible, debug):
                     else:
                         dversion = None
 
+                    if dversion:
+                        log.info("Installing child dependency %s %s..", depend, dversion)
+                    else:
+                        log.info("Installing child dependency %s..", depend)
+
                     # Install dependency child before dependency itself.
                     dd = vmcloak.dependencies.names[depend]
                     dd(h, m, a, image, dversion, settings).run()
