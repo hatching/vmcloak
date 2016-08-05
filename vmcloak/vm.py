@@ -29,6 +29,7 @@ class VirtualBox(Machinery):
                 cmd += ["--" + k.rstrip("_"), str(v)]
 
         try:
+            log.debug("Running command : %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
             log.error("[-] Error running command: %s", e)
