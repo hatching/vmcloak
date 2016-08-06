@@ -17,11 +17,13 @@ class Java(Dependency):
     name = "java"
     default = "7"
     exes = [
+        # lots of java7 - http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
         {
             "version": "7",
             "url": "http://cuckoo.sh/vmcloak/jdk-7-windows-i586.exe",
             "sha1": "2546a78b6138466b3e23e25b5ca59f1c89c22d03",
         },
+        # lots of java8 - http://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html
         {
             "version": "8u101",
             "url": "http://cuckoo.sh/vmcloak/jdk-8u101-windows-i586.exe",
