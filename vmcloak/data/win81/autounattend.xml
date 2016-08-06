@@ -102,7 +102,7 @@
                 <WillShowUI>OnError</WillShowUI>
                 <Disk>
                     <DiskID>0</DiskID>
-                    <WillWipeDisk>false</WillWipeDisk>
+                    <WillWipeDisk>true</WillWipeDisk>
                     <CreatePartitions>
                         <CreatePartition>
                             <Order>1</Order>
