@@ -29,6 +29,7 @@ class VirtualBox(Machinery):
                 cmd += ["--" + k.rstrip("_"), str(v)]
 
         try:
+            log.debug("Running command : %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
             log.error("[-] Error running command: %s", e)
@@ -80,6 +81,9 @@ class VirtualBox(Machinery):
 
     def ramsize(self, ramsize):
         return self._call("modifyvm", self.name, memory=ramsize)
+
+    def vramsize(self, vramsize):
+        return self._call("modifyvm", self.name, vram=vramsize)
 
     def os_type(self, osversion):
         operating_systems = {
@@ -174,6 +178,7 @@ class VirtualBox(Machinery):
             "nictype%d" % index: nictype,
             "nicpromisc%d" % index: "allow-all",
             "hostonlyadapter%d" % index: adapter,
+            "cableconnected%d" % index: "on",
         }
         self._call("modifyvm", self.name, **nic)
         return self.modify_mac(macaddr, index)

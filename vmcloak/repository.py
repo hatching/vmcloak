@@ -38,6 +38,7 @@ class Image(Base):
     gateway = Column(String(32))
     cpus = Column(Integer)
     ramsize = Column(Integer)
+    vramsize = Column(Integer)
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
