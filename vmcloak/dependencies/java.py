@@ -17,7 +17,7 @@ class Java(Dependency):
     name = "java"
     default = "7"
     exes = [
-        # lots of java7 - http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
+        # http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
         {
             "version": "7",
             "url": "http://cuckoo.sh/vmcloak/jdk-7-windows-i586.exe",
@@ -163,7 +163,7 @@ class Java(Dependency):
             "url": "http://cuckoo.sh/vmcloak/jdk-7u80-windows-i586.exe",
             "sha1": "aebbc0b02c16e7169b0577962fa91c613f8a7a45",
         },
-        # lots of java8 - http://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html
+        # http://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html
         {
             "version": "8",
             "url": "http://cuckoo.sh/vmcloak/jdk-8-windows-i586.exe",
@@ -273,19 +273,19 @@ class Java(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\java.exe")
-        
+
         if self.version.startswith("7"):
             self.a.execute("C:\\java.exe /s WEB_JAVA=1 WEB_JAVA_SECURITY_LEVEL=M SPONSORS=0", async=True)
         else:
             self.a.upload("C:\\config.cfg", config)
             self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", async=True)
-        
+
         # Wait until java.exe & javaw.exe are no longer running.
         self.wait_process_exit("java.exe")
         self.wait_process_exit("javaw.exe")
 
         self.a.remove("C:\\java.exe")
-        
+
         if not self.version.startswith("7"):
             self.a.remove("C:\\config.cfg")
 

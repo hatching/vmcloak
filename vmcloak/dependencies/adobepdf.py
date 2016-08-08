@@ -107,7 +107,7 @@ class AdobePdf(Dependency):
         # add needed registry keys to skip Licence Agreement
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
-            "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" " % 
+            "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" " %
             self.version.split(".")[0]
         )
         self.a.execute(
@@ -118,7 +118,7 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
             "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" "
-            "/v Launched /t REG_DWORD /d 1 /f"  % self.version.split(".")[0]
+            "/v Launched /t REG_DWORD /d 1 /f" % self.version.split(".")[0]
         )
 
         # man : https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/
@@ -126,27 +126,27 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\AVGeneral\" "
-            "/v bCheckForUpdatesAtStartup /t REG_DWORD /d 0 /f" % 
+            "/v bCheckForUpdatesAtStartup /t REG_DWORD /d 0 /f" %
             self.version.split(".")[0]
         )
 
         # allow URL access
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
-            "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" " %  
+            "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" " %
             self.version.split(".")[0]
         )
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" "
-            "/v iURLPerms /t REG_DWORD /d 2 /f"  % self.version.split(".")[0]
+            "/v iURLPerms /t REG_DWORD /d 2 /f" % self.version.split(".")[0]
         )
 
         # FIXME: really needed ?
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\Security\\cDigSig\\cCustomDownload\" "
-            "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f" % 
+            "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f" %
             self.version.split(".")[0]
         )
 
