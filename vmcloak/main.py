@@ -29,6 +29,7 @@ from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
+log.setLevel(logging.ERROR)
 
 def initvm(image, name=None, multi=False, ramsize=None, cpus=None):
     handlers = {
