@@ -82,6 +82,9 @@ class VirtualBox(Machinery):
     def ramsize(self, ramsize):
         return self._call("modifyvm", self.name, memory=ramsize)
 
+    def vramsize(self, vramsize):
+        return self._call("modifyvm", self.name, vram=vramsize)
+
     def os_type(self, osversion):
         operating_systems = {
             "winxp": "WindowsXP",

@@ -31,7 +31,7 @@ logging.basicConfig()
 log = logging.getLogger("vmcloak")
 log.setLevel(logging.ERROR)
 
-def initvm(image, name=None, multi=False, ramsize=None, cpus=None):
+def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None):
     handlers = {
         "winxp": WindowsXP,
         "win7x86": Windows7x86,
@@ -52,6 +52,7 @@ def initvm(image, name=None, multi=False, ramsize=None, cpus=None):
         m.cpus(cpus or image.cpus)
         m.mouse("usbtablet")
         m.ramsize(ramsize or image.ramsize)
+        m.vramsize(vramsize or image.vramsize)
         m.attach_hd(image.path, multi=multi)
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
@@ -111,6 +112,7 @@ def clone(name, outname):
 @click.option("--dns", default="8.8.8.8", help="DNS Server.")
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
+@click.option("--vramsize", default=16, help="Video memory size")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
@@ -118,7 +120,7 @@ def clone(name, outname):
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
-         netmask, gateway, dns, cpus, ramsize, tempdir, resolution,
+         netmask, gateway, dns, cpus, ramsize, vramsize, tempdir, resolution,
          vm_visible, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
@@ -227,6 +229,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         m.cpus(cpus)
         m.mouse("usbtablet")
         m.ramsize(ramsize)
+        m.vramsize(vramsize)
         m.create_hd(hdd_path)
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, adapter=adapter)
@@ -250,7 +253,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
                       netmask=netmask, gateway=gateway,
-                      cpus=cpus, ramsize=ramsize, vm="%s" % vm))
+                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm))
     session.commit()
 
 @main.command()
