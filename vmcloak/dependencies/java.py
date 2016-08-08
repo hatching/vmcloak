@@ -165,6 +165,101 @@ class Java(Dependency):
         },
         # lots of java8 - http://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html
         {
+            "version": "8",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8-windows-i586.exe",
+            "sha1": "09a05b1afad97ffa35a47d571752c3e804c200c7",
+        },
+        {
+            "version": "8u5",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u5-windows-i586.exe",
+            "sha1": "81660732a53e08651c633d99b0e6042cbbaf616d",
+        },
+        {
+            "version": "8u11",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u11-windows-i586.exe",
+            "sha1": "757103707b16e6a79ebd4d134613e483007a0c7a",
+        },
+        {
+            "version": "8u20",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u20-windows-i586.exe",
+            "sha1": "30df3349f710e6b54adccadadc1e1f939ab2f6da",
+        },
+        {
+            "version": "8u25",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u25-windows-i586.exe",
+            "sha1": "79b4b68aea5ef6448c39c2ee3103722db6548ff0",
+        },
+        {
+            "version": "8u31",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u31-windows-i586.exe",
+            "sha1": "5b8a1f8d11ecbcd46ed3389498ef67a4f699133b",
+        },
+        {
+            "version": "8u40",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u40-windows-i586.exe",
+            "sha1": "ff9f4d62dffa0a81abbc0e5e151586301ddf4884",
+        },
+        {
+            "version": "8u45",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u45-windows-i586.exe",
+            "sha1": "8e839fe0e30a56784566017f6acdb0fbe213c8bc",
+        },
+        {
+            "version": "8u51",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u51-windows-i586.exe",
+            "sha1": "0aaee8ff5f62fdcb3685d513be471c49824d7e04",
+        },
+        {
+            "version": "8u60",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u60-windows-i586.exe",
+            "sha1": "47b36bc0fdc44029f82a50346fbb85b8f7803d7f",
+        },
+        {
+            "version": "8u65",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u65-windows-i586.exe",
+            "sha1": "66bdacc1252f309f157fd0786d2e148dbb394629",
+        },
+        {
+            "version": "8u66",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u66-windows-i586.exe",
+            "sha1": "0013f600723a1a16aa97f7c3fbe1c27fd7674cbe",
+        },
+        {
+            "version": "8u71",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u71-windows-i586.exe",
+            "sha1": "c6726fb46cb40b42b4b545502ee87172b7d290f5",
+        },
+        {
+            "version": "8u72",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u72-windows-i586.exe",
+            "sha1": "d1b6e793c21f1bec935f647ec49a12bc54109ace",
+        },
+        {
+            "version": "8u73",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u73-windows-i586.exe",
+            "sha1": "f56e21ece567f42fce5a38961bd81288dd2956c0",
+        },
+        {
+            "version": "8u74",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u74-windows-i586.exe",
+            "sha1": "8fa2c7f22b9176d0201d40dc21c29bc7002f5251",
+        },
+        {
+            "version": "8u77",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u77-windows-i586.exe",
+            "sha1": "1560add14dde3e4c5bac020116f5bc06d49be567",
+        },
+        {
+            "version": "8u91",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u91-windows-i586.exe",
+            "sha1": "5374b68f6cca15345fd7d8de0b352cd37804068d",
+        },
+        {
+            "version": "8u92",
+            "url": "http://cuckoo.sh/vmcloak/jdk-8u92-windows-i586.exe",
+            "sha1": "b89aa89d66ea1783628f62487a137c993af7ca8b",
+        },
+        {
             "version": "8u101",
             "url": "http://cuckoo.sh/vmcloak/jdk-8u101-windows-i586.exe",
             "sha1": "2d2d56f5774cc2f15d9e54bebc9a868913e606b7",
