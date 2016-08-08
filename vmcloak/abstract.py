@@ -52,7 +52,7 @@ class Machinery(object):
         raise
 
     def vramsize(self, vramsize):
-        """Modify the amount of RAM available for this Virtual Machine."""
+        """Modify the amount of Video memory available for this Virtual Machine."""
         raise
 
     def os_type(self, osversion):
