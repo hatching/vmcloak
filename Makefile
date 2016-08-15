@@ -13,6 +13,7 @@ deb:
 
 clean:
 	rm -rf $(DIST)
+	rm -rf tests/__pycache__
 	rm -f $(shell find .|grep .pyc)
 	make -C docs/ clean
 	make -C utils/ clean
