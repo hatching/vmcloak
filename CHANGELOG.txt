@@ -1,4 +1,4 @@
-0.4, August 18th 2016
+0.4, August 15th 2016
 
     New: Windows 8.1 and Windows 10 support (thanks razu).
     New: .NET 4.5.1 and 4.6.1 support (thanks razu).
