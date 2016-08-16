@@ -176,27 +176,47 @@ def sha1_file(path):
 
 def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
     log.debug("Registering the Virtual Machine with Cuckoo.")
+
+    # Legacy Cuckoo setup.
+    machine_py = os.path.join(cuckoo_dirpath, "utils", "machine.py")
+    if os.path.exists(machine_py):
+        try:
+            args = [
+                machine_py, "--add",
+                "--ip", hostonly_ip,
+                "--platform", "windows",
+                "--tags", tags or "",
+                "--snapshot", "vmcloak",
+                vmname,
+            ]
+
+            if rdp_port:
+                args += ["--rdp_port", "%s" % rdp_port]
+
+            subprocess.check_call(args, cwd=cuckoo_dirpath)
+            return True
+        except OSError as e:
+            log.error("Is $CUCKOO/utils/machine.py executable? -> %s", e)
+            return False
+        except subprocess.CalledProcessError as e:
+            log.error("Error registering the VM: %s.", e)
+            return False
+        return
+
+    # Cuckoo Package setup.
     try:
-        machine_py = os.path.join(cuckoo_dirpath, "utils", "machine.py")
         args = [
-            machine_py, "--add",
-            "--ip", hostonly_ip,
+            "cuckoo",
+            "--cwd", cuckoo_dirpath,
+            "machine",
+            "--add", vmname, hostonly_ip,
             "--platform", "windows",
             "--tags", tags or "",
             "--snapshot", "vmcloak",
-            vmname,
         ]
-
-        if rdp_port:
-            args += ["--rdp_port", "%s" % rdp_port]
-
-        subprocess.check_call(args, cwd=cuckoo_dirpath)
-        return True
-    except OSError as e:
-        log.error("Is $CUCKOO/utils/machine.py executable? -> %s", e)
-        return False
+        subprocess.check_call(args)
     except subprocess.CalledProcessError as e:
-        log.error("Error registering the VM: %s.", e)
+        log.error("Error registering VM: %s", e)
         return False
 
 def wait_for_host(ipaddr, port):
