@@ -6,10 +6,13 @@
     New: Export .ova/.ovf functionality.
     New: Basic unittests for each supported Operating System.
     New: Tweak the snapshot command to create multiple snapshots at once.
+    New: Visual Studio Redistributable packages (thanks Ricardo van Zutphen).
+    New: ISO mode install (initial bare metal support, thanks razu).
     Tweak: Upgrade to Cuckoo Agent 0.5 featuring IP pinning and 3 bugfixes.
     Tweak: Prune superfluous warning thrown by genisoimage.
     Tweak: Lots of Java7 and Java8 versions (thanks razu).
     Tweak: Lots of new Adobe PDF Reader versions.
+    Tweak: Configurable video memory (thanks razu).
     Bugfix: Improved VirtualBox 5.0 and 5.1 support.
 
 0.3.13, June 28th 2016
