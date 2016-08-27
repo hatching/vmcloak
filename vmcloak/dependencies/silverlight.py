@@ -8,7 +8,7 @@ class Silverlight(Dependency):
     name = "silverlight"
     exes = [
         {
-            "url": "http://cuckoo.sh/vmcloak-files/Silverlight_Developer_x86.exe",
+            "url": "https://cuckoo.sh/vmcloak-files/Silverlight_Developer_x86.exe",
             "sha1": "f87518a85e90050cbe4b4b76308f105c7b37acdc",
         },
     ]

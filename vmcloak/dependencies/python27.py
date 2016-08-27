@@ -8,7 +8,7 @@ class Python27(Dependency):
     name = "python27"
     exes = [
         {
-            "url": "http://cuckoo.sh/vmcloak/python-2.7.6.msi",
+            "url": "https://cuckoo.sh/vmcloak/python-2.7.6.msi",
             "sha1": "c5d71f339f7edd70ecd54b50e97356191347d355",
         },
     ]

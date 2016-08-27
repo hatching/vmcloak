@@ -12,7 +12,7 @@ class Cuteftp(Dependency):
     exes = [
         {
             "version": "9.0.5",
-            "url": "http://cuckoo.sh/vmcloak/cuteftp.exe",
+            "url": "https://cuckoo.sh/vmcloak/cuteftp.exe",
             "sha1": "1d8497b3f31f76168eb2573efe60dcefb3422e1d",
         },
     ]

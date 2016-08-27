@@ -10,7 +10,7 @@ class Chrome(Dependency):
     name = "chrome"
     exes = [
         {
-            "url": "http://cuckoo.sh/vmcloak/googlechromestandaloneenterprise.msi",
+            "url": "https://cuckoo.sh/vmcloak/googlechromestandaloneenterprise.msi",
             "sha1": "a0ade494dda8911eeb68c9294c2dd0e3229d8f02",
         },
     ]

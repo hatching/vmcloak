@@ -16,9 +16,9 @@ class Wallpaper(Dependency):
     name = "wallpaper"
 
     doges = [
-        "http://cuckoo.sh/vmcloak/doge1.jpg",
-        "http://cuckoo.sh/vmcloak/doge2.jpg",
-        "http://cuckoo.sh/vmcloak/doge3.jpg",
+        "https://cuckoo.sh/vmcloak/doge1.jpg",
+        "https://cuckoo.sh/vmcloak/doge2.jpg",
+        "https://cuckoo.sh/vmcloak/doge3.jpg",
     ]
 
     def init(self):

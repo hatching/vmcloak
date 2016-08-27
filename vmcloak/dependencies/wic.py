@@ -13,7 +13,7 @@ class WIC(Dependency):
     name = "wic"
     exes = [
         {
-            "url": "http://cuckoo.sh/vmcloak/wic_x86_enu.exe",
+            "url": "https://cuckoo.sh/vmcloak/wic_x86_enu.exe",
             "sha1": "53c18652ac2f8a51303deb48a1b7abbdb1db427f",
         },
     ]

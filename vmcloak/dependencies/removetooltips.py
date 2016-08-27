@@ -10,7 +10,7 @@ class RemoveTooltips(Dependency):
     description = "Removes balloon tooltips for new users"
     exes = [
         {
-            "url": "http://cuckoo.sh/vmcloak/MicrosoftFixit50048.msi",
+            "url": "https://cuckoo.sh/vmcloak/MicrosoftFixit50048.msi",
             "sha1": "0de68031b1c1d17bf6851b13f2d083ee61b6b533",
         },
     ]

@@ -12,7 +12,7 @@ class Firefox(Dependency):
     exes = [
         {
             "version": "41.0.2",
-            "url": "http://cuckoo.sh/vmcloak/Firefox_Setup_41.0.2.exe",
+            "url": "https://cuckoo.sh/vmcloak/Firefox_Setup_41.0.2.exe",
             "sha1": "c5118ca76f0cf6ecda5d2b9292bf191525c9627a",
         },
     ]
