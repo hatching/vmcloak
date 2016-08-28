@@ -7,6 +7,7 @@ from vmcloak.abstract import Dependency
 class Flash(Dependency):
     name = "flash"
     default = "11.7.700.169"
+    recommended = True
     exes = [
         {
             "version": "11.4.402.287",

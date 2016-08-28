@@ -7,6 +7,7 @@ from vmcloak.abstract import Dependency
 class AdobePdf(Dependency):
     name = "adobepdf"
     default = "9.0.0"
+    recommended = True
     exes = [
         {
             "version": "9.0.0",
@@ -153,3 +154,4 @@ class AdobePdf(Dependency):
 class Adobe9(AdobePdf, Dependency):
     """Backwards compatibility."""
     name = "adobe9"
+    recommended = False

@@ -8,6 +8,7 @@ class DotNet(Dependency):
     name = "dotnet"
     depends = "wic"
     default = "4.0"
+    recommended = True
     exes = [
         {
             "version": "4.0",
@@ -34,3 +35,4 @@ class DotNet(Dependency):
 class DotNet40(DotNet, Dependency):
     """Backwards compatibility."""
     name = "dotnet40"
+    recommended = False

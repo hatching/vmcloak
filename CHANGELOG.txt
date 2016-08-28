@@ -1,3 +1,7 @@
+0.4.2, TBD
+
+    Tweak: Reintroduce the --recommended switch for vmcloak install.
+
 0.4.1, August 27th 2016
 
     Tweak: Cuckoo Package support for vmcloak-register.

@@ -6,6 +6,7 @@ from vmcloak.abstract import Dependency
 
 class Pillow(Dependency):
     name = "pillow"
+    recommended = True
     exes = [
         {
             "url": "https://cuckoo.sh/vmcloak/Pillow-2.9.0.win32-py2.7.exe",

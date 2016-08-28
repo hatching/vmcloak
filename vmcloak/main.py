@@ -260,8 +260,9 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 @click.argument("name")
 @click.argument("dependencies", nargs=-1)
 @click.option("--vm-visible", is_flag=True)
+@click.option("-r", "--recommended", is_flag=True, help="Install recommended packages.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
-def install(name, dependencies, vm_visible, debug):
+def install(name, dependencies, vm_visible, recommended, debug):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -291,7 +292,12 @@ def install(name, dependencies, vm_visible, debug):
     settings = {}
     deps = []
 
-    # First we fetch the configuration settings off of the arguments.
+    # Include all recommended dependencies.
+    for dependency in vmcloak.dependencies.plugins:
+        if dependency.recommended:
+            deps.append((dependency.name, dependency.default))
+
+    # Fetch the configuration settings off of the arguments.
     for dependency in dependencies:
         if "." in dependency and "=" in dependency:
             key, value = dependency.split("=", 1)

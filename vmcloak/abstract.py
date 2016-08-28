@@ -348,6 +348,7 @@ class Dependency(object):
     informs VMCloak on how to install that particular piece of software."""
     name = None
     default = None
+    recommended = False
     depends = None
     exes = []
 

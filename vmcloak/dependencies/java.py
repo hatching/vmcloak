@@ -16,6 +16,7 @@ WEB_ANALYTICS=Disable
 class Java(Dependency):
     name = "java"
     default = "7"
+    recommended = True
     exes = [
         # http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
         {
@@ -298,3 +299,4 @@ class Java(Dependency):
 class Java7(Java, Dependency):
     """Backwards compatibility."""
     name = "java7"
+    recommended = False
