@@ -13,6 +13,7 @@ config = """
 <Configuration Product="ProPlus">
     <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
     <PIDKEY Value="%(serial_key)s" />
+    <Setting Id="AUTO_ACTIVATE" Value="1" />
 </Configuration>
 """
 
