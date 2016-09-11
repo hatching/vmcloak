@@ -33,13 +33,15 @@ class Office(Dependency):
         if not self.isopath or not os.path.isfile(self.isopath):
             log.error("Please provide the Office installer ISO file.")
             return False
-        
+
         if not self.activate:
             self.activate = 0
             log.info("Defaulting activate to False")
             return True
         elif self.activate not in ["0", "1"]:
-            log.error("Please keep activate value 0 or 1. You had %s." % self.activate)
+            log.error("Please keep activate value 0 or 1. You had %s." % 
+                      self.activate
+            )
             return False
         
     def run(self):
@@ -47,7 +49,9 @@ class Office(Dependency):
             self.disable_autorun()
             self.m.attach_iso(self.isopath)
 
-        self.a.upload("C:\\config.xml", config % dict(serial_key=self.serialkey, activate=self.activate))
+        self.a.upload("C:\\config.xml", config % 
+            dict(serial_key=self.serialkey, activate=self.activate)
+        )
         self.a.execute("D:\\setup.exe /config C:\\config.xml")
 
         # Wait until setup.exe is no longer running.
