@@ -39,18 +39,20 @@ class Office(Dependency):
             log.info("Defaulting activate to False")
             return True
         elif self.activate not in ["0", "1"]:
-            log.error("Please keep activate value 0 or 1. You had %s." % 
-                      self.activate
+            log.error(
+                "Please keep activate value 0 or 1. You had %s.",
+                self.activate
             )
             return False
-        
+
     def run(self):
         if self.i.vm == "virtualbox":
             self.disable_autorun()
             self.m.attach_iso(self.isopath)
 
-        self.a.upload("C:\\config.xml", config % 
-            dict(serial_key=self.serialkey, activate=self.activate)
+        self.a.upload(
+            "C:\\config.xml",
+            config % dict(serial_key=self.serialkey, activate=self.activate)
         )
         self.a.execute("D:\\setup.exe /config C:\\config.xml")
 
