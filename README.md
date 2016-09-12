@@ -34,3 +34,5 @@ Credits
 The development of the VMCloak project initially started out as part of the
 ITES Project at Avira, thanks to **Thorsten Sick**. Many thanks to
 **Rasmus Männa** for lots of great contributions lately.
+
+[![Coverage Status](https://coveralls.io/repos/github/jbremer/vmcloak/badge.svg)](https://coveralls.io/github/jbremer/vmcloak)
