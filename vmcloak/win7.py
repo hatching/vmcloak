@@ -7,7 +7,6 @@ from vmcloak.abstract import WindowsAutounattended
 class Windows7(WindowsAutounattended):
     name = "win7"
     service_pack = 2
-    mount = "/mnt/win7"
     interface = "Local Area Connection"
 
     # List of preferences when multiple Windows 7 types are available.
@@ -17,6 +16,8 @@ class Windows7(WindowsAutounattended):
 
 class Windows7x64(Windows7):
     arch = "amd64"
+    mount = "/mnt/win7x64", "/mnt/win7"
 
 class Windows7x86(Windows7):
     arch = "x86"
+    mount = "/mnt/win7x86", "/mnt/win7"

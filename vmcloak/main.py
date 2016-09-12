@@ -172,8 +172,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         )
         exit(1)
 
-    if not os.path.isdir(iso_mount or h.mount) or \
-            not os.listdir(iso_mount or h.mount):
+    mount = h.pickmount(iso_mount)
+    if not mount:
         log.error("Please specify --iso-mount to a directory containing the "
                   "mounted Windows Installer ISO image.")
         log.info("Refer to the documentation on mounting an .iso image.")
@@ -217,7 +217,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
     hdd_path = os.path.join(image_path, "%s.vdi" % name)
     m = VirtualBox(name=name)
 
-    if not h.buildiso(iso_mount or h.mount, iso_path, bootstrap, tempdir):
+    if not h.buildiso(mount, iso_path, bootstrap, tempdir):
         shutil.rmtree(bootstrap)
         exit(1)
 

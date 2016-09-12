@@ -7,7 +7,6 @@ from vmcloak.abstract import WindowsAutounattended
 class Windows10(WindowsAutounattended):
     name = "win10"
     service_pack = 2
-    mount = "/mnt/win10"
     interface = "Ethernet"
 
     # List of preferences when multiple Windows 10 types are available.
@@ -17,6 +16,8 @@ class Windows10(WindowsAutounattended):
 
 class Windows10x64(Windows10):
     arch = "amd64"
+    mount = "/mnt/win10x64", "/mnt/win10"
 
 class Windows10x86(Windows10):
     arch = "x86"
+    mount = "/mnt/win10x86", "/mnt/win10"

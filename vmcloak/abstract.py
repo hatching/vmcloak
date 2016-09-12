@@ -217,6 +217,19 @@ class OperatingSystem(object):
         """Abstract method for checking a serial key if provided and otherwise
         use a default serial key if available."""
 
+    def pickmount(self, isomount=None):
+        """Picks the first available mounted directory."""
+        mounts = [isomount]
+
+        if isinstance(self.mount, basestring):
+            mounts.append(self.mount)
+        else:
+            mounts.extend(self.mount)
+
+        for mount in mounts:
+            if mount and os.path.isdir(mount) and os.listdir(mount):
+                return mount
+
     def buildiso(self, mount, newiso, bootstrap, tmp_dir=None):
         """Builds an ISO file containing all our modifications."""
         outdir = tempfile.mkdtemp(dir=tmp_dir)
