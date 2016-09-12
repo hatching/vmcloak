@@ -292,10 +292,11 @@ def install(name, dependencies, vm_visible, recommended, debug):
     settings = {}
     deps = []
 
-    # Include all recommended dependencies.
-    for dependency in vmcloak.dependencies.plugins:
-        if dependency.recommended:
-            deps.append((dependency.name, dependency.default))
+    # Include all recommended dependencies when requested.
+    if recommend:
+        for dependency in vmcloak.dependencies.plugins:
+            if dependency.recommended:
+                deps.append((dependency.name, dependency.default))
 
     # Fetch the configuration settings off of the arguments.
     for dependency in dependencies:
