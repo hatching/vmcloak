@@ -56,7 +56,7 @@ def test_winxp():
     os.remove(image.path)
 
 def test_winxp_many():
-    ip, port, count = "192.168.56.103", 13337, 10
+    ip, port, count = "192.168.56.201", 13400, 10
 
     name, snapshot = genname("winxp"), genname("winxp-snapshot")
     call(
