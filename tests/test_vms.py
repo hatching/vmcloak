@@ -29,7 +29,8 @@ def test_winxp():
 
     name, snapshot = genname("winxp"), genname("winxp-snapshot")
     call(
-        main.init, name, "--winxp", "--port", port,
+        main.init, name, "--winxp",
+        "--ip", "192.168.56.3", "--port", port,
         "--tempdir", dirpath, "--serial-key", config["winxp"]["serialkey"]
     )
     call(main.snapshot, name, snapshot, ip)
@@ -59,7 +60,8 @@ def test_winxp_many():
 
     name, snapshot = genname("winxp"), genname("winxp-snapshot")
     call(
-        main.init, name, "--winxp", "--port", port,
+        main.init, name, "--winxp",
+        "--ip", "192.168.56.4", "--port", port,
         "--tempdir", dirpath, "--serial-key", config["winxp"]["serialkey"]
     )
     call(main.snapshot, name, snapshot, ip, "--count", count)
@@ -100,7 +102,9 @@ def test_win7x64():
 
     name, snapshot = genname("win7x64"), genname("win7x64-snapshot")
     call(
-        main.init, name, "--win7x64", "--port", port, "--tempdir", dirpath,
+        main.init, name, "--win7x64",
+        "--ip", "192.168.56.5", "--port", port,
+        "--tempdir", dirpath,
     )
     call(main.snapshot, name, snapshot, ip)
 
@@ -128,7 +132,9 @@ def test_win81x64():
 
     name, snapshot = genname("win81x64"), genname("win81x64-snapshot")
     call(
-        main.init, name, "--win81x64", "--port", port, "--tempdir", dirpath,
+        main.init, name, "--win81x64",
+        "--ip", "192.168.56.6", "--port", port,
+        "--tempdir", dirpath,
     )
     call(main.snapshot, name, snapshot, ip)
 
@@ -156,7 +162,9 @@ def test_win10x64():
 
     name, snapshot = genname("win10x64"), genname("win10x64-snapshot")
     call(
-        main.init, name, "--win10x64", "--port", port, "--tempdir", dirpath,
+        main.init, name, "--win10x64",
+        "--ip", "192.168.56.7", "--port", port,
+        "--tempdir", dirpath,
     )
     call(main.snapshot, name, snapshot, ip)
 
