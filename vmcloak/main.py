@@ -457,8 +457,12 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--adapter", help="Hostonly adapter for this VM.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--count", type=int, help="The amount of snapshots to make.")
+@click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count):
+             adapter, vm_visible, count, debug):
+    if debug:
+        log.setLevel(logging.DEBUG)
+
     session = Session()
 
     if adapter:
