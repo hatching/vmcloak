@@ -10,6 +10,7 @@ import time
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.exceptions import CommandError
+from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
 from vmcloak.repository import vms_path
 
@@ -17,10 +18,13 @@ log = logging.getLogger(__name__)
 
 class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
-    VBOXMANAGE = "/usr/bin/VBoxManage"
+
+    def __init__(self, *args, **kwargs):
+        Machinery.__init__(self, *args, **kwargs)
+        self.vboxmanage = get_path("vboxmanage")
 
     def _call(self, *args, **kwargs):
-        cmd = [self.VBOXMANAGE] + list(args)
+        cmd = [self.vboxmanage] + list(args)
 
         for k, v in kwargs.items():
             if v is None or v is True:
@@ -64,13 +68,6 @@ class VirtualBox(Machinery):
                 pass
 
             time.sleep(1)
-
-    def api_status(self):
-        if not os.path.isfile(self.VBOXMANAGE):
-            log.error("VBoxManage not found!")
-            return False
-
-        return True
 
     def create_vm(self):
         return self._call("createvm", name=self.name,
