@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import re
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
@@ -21,9 +22,10 @@ from vmcloak.verify import valid_serial_key
 
 log = logging.getLogger(__name__)
 
-GENISOIMAGE_ERROR = (
-    "Warning: creating filesystem that does not conform to ISO-9660.\n"
-)
+GENISOIMAGE_WARNINGS = [
+    "Warning: creating filesystem that does not conform to ISO-9660.",
+    "Warning: creating filesystem that does not conform to ISO-9660. Warning: creating filesystem with (nonstandard) Joliet extensions but without (standard) Rock Ridge extensions. It is highly recommended to add Rock Ridge",
+]
 
 class Machinery(object):
     FIELDS = {}
@@ -263,11 +265,13 @@ class OperatingSystem(object):
             isocreate, "-quiet", "-b", "boot.img", "-o", newiso,
         ] + self.genisoargs + [outdir]
 
+        log.debug("Executing genisoimage: %s", " ".join(args))
         p = subprocess.Popen(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         out, err = p.communicate()
-        if p.wait() or out or err != GENISOIMAGE_ERROR:
+
+        if p.wait() or out or re.sub("[\s]+", " ", err).strip() not in GENISOIMAGE_WARNINGS:
             log.error(
                 "Error creating ISO file (err=%d): %s %s",
                 p.wait(), out, err
