@@ -20,6 +20,10 @@ PATHS = {
         "/usr/local/bin/mkisofs",
         "/usr/pkg/bin/mkisofs",
     ],
+    "vboxmanage": [
+        "/usr/bin/VBoxManage",
+        "/usr/local/bin/VBoxManage",
+    ],
 }
 
 INSTALL = {
@@ -30,6 +34,9 @@ INSTALL = {
     "genisoimage": {
         "Linux": "apt-get install genisoimage",
         "NetBSD": "pkgin install cdrkit",
+    },
+    "vboxmanage": {
+        "Linux": "apt-get install virtualbox",
     },
 }
 
