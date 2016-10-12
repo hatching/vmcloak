@@ -24,8 +24,12 @@ log = logging.getLogger(__name__)
 
 GENISOIMAGE_WARNINGS = [
     "Warning: creating filesystem that does not conform to ISO-9660.",
-    "Warning: creating filesystem that does not conform to ISO-9660. Warning: creating filesystem with (nonstandard) Joliet extensions but without (standard) Rock Ridge extensions. It is highly recommended to add Rock Ridge",
+    "Warning: creating filesystem that does not conform to ISO-9660."
+    " Warning: creating filesystem with (nonstandard) Joliet extensions but"
+    " without (standard) Rock Ridge extensions. It is highly recommended to"
+    " add Rock Ridge",
 ]
+
 
 class Machinery(object):
     FIELDS = {}
@@ -54,7 +58,8 @@ class Machinery(object):
         raise
 
     def vramsize(self, vramsize):
-        """Modify the amount of Video memory available for this Virtual Machine."""
+        """Modify the amount of Video memory available for this Virtual
+        Machine."""
         raise
 
     def os_type(self, osversion):
@@ -170,6 +175,7 @@ class Machinery(object):
         config = {}
         _init_vm("", self.FIELDS)
 
+
 class OperatingSystem(object):
     # Short name for this OS.
     name = None
@@ -270,8 +276,8 @@ class OperatingSystem(object):
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         out, err = p.communicate()
-
-        if p.wait() or out or re.sub("[\s]+", " ", err).strip() not in GENISOIMAGE_WARNINGS:
+        warning = re.sub("[\\s]+", " ", err).strip()
+        if p.wait() or out or warning not in GENISOIMAGE_WARNINGS:
             log.error(
                 "Error creating ISO file (err=%d): %s %s",
                 p.wait(), out, err
