@@ -1,3 +1,7 @@
+# Copyright (C) 2016 Jurriaan Bremer.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
 import json
 import os.path
 import tempfile
