@@ -5,11 +5,11 @@
 import logging
 import os.path
 import random
+import re
 import shutil
 import subprocess
 import tempfile
 import time
-import re
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT

@@ -28,6 +28,64 @@ following blogpost: [http://jbremer.org/vmcloak3][blogpost].
 
 [blogpost]: http://jbremer.org/vmcloak3
 
+Testing
+-------
+
+In order to run the VMCloak unit tests, which should be run on a custom build
+server due to its huge resource requirements (i.e., setting up multiple
+virtual machines is not something to take lightly), we provide some pointers
+for setting up such an environment.
+
+First of all, the _~/.vmcloak/config.json_ should be created containing a JSON
+blob with, currently, one value. The _winxp.serialkey_ value should be
+featured with a serial key that matches your Windows XP ISO file. An example
+config.json file may look as follows.
+
+```javascript
+{
+    "winxp": {
+        "serialkey": "windows xp serial key here"
+    }
+}
+```
+
+Then install _pytest_ and _pytest-xdist_:
+
+```bash
+$ pip install -U pytest pytest-xdist
+```
+
+Mount all of the ISO files as required, for a default configuration this looks
+as follows (the following commands should be run as _root_ user):
+
+```bash
+$ mkdir /mnt/winxp
+$ mount -o loop,ro vms/winxppro.iso /mnt/winxp
+
+$ mkdir /mnt/win7x64
+$ mount -o loop,ro vms/win7ultimate.iso /mnt/win7x64
+
+$ mkdir /mnt/win81x64
+$ mount -o loop,ro vms/Win8.1_EnglishInternational_x64.iso /mnt/win81x64
+
+$ mkdir /mnt/win10x64
+$ mount -o loop,ro vms/Win10_1511_2_EnglishInternational_x64.iso /mnt/win10x64
+```
+
+Now we're going to run the actual unit tests. Note that we can speed them up
+by specifying N unit tests to be ran in parallel. As most of the tests
+actually install Windows or run a virtual machine, we recommend to run at most
+one unit test per CPU core. Also reserve about two to four gigabytes of RAM
+for each extra unit test in parallel. E.g., if you want to run four unit tests
+in parallel, then your computer should have at least four CPU cores and 16GB
+of RAM.
+
+Finally run the unit tests:
+
+```bash
+py.test -n 8
+```
+
 Credits
 -------
 
