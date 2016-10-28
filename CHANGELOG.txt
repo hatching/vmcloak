@@ -1,6 +1,11 @@
-0.4.2, TBD
+0.4.2, October 15th 2016
 
+    New: Tested Mac OS X support (thanks Jop van der Lelie).
     Tweak: Reintroduce the --recommended switch for vmcloak install.
+    Tweak: Automate Office activation (thanks razu).
+    Tweak: Introduce preference paths for mounted ISO installers.
+    New: Documentation on the unit tests.
+    Tweak: Fixate dependencies to match those of Cuckoo Sandbox.
 
 0.4.1, August 27th 2016
 
