@@ -7,3 +7,6 @@ class CommandError(Exception):
 
 class DependencyError(Exception):
     pass
+
+class SwarmError(Exception):
+    pass
