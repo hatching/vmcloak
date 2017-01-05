@@ -7,6 +7,7 @@ software:
 * Python 2.6 or 2.7
 * mkisofs *or* genisoimage
 * VirtualBox
+* wget
 * **root** to :ref:`mount the Windows Installer ISO image <conf-mounted-iso>`
 
 To create a :ref:`Hardware Profile <hwconfig-create>` **root** is required as
