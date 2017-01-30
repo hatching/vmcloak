@@ -23,49 +23,49 @@ class VcRedist(Dependency):
             "version": "2005",
             "arch": "x86",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2005_x86.exe",
-            "sha1": "7dfa98be78249921dd0eedb9a3dd809e7d215c8d"
+            "sha1": "47fba37de95fa0e2328cf2e5c8ebb954c4b7b93c"
         },
         {
             "version": "2005",
             "arch": "amd64",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2005_x64.exe",
-            "sha1": "756f2c773d4733e3955bf7d8f1e959a7f5634b1a"
+            "sha1": "90a3d2a139c1a106bfccd98cbbd7c2c1d79f5ebe"
         },
         {
             "version": "2008",
             "arch": "x86",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2008_x86.exe",
-            "sha1": "6939100e397cef26ec22e95e53fcd9fc979b7bc9"
+            "sha1": "56719288ab6514c07ac2088119d8a87056eeb94a"
         },
         {
             "version": "2008",
             "arch": "amd64",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2008_x64.exe",
-            "sha1": "13674c43652b941dafd2049989afce63cb7c517b"
+            "sha1": "5580072a056fdd50cdf93d470239538636f8f3a9"
         },
         {
             "version": "2010",
             "arch": "x86",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2010_x86.exe",
-            "sha1": "b84b83a8a6741a17bfb5f3578b983c1de512589d"
+            "sha1": "372d9c1670343d3fb252209ba210d4dc4d67d358"
         },
         {
             "version": "2010",
             "arch": "amd64",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2010_x64.exe",
-            "sha1": "027d0c2749ec5eb21b031f46aee14c905206f482"
+            "sha1": "b330b760a8f16d5a31c2dc815627f5eb40861008"
         },
         {
             "version": "2012",
             "arch": "x86",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2012_x86.exe",
-            "sha1": "7d6f654c16f9ce534bb2c4b1669d7dc039c433c9"
+            "sha1": "96b377a27ac5445328cbaae210fc4f0aaa750d3f"
         },
         {
             "version": "2012",
             "arch": "amd64",
             "url": "https://cuckoo.sh/vmcloak/vcredist_2012_x64.exe",
-            "sha1": "c4ac45564e801e1bfd87936cac8a76c5754cdbd4"
+            "sha1": "1a5d93dddbc431ab27b1da711cd3370891542797"
         },
         {
             "version": "2013",
