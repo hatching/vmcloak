@@ -7,70 +7,15 @@
 Configuration
 =============
 
-VMCloak takes a configuration file and/or command line arguments as input,
-and generates the Virtual Machine as output. Naturally this process includes
-a whole lot of steps, thus the configuration allows one to tweak as many steps
-as possible.
-
-Ini file
---------
-
-As it is not uncommon for one to create multiple VMs at once, rather than just
-a single one, VMCloak supports one or more configuration file(s) to be
-specified using the ``-s`` (short for ``--settings``) switch.
-
-Configuration entries in the INI files should be present in the ``vmcloak``
-section. E.g., ``vmcloak --data-dir ~/vms`` would be equal to having the
-following INI file, *conf.ini*, with ``vmcloak -s conf.ini``.
-
-.. code-block:: ini
-
-    [vmcloak]
-    data_dir = ~/vms
-
-Configuration order
--------------------
-
-VMCloak features default values for various configuration values. These
-defaults may be overwritten through settings files as well as parameters on
-the command line.
-
-Let's take the following command:
-
-.. code-block:: bash
-
-    vmcloak -s first.conf -s second.conf --iso-mount /mnt/winxp cuckoo1
-
-In this example the order of precedence is as follows (from lowest to
-highest):
-
-* Default values.
-* The ``first`` settings file.
-* The ``second`` settings file.
-* Command line arguments.
-
-As usual, if a particular value is set twice, the value with the highest
-precedence is used in the end. E.g., if ``first.conf`` set ``--iso-mount``,
-then this value is overwritten by the command line in this case.
-
-Required configuration entries
-------------------------------
-
-A few configuration entries are required.
-
-* :ref:`conf-mounted-iso`
-* :ref:`conf-vm-dir`
-* :ref:`conf-data-dir`
-* :ref:`conf-serial-key`
-* :ref:`conf-vmname`
+Since VMCloak 0.3 it no longer uses configuration files for simply creating
+VMs. However, a couple of things remain necessary to be performed before
+invoking VMCloak.
 
 .. _conf-mounted-iso:
 
-Mounted ISO Image
-^^^^^^^^^^^^^^^^^
+Mounting the ISO Image
+^^^^^^^^^^^^^^^^^^^^^^
 
-``--iso-mount`` reflects one of the most important configuration entries.
-``--iso-mount`` accepts a path to a **mounted** Windows Installer ISO image.
 In order to mount a Windows Installer ISO image a directory should be created
 with **root**, and then the image should be mounted on that directory, with
 root as well. The following bash snippet depicts how to setup an ISO mount on
@@ -81,8 +26,6 @@ a Ubuntu/Debian system.
     mkdir /mnt/winxp
     mount -o loop,ro winxp.iso /mnt/winxp
 
-Then, when mounted, one would give ``--iso-mount /mnt/winxp`` to ``vmcloak``.
-
 In order to mount an image under BSD the following commands might be required.
 
 .. code-block:: bash
@@ -90,25 +33,6 @@ In order to mount an image under BSD the following commands might be required.
     mkdir /mnt/winxp
     vnconfig /dev/vnd0d winxp.iso
     mount -t cd9660 /dev/vnd0d /mnt/winxp
-
-.. _conf-vm-dir:
-
-VM-dir Directory
-^^^^^^^^^^^^^^^^
-
-``--vm-dir`` specifies the path to the directory where a directory will
-be created for the Virtual Machine. The directory will contain files such as
-the machine information and snapshot files. You can load that in tmpfs to
-gain additional speed.
-
-.. _conf-data-dir:
-
-Data-dir Directory
-^^^^^^^^^^^^^^^^^^
-
-``--data-dir`` specifies the path to the directory where the hard disk images are stored.
-
-.. _conf-serial-key:
 
 Serial Key
 ^^^^^^^^^^

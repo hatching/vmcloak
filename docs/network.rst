@@ -1,6 +1,11 @@
 Networking
 ==========
 
+.. deprecated:: 0.3
+  Since Cuckoo Sandbox 2.0-RC1 better options exist to handle
+  per-analysis network routing. Please refer to Cuckoo's official
+  documentation to learn more about this.
+
 By default, and at the moment this is necessary for VMCloak to work, every
 generated Virtual Machine will have a hostonly network adapter. This adapter
 is used to talk to Cuckoo. However, as it is host-only, this does not allow
@@ -31,7 +36,7 @@ be found on your system by running ``vmcloak-iptables`` (the name of this
 script is subject to change in the future, though.)
 
 .. literalinclude:: ../bin/vmcloak-iptables
-    :language: python
+    :language: bash
 
 That being said setting up full internet access for your Virtual Machines
 boils down to running the following commands:
