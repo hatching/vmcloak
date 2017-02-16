@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2017 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.2",
+    version="0.4.3a1",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     url="http://vmcloak.org/",

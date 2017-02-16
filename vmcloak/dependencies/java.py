@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2017 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -269,6 +269,11 @@ class Java(Dependency):
             "version": "8u102",
             "url": "https://cuckoo.sh/vmcloak/jdk-8u102-windows-i586.exe",
             "sha1": "3acf0fca1d5bf56f8a2ce577d055bfd0dd1773f9",
+        },
+        {
+            "version": "8u121",
+            "url": "https://cuckoo.sh/vmcloak/jdk-8u121-windows-i586.exe",
+            "sha1": "e71fc3eb9f895eba5c2836b05d627884edd0157a",
         },
     ]
 

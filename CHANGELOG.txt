@@ -1,3 +1,7 @@
+0.4.3, TBD
+
+    New: Java JDK 8u121.
+
 0.4.2, October 15th 2016
 
     New: Tested Mac OS X support (thanks Jop van der Lelie).
