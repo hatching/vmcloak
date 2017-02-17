@@ -20,6 +20,18 @@ the process of generating a new VM.
 * mkisofs/genisoimage
 * VirtualBox
 
+Installation
+------------
+
+On Ubuntu a few packages are required due to the indirect inclusion of the
+``cryptography`` Python package. Installation of all packages *excluding*
+``VirtualBox`` may be done by running as follows.
+
+```bash
+$ sudo apt-get install build-essential libssl-dev libffi-dev
+$ sudo apt-get install python-dev genisoimage
+```
+
 Usage
 -----
 
