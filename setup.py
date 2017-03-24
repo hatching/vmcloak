@@ -41,10 +41,10 @@ setup(
         "vmcloak.data.win7": ["*.*"],
     },
     install_requires=[
-        "click==6.6",
-        "jinja2==2.8",
-        "pyyaml==3.12",
-        "sqlalchemy==1.0.8",
+        "click>=6.6",
+        "jinja2>=2.8",
+        "pyyaml>=3.12",
+        "sqlalchemy>=1.0.8",
     ],
     extras_require={
         ":sys_platform == 'win32'": [
