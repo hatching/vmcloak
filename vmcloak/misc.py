@@ -12,6 +12,7 @@ import stat
 import struct
 import subprocess
 import sys
+import time
 
 from ConfigParser import ConfigParser
 
@@ -227,7 +228,7 @@ def wait_for_host(ipaddr, port):
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
-            pass
+            time.sleep(1)
 
 def drop_privileges(user):
     if not HAVE_PWD:
