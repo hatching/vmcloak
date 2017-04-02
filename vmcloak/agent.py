@@ -21,7 +21,7 @@ class Agent(object):
     @property
     def system(self):
         if not self._system:
-            self._system = self.get("/environ").json()["system"]
+            self._system = self.get("/system").json()["system"].lower()
         return self._system
 
     def get(self, method, *args, **kwargs):
@@ -106,7 +106,7 @@ class Agent(object):
         """Change the IP address of this machine."""
         if self.system == 'linux':
             command = (
-                "IFACE=`ip route ls | grep '^default' | cut -f 5 -d ' '` ifconfig $IFACE %s netmask %s; route add default dev $IFACE"
+                "IFACE=`ip route ls | grep '^default' | cut -f 5 -d ' '`; export IFACE; ifconfig $IFACE %s netmask %s; route add default dev $IFACE"
             ) % (ipaddr, netmask, gateway)
         else:
             command = (
