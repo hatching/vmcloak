@@ -126,7 +126,7 @@ class Agent(object):
     def dns_server(self, ipaddr):
         """Set the IP address of the DNS server."""
         if self.system == "linux":
-            command = "echo '%s' > /etc/resolv.conf" % (ipaddr,)
+            command = "echo 'nameserver %s' > /etc/resolv.conf" % (ipaddr,)
         else:
             command = \
                 "netsh interface ip set dns " \
