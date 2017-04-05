@@ -48,12 +48,14 @@ class Agent(object):
         environ = self.get("/environ").json()["environ"]
         return environ if value is None else environ.get(value, default)
 
-    def execute(self, command, async=False):
+    def execute(self, command, async=False, shell=False):
         """Execute a command."""
+        kwargs = dict(command=command)
         if async:
-            return self.post("/execute", command=command, async="true")
-        else:
-            return self.post("/execute", command=command)
+            kwargs['async'] = 'true'
+        if shell:
+            kwargs['shell'] = 'true'
+        return self.post("/execute", **kwargs)
 
     def remove(self, path):
         """Remove a file or entire directory."""
@@ -67,14 +69,14 @@ class Agent(object):
     def shutdown(self):
         """Power off the machine."""
         if self.system == "linux":
-            self.execute("poweroff", async=True)
+            self.execute("poweroff", async=True, shell=True)
         else:
             self.execute("shutdown -s -t 0", async=True)
 
     def reboot(self):
         """Reboot the machine."""
         if self.system == 'linux':
-            self.execute("reboot", async=True)
+            self.execute("reboot", async=True, shell=True)
         else:
             self.execute("shutdown -r -t 0", async=True)
 
@@ -85,7 +87,7 @@ class Agent(object):
     def killprocess(self, process_name):
         """Terminate a process."""
         if self.system == "linux":
-            self.execute("pkill -9 %s" % process_name)
+            self.execute("pkill -9 %s" % process_name, shell=True)
         else:
             self.execute("taskkill /F /IM %s" % process_name)
 
@@ -100,7 +102,7 @@ class Agent(object):
             args = dict(oldname=self.environ("COMPUTERNAME"), newname=hostname)
 
         # self.execute(cmdline % args, shell=True)
-        self.execute(cmdline % args)
+        self.execute(cmdline % args, shell=True)
 
     def static_ip(self, ipaddr, netmask, gateway, interface):
         """Change the IP address of this machine."""
@@ -115,7 +117,7 @@ class Agent(object):
 
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
-                          data={"command": command}, timeout=5)
+                          data={"command": command}, timeout=5, shell=True)
         except requests.exceptions.ReadTimeout:
             pass
 
@@ -131,7 +133,7 @@ class Agent(object):
             command = \
                 "netsh interface ip set dns " \
                 "name=\"Local Area Connection\" static %s" % ipaddr
-        self.execute(command)
+        self.execute(command, shell=True)
 
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
