@@ -117,7 +117,7 @@ class Agent(object):
 
         try:
             requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
-                          data={"command": command, shell: 'true'}, timeout=5)
+                          data={"command": command, "shell": 'true'}, timeout=5)
         except requests.exceptions.ReadTimeout:
             pass
 
