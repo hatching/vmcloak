@@ -92,6 +92,41 @@ def clone(name, outname):
     session.commit()
 
 @main.command()
+@click.argument('name')
+@click.option("--path", help="Path to disk image")
+@click.option("--osversion", help="Operating system name.")
+@click.option("--servicepack", help="Service pack name.", default="")
+@click.option("--vm", default="virtualbox", help="Virtual Machinery.")
+@click.option("--ip", default="192.168.56.2", help="Guest IP address.")
+@click.option("--port", default=8000, type=int, help="Port to run the Agent on.")
+@click.option("--adapter", default="vboxnet0", help="Network adapter.")
+@click.option("--netmask", default="255.255.255.0", help="Guest IP address.")
+@click.option("--gateway", default="192.168.56.1", help="Guest IP address.")
+@click.option("--cpus", default=1, type=int, help="CPU count.")
+@click.option("--ramsize", default=1024, type=int, help="Memory size")
+@click.option("--vramsize", default=16, type=int, help="Video memory size")
+@click.option("--mode", default="normal", help="normal or multiattach")
+def add(name, path, osversion, servicepack, vm, ip, port, adapter,
+           netmask, gateway, cpus, ramsize, vramsize, mode):
+    if not os.path.exists(path):
+        log.error('Disk image not found: %s', path)
+        exit(1)
+
+    session = Session()
+
+    image = session.query(Image).filter_by(name=name).first()
+    if image:
+        log.error("Image already exists: %s", name)
+        exit(1)
+
+    session.add(Image(name=str(name), path=path, osversion=osversion,
+                      servicepack=str(servicepack), mode=mode,
+                      ipaddr=ip, port=port, adapter=adapter,
+                      netmask=netmask, gateway=gateway,
+                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm=str(vm)))
+    session.commit()
+
+@main.command()
 @click.argument("name")
 @click.option("--winxp", is_flag=True, help="This is a Windows XP instance.")
 @click.option("--win7x86", is_flag=True, help="This is a Windows 7 32-bit instance.")

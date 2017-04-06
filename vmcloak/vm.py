@@ -82,8 +82,10 @@ class VirtualBox(Machinery):
     def vramsize(self, vramsize):
         return self._call("modifyvm", self.name, vram=vramsize)
 
-    def os_type(self, osversion):
+    def os_type(self, osversion, default="Other"):
         operating_systems = {
+            "linux": "Linux",
+            "linux64": "Linux_64",
             "winxp": "WindowsXP",
             "win7x86": "Windows7",
             "win7x64": "Windows7_64",
@@ -93,7 +95,7 @@ class VirtualBox(Machinery):
             "win10x64": "Windows10_64",
         }
         return self._call("modifyvm", self.name,
-                          ostype=operating_systems[osversion])
+                          ostype=operating_systems.get(osversion, default))
 
     def create_hd(self, hdd_path, fsize=256*1024):
         self._call("createhd", filename=hdd_path, size=fsize)
