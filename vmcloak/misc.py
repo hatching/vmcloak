@@ -213,6 +213,7 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
             "--platform", "windows",
             "--tags", tags or "",
             "--snapshot", "vmcloak",
+            "--options", "",
         ]
         subprocess.check_call(args)
     except subprocess.CalledProcessError as e:
