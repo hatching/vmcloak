@@ -13,6 +13,7 @@ import struct
 import subprocess
 import sys
 import time
+import urllib2
 
 from ConfigParser import ConfigParser
 
@@ -272,3 +273,8 @@ def ipaddr_increase(ipaddr):
     """Increases the IP address."""
     addr = struct.unpack(">I", socket.inet_aton(ipaddr))[0]
     return socket.inet_ntoa(struct.pack(">I", addr + 1))
+
+
+def filename_from_url(url):
+    """Return the filename from a given url."""
+    return os.path.basename(urllib2.urlparse.urlparse(url).path)
