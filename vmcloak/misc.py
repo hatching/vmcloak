@@ -278,3 +278,28 @@ def ipaddr_increase(ipaddr):
 def filename_from_url(url):
     """Return the filename from a given url."""
     return os.path.basename(urllib2.urlparse.urlparse(url).path)
+
+
+def download_file(url, filepath):
+    """Download the file from url and store it in the given filepath."""
+    user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko'
+    headers = {'User-Agent': user_agent}
+
+    req = urllib2.Request(url=url, headers=headers)
+
+    try:
+        log.debug("Opening connection to '{}'".format(url))
+        t0 = time.time()
+        res = urllib2.urlopen(req).read()
+        t1 = time.time()
+    except urllib2.URLError as e:
+        log.warn("Failed to download file from '{}', got error: '{}'".format(url, e))
+        return False
+
+    fname = filename_from_url(url)
+    size = len(res)
+    msize = size / 1000.0 / 1000
+    log.debug("Succesfully downloaded file '{}' ({:.2f}MB) from '{}' in '{:.2f}' second(s) ({:.2f}MB/s)".format(
+        fname, msize, url, t1 - t0, msize / (t1 - t0)))
+    with open(filepath, "wb") as f:
+        f.write(res)
