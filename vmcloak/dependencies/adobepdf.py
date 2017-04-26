@@ -92,7 +92,12 @@ class AdobePdf(Dependency):
         {
             "version": "11.0.10",
             "url": "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
+            "urls": [
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.10/en_US/AdbeRdr11010_en_US.exe",
+                "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
+            ],
             "sha1": "98b2b838e6c4663fefdfd341dfdc596b1eff355c",
+            "filename": "AdbeRdr11010_en_US.exe",
         },
     ]
 
@@ -106,11 +111,6 @@ class AdobePdf(Dependency):
         self.a.remove("C:\\%s" % self.filename)
 
         # add needed registry keys to skip Licence Agreement
-        self.a.execute(
-            "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
-            "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" " %
-            self.version.split(".")[0]
-        )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
             "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" "
@@ -131,12 +131,15 @@ class AdobePdf(Dependency):
             self.version.split(".")[0]
         )
 
-        # allow URL access
+        # disable the updater completely
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/Updater-Win.html
         self.a.execute(
-            "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
-            "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" " %
-            self.version.split(".")[0]
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "/v bUpdater /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
         )
+
+        # allow URL access
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" "
