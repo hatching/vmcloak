@@ -12,6 +12,7 @@ import stat
 import struct
 import subprocess
 import sys
+import time
 
 from ConfigParser import ConfigParser
 
@@ -224,11 +225,12 @@ def wait_for_host(ipaddr, port):
     # Wait for the Agent to come up with a timeout of 1 second.
     while True:
         try:
-            log.debug("Waiting for host %s", ipaddr)
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
+            log.debug("Waiting for host %s", ipaddr)
             pass
+        time.sleep(1)
 
 def drop_privileges(user):
     if not HAVE_PWD:
