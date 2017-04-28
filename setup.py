@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.3a2",
+    version="0.4.3",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     url="http://vmcloak.org/",

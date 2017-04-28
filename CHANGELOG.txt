@@ -1,8 +1,10 @@
-0.4.3, TBD
+0.4.3, April 28th, 2017
 
     New: Swarm configuration for deploying dozens of VMs at once (WIP).
     New: Java JDK 8u121.
     Tweak: Removal of obsolete documentation.
+    Tweak: Update to Cuckoo Agent 0.7.
+    Bugfix: Improve register cuckoo function (thanks Markus Teufelberger).
 
 0.4.2, October 15th 2016
 
