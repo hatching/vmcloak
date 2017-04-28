@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2010-2015 Cuckoo Foundation.
+# Copyright (C) 2015-2017 Cuckoo Foundation.
 # This file is part of Cuckoo Sandbox - http://www.cuckoosandbox.org
 # See the file 'docs/LICENSE' for copying permission.
 
@@ -21,9 +21,9 @@ import zipfile
 import SimpleHTTPServer
 import SocketServer
 
-AGENT_VERSION = "0.5"
+AGENT_VERSION = "0.7"
 AGENT_FEATURES = [
-    "execpy", "pinning", "logs",
+    "execpy", "pinning", "logs", "largefile", "unicodepath",
 ]
 
 sys.stdout = io.BytesIO()
@@ -43,7 +43,7 @@ class MiniHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_POST(self):
         environ = {
             "REQUEST_METHOD": "POST",
-            "CONTENT_TYPE": self.headers["Content-Type"],
+            "CONTENT_TYPE": self.headers.get("Content-Type"),
         }
 
         form = cgi.FieldStorage(fp=self.rfile,
@@ -65,7 +65,7 @@ class MiniHTTPRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 if value.filename:
                     request.files[key] = value.file
                 else:
-                    request.form[key] = value.value
+                    request.form[key] = value.value.decode("utf8")
 
         if "client_ip" not in state or request.client_ip == state["client_ip"]:
             self.httpd.handle(self)
@@ -201,7 +201,7 @@ def get_status():
 @app.route("/status", methods=["POST"])
 def put_status():
     if "status" not in request.form:
-        return json_error("No status has been provided")
+        return json_error(400, "No status has been provided")
 
     state["status"] = request.form["status"]
     state["description"] = request.form.get("description")
@@ -273,7 +273,7 @@ def do_store():
 
     try:
         with open(request.form["filepath"], "wb") as f:
-            f.write(request.files["file"].read())
+            shutil.copyfileobj(request.files["file"], f, 10*1024*1024)
     except:
         return json_exception("Error storing file")
 
@@ -343,9 +343,10 @@ def do_execute():
         if async:
             subprocess.Popen(request.form["command"], shell=shell, cwd=cwd)
         else:
-            p = subprocess.Popen(request.form["command"], shell=shell, cwd=cwd,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+            p = subprocess.Popen(
+                request.form["command"], shell=shell, cwd=cwd,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             stdout, stderr = p.communicate()
     except:
         return json_exception("Error executing command")
