@@ -416,8 +416,6 @@ class Dependency(object):
         # Download the dependency (if there is any to download).
         if self.exe:
             self.download()
-            if not os.path.exists(self.filepath):
-                raise DependencyError
 
         if self.check() is False:
             raise DependencyError
@@ -453,6 +451,9 @@ class Dependency(object):
             else:
                 log.warn("The checksum of '{}' from '{}' didn't match!".format(self.filename, url))
                 os.remove(self.filepath)
+
+        if not os.path.exists(self.filepath):
+            raise DependencyError
 
     def init(self):
         pass
