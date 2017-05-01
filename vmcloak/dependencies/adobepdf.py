@@ -2,7 +2,12 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import logging
+
 from vmcloak.abstract import Dependency
+from vmcloak.exceptions import DependencyError
+
+log = logging.getLogger(__name__)
 
 class AdobePdf(Dependency):
     name = "adobepdf"
@@ -55,6 +60,15 @@ class AdobePdf(Dependency):
             "sha1": "fe6808d5d11e94dc5581f33ed386ce552f0c84d6",
         },
         {
+            "version": "11.0.0",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.00/en_US/AdbeRdr11000_en_US.exe",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.00/en_US/AdbeRdr11000_en_US.exe",
+            ],
+            "sha1": "e7dd04e037c40b160a2f01db438dba9ea0b12c52",
+            "filename": "AdbeRdr11000_en_US.exe",
+        },
+        {
             "version": "11.0.2",
             "url": "https://cuckoo.sh/vmcloak/AdbeRdr11002_en_US.exe",
             "sha1": "e1d9e57f08e169fb1c925f8ded93e5f5efe5cda3",
@@ -93,22 +107,66 @@ class AdobePdf(Dependency):
             "version": "11.0.10",
             "url": "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
             "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.10/en_US/AdbeRdr11010_en_US.exe",
                 "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.10/en_US/AdbeRdr11010_en_US.exe",
                 "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
             ],
             "sha1": "98b2b838e6c4663fefdfd341dfdc596b1eff355c",
             "filename": "AdbeRdr11010_en_US.exe",
         },
+        {
+            "version": "11.0.19",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.19/misc/AdbeRdrUpd11019.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.19/misc/AdbeRdrUpd11019.msp",
+            ],
+            "sha1": "98fdf7a15fb2486ee7257767296d4f7a0a62ac92",
+            "filename": "AdbeRdrUpd11019.msp",
+        },
     ]
 
     def run(self):
-        self.upload_dependency("C:\\%s" % self.filename)
-        self.a.execute(
-            "C:\\%s /sAll /msi /norestart /quiet ALLUSERS=1 EULA_ACCEPT=YES" %
-            self.filename
-        )
+        if self.version.startswith("11") and self.filename.endswith(".msp"):
+            log.debug("We have a MSI upgrade package, we need the vanilla AdbeRdr installer.")
 
-        self.a.remove("C:\\%s" % self.filename)
+            orgexe = self.exe
+            self.exe = None
+            for exe in self.exes:
+                if exe["version"] == "11.0.0":
+                    self.exe = exe
+                    break
+
+            if not self.exe:
+                log.error("Could not find AdbeRdr v11.0 which is required for {}".format(self.filename))
+                raise DependencyError
+
+            self.download()
+
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "C:\\{} -nos_oC:\\AdobeFiles -nos_ne".format(
+                    self.filename)
+            )
+            self.a.remove("C:\\%s" % self.filename)
+
+            self.exe = orgexe
+            self.download()
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "msiexec /i C:\\AdobeFiles\\AcroRead.msi "
+                "/update C:\\{} /norestart /passive "
+                "ALLUSERS=1 EULA_ACCEPT=YES".format(self.filename)
+            )
+            self.a.remove("C:\\%s" % self.filename)
+            self.a.remove("C:\\AdobeFiles")
+        else:
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "C:\\%s /sAll /msi /norestart /passive ALLUSERS=1 EULA_ACCEPT=YES" %
+                self.filename
+            )
+
+            self.a.remove("C:\\%s" % self.filename)
 
         # add needed registry keys to skip Licence Agreement
         self.a.execute(
@@ -135,7 +193,7 @@ class AdobePdf(Dependency):
         # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/Updater-Win.html
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
-            "Policies\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
             "/v bUpdater /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
         )
 
