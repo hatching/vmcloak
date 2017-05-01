@@ -115,6 +115,69 @@ class AdobePdf(Dependency):
             "filename": "AdbeRdr11010_en_US.exe",
         },
         {
+            "version": "11.0.11",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.11/misc/AdbeRdrUpd11011.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.11/misc/AdbeRdrUpd11011.msp",
+            ],
+            "sha1": "182eb5b4ca71e364f62e412cdaec65e7937417e4",
+            "filename": "AdbeRdrUpd11011.msp",
+        },
+        {
+            "version": "11.0.12",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.12/misc/AdbeRdrUpd11012.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.12/misc/AdbeRdrUpd11012.msp",
+            ],
+            "sha1": "c5a5f2727dd7dabe0fcf96ace644751ac27872e7",
+            "filename": "AdbeRdrUpd11012.msp",
+        },
+        {
+            "version": "11.0.13",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.13/misc/AdbeRdrUpd11013.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.13/misc/AdbeRdrUpd11013.msp",
+            ],
+            "sha1": "89317596ffe50e35c136ef204ac911cbf83b14d9",
+            "filename": "AdbeRdrUpd11013.msp",
+        },
+        {
+            "version": "11.0.14",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.14/misc/AdbeRdrUpd11014.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.14/misc/AdbeRdrUpd11014.msp",
+            ],
+            "sha1": "d7b990117d8a6bbc4380663b7090cd60d2103079",
+            "filename": "AdbeRdrUpd11014.msp",
+        },
+        {
+            "version": "11.0.16",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.16/misc/AdbeRdrUpd11016.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.16/misc/AdbeRdrUpd11016.msp",
+            ],
+            "sha1": "ca825c50ed96a2fec6056c94c1bb44eedbaed890",
+            "filename": "AdbeRdrUpd11016.msp",
+        },
+        {
+            "version": "11.0.17",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.17/misc/AdbeRdrUpd11017.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.17/misc/AdbeRdrUpd11017.msp",
+            ],
+            "sha1": "c5fe501856be635566e864fe76f6d6a7ff3874ca",
+            "filename": "AdbeRdrUpd11017.msp",
+        },
+        {
+            "version": "11.0.18",
+            "urls": [
+                "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.18/misc/AdbeRdrUpd11018.msp",
+                "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.18/misc/AdbeRdrUpd11018.msp",
+            ],
+            "sha1": "420d64c064cd9904836a60066a222c64b0ea060e",
+            "filename": "AdbeRdrUpd11018.msp",
+        },
+        {
             "version": "11.0.19",
             "urls": [
                 "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.19/misc/AdbeRdrUpd11019.msp",
@@ -123,6 +186,7 @@ class AdobePdf(Dependency):
             "sha1": "98fdf7a15fb2486ee7257767296d4f7a0a62ac92",
             "filename": "AdbeRdrUpd11019.msp",
         },
+
     ]
 
     def run(self):
