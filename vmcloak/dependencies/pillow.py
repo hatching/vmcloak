@@ -4,12 +4,16 @@
 
 from vmcloak.abstract import Dependency
 
+
 class Pillow(Dependency):
     name = "pillow"
     recommended = True
     exes = [
         {
-            "url": "https://cuckoo.sh/vmcloak/Pillow-2.9.0.win32-py2.7.exe",
+            "urls": [
+                "https://pypi.python.org/packages/2.7/P/Pillow/Pillow-2.9.0.win32-py2.7.exe",
+                "https://cuckoo.sh/vmcloak/Pillow-2.9.0.win32-py2.7.exe",
+            ],
             "sha1": "1138f6db53b54943cbe7cf237c4df7e9255ca034",
         },
     ]

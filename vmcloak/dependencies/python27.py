@@ -4,11 +4,15 @@
 
 from vmcloak.abstract import Dependency
 
+
 class Python27(Dependency):
     name = "python27"
     exes = [
         {
-            "url": "https://cuckoo.sh/vmcloak/python-2.7.6.msi",
+            "urls": [
+                "https://www.python.org/ftp/python/2.7.6/python-2.7.6.msi",
+                "https://cuckoo.sh/vmcloak/python-2.7.6.msi",
+            ],
             "sha1": "c5d71f339f7edd70ecd54b50e97356191347d355",
         },
     ]
