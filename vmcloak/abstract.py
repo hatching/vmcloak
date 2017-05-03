@@ -435,7 +435,7 @@ class Dependency(object):
                 break
 
         self.filepath = os.path.join(deps_path, self.filename)
-        if (os.path.exists(self.filepath) and
+        if (os.path.exists(self.filepath) and "sha1" in self.exe and
                 sha1_file(self.filepath) == self.exe["sha1"]):
             return
 
@@ -444,6 +444,10 @@ class Dependency(object):
 
             if not os.path.exists(self.filepath):
                 continue
+
+            if self.exe["version"] == "latest":
+                log.info("Got latest version '{}' from '{}', no checksum available!".format(self.filename, url))
+                break
 
             if sha1_file(self.filepath) == self.exe["sha1"]:
                 log.info("Got file '{}' from '{}', with matching checksum.".format(self.filename, url))
