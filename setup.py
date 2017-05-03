@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.3",
+    version="0.4.4a1",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     url="http://vmcloak.org/",
@@ -48,13 +48,13 @@ setup(
     ],
     extras_require={
         ":sys_platform == 'win32'": [
-            "requests==2.7.0",
+            "requests>=2.7.0",
         ],
         ":sys_platform == 'darwin'": [
-            "requests==2.7.0",
+            "requests>=2.7.0",
         ],
         ":sys_platform == 'linux2'": [
-            "requests[security]==2.7.0",
+            "requests[security]>=2.7.0",
         ],
     },
 )

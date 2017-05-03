@@ -1,3 +1,7 @@
+0.4.4, TBD
+
+    Tweak: Support multiple versions of the requests dependency.
+
 0.4.3, April 28th, 2017
 
     New: Swarm configuration for deploying dozens of VMs at once (WIP).
