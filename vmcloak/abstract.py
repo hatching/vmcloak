@@ -445,7 +445,7 @@ class Dependency(object):
             if not os.path.exists(self.filepath):
                 continue
 
-            if self.exe["version"] == "latest":
+            if "version" in self.exe and self.exe["version"] == "latest":
                 log.info("Got latest version '{}' from '{}', no checksum available!".format(self.filename, url))
                 break
 
