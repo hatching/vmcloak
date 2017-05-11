@@ -22,7 +22,7 @@ class WIC(Dependency):
             "sha1": "53c18652ac2f8a51303deb48a1b7abbdb1db427f",
         },
         {
-            "arch": "x64",
+            "arch": "amd64",
             "urls": [
                 "https://download.microsoft.com/download/6/4/5/645FED5F-A6E7-44D9-9D10-FE83348796B0/wic_x64_enu.exe",
             ],
