@@ -261,6 +261,14 @@ class AdobePdf(Dependency):
             "/v bUpdater /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
         )
 
+        # disable the sandboxing (protected mode)
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/protectedmode.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "/v bProtectedMode /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
+        )
+
         # allow URL access
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
