@@ -269,6 +269,19 @@ class AdobePdf(Dependency):
             "/v bProtectedMode /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
         )
 
+        # disable enchanced security
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/enhanced.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "/v bEnhancedSecurityStandalone /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "/v bEnhancedSecurityInBrowser /t REG_DWORD /d 0 /f".format(self.version.split(".")[0])
+        )
+
         # allow URL access
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
