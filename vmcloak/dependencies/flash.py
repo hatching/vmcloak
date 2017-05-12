@@ -109,9 +109,20 @@ class Flash(Dependency):
             "url": "https://cuckoo.sh/vmcloak/flashplayer20_0d0_228_winax.msi",
             "sha1": "fa86f107111fc7def35742097bf0aa29c82d7638",
         },
+        {
+            "version": "latest",
+            "urls": [
+                "https://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player_ax.exe",
+            ],
+        },
     ]
 
     def run(self):
         self.upload_dependency("C:\\%s" % self.filename)
-        self.a.execute("msiexec /i C:\\%s /passive" % self.filename)
+
+        if self.filename.endswith(".msi"):
+            self.a.execute("msiexec /i C:\\%s /passive" % self.filename)
+        else:
+            self.a.execute("C:\\%s -install" % self.filename)
+
         self.a.remove("C:\\%s" % self.filename)
