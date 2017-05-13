@@ -73,6 +73,10 @@ class VirtualBox(Machinery):
         return self._call("createvm", name=self.name,
                           basefolder=vms_path, register=True)
 
+    def modify_hdd_uuid(self, hdd_uuid):
+        vm_uuid = self.vminfo('UUID')
+        return self._call("modifyvm", vm_uuid, hardwareuuid=hdd_uuid)
+
     def delete_vm(self):
         self._call("unregistervm", self.name, delete=True)
 

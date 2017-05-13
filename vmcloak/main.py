@@ -8,6 +8,7 @@ import os.path
 import shutil
 import tempfile
 import time
+import uuid
 
 from sqlalchemy.orm.session import make_transient
 
@@ -48,6 +49,8 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
     if image.vm == "virtualbox":
         m = VirtualBox(name=name or image.name)
         m.create_vm()
+        hdd_uuid = image.hdd_uuid
+        m.modify_hdd_uuid(hdd_uuid)
         m.os_type(image.osversion)
         m.cpus(cpus or image.cpus)
         m.mouse("usbtablet")
@@ -225,6 +228,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 
     if vm == "virtualbox":
         m.create_vm()
+        hdd_uuid = str(uuid.uuid4())
+        m.modify_hdd_uuid(hdd_uuid)
         m.os_type(osversion)
         m.cpus(cpus)
         m.mouse("usbtablet")
@@ -252,7 +257,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
     session.add(Image(name=name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
-                      netmask=netmask, gateway=gateway,
+                      netmask=netmask, gateway=gateway, hdd_uuid=hdd_uuid,
                       cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm))
     session.commit()
 

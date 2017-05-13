@@ -39,6 +39,7 @@ class Image(Base):
     cpus = Column(Integer)
     ramsize = Column(Integer)
     vramsize = Column(Integer)
+    hdd_uuid = Column(String(36))
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
