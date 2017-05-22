@@ -125,4 +125,15 @@ class Flash(Dependency):
         else:
             self.a.execute("C:\\%s -install" % self.filename)
 
+        mms = ("SilentAutoUpdateEnable=0\r\n"
+               "AutoUpdateDisable=1\r\n"
+               "ProtectedMode=0\r\n")
+
+        if self.h.arch == "x86":
+            mmsfp = "C:\\Windows\\System32\\Macromed\\Flash\\mms.cfg"
+        else:
+            mmsfp = "C:\\Windows\\SysWow64\\Macromed\\Flash\\mms.cfg"
+
+        self.a.upload(mmsfp, mms)
+
         self.a.remove("C:\\%s" % self.filename)
