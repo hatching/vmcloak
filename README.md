@@ -30,6 +30,15 @@ On Ubuntu a few packages are required due to the indirect inclusion of the
 ```bash
 $ sudo apt-get install build-essential libssl-dev libffi-dev
 $ sudo apt-get install python-dev genisoimage
+$ sudo pip install vmcloak
+```
+
+Or one may also install it in a virtualenv.
+
+```bash
+$ virtualenv .
+$ source ./bin/activate
+$ pip install -U vmcloak
 ```
 
 Usage
