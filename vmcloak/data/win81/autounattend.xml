@@ -82,12 +82,12 @@
     <settings pass="windowsPE">
         <component name="Microsoft-Windows-International-Core-WinPE" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             <InputLocale>0809:00000809</InputLocale>
-            <SystemLocale>en-GB</SystemLocale>
-            <UILanguage>en-GB</UILanguage>
-            <UILanguageFallback>en-GB</UILanguageFallback>
-            <UserLocale>en-GB</UserLocale>
+            <SystemLocale>en-US</SystemLocale>
+            <UILanguage>en-US</UILanguage>
+            <UILanguageFallback>en-US</UILanguageFallback>
+            <UserLocale>en-US</UserLocale>
             <SetupUILanguage>
-                <UILanguage>en-GB</UILanguage>
+                <UILanguage>en-US</UILanguage>
             </SetupUILanguage>
         </component>
         <component name="Microsoft-Windows-Setup" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
