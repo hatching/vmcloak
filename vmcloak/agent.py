@@ -1,11 +1,10 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2017 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-import requests
+import io
 import logging
-
-from StringIO import StringIO
+import requests
 
 from vmcloak.misc import wait_for_host
 
@@ -19,17 +18,26 @@ class Agent(object):
     def get(self, method, *args, **kwargs):
         """Wrapper around GET requests."""
         url = "http://%s:%s%s" % (self.ipaddr, self.port, method)
-        return requests.get(url, *args, **kwargs)
+        session = requests.Session()
+        session.trust_env = False
+        session.proxies = None
+        return session.get(url, *args, **kwargs)
 
     def post(self, method, **kwargs):
         """Wrapper around POST requests."""
         url = "http://%s:%s%s" % (self.ipaddr, self.port, method)
-        return requests.post(url, data=kwargs)
+        session = requests.Session()
+        session.trust_env = False
+        session.proxies = None
+        return session.post(url, data=kwargs)
 
     def postfile(self, method, files, **kwargs):
         """Wrapper around POST requests with attached files."""
         url = "http://%s:%s%s" % (self.ipaddr, self.port, method)
-        return requests.post(url, files=files, data=kwargs)
+        session = requests.Session()
+        session.trust_env = False
+        session.proxies = None
+        return session.post(url, files=files, data=kwargs)
 
     def ping(self):
         """Ping the machine."""
@@ -88,8 +96,13 @@ class Agent(object):
         ) % (interface, ipaddr, netmask, gateway)
 
         try:
-            requests.post("http://%s:%s/execute" % (self.ipaddr, self.port),
-                          data={"command": command}, timeout=5)
+            session = requests.Session()
+            session.trust_env = False
+            session.proxies = None
+            session.post(
+                "http://%s:%s/execute" % (self.ipaddr, self.port),
+                data={"command": command}, timeout=5
+            )
         except requests.exceptions.ReadTimeout:
             pass
 
@@ -107,24 +120,35 @@ class Agent(object):
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
         if isinstance(contents, basestring):
-            contents = StringIO(contents)
+            contents = io.BytesIO(contents)
         self.postfile("/store", {"file": contents}, filepath=filepath)
 
     def click(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons."""
-        log.debug("Clicking window '%s' button '%s'", window_title, button_name)
-        self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
-            window_title, button_name))
+        log.debug(
+            "Clicking window '%s' button '%s'", window_title, button_name
+        )
+        self.execute(
+            "C:\\vmcloak\\click.exe \"%s\" \"%s\"" %
+            (window_title, button_name)
+        )
 
     def click_async(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons
         asynchronously. This is mostly used in cases where the click may or
         may not be required, leaving the clicking process hanging."""
-        log.debug("Clicking (async) window '%s' button '%s'", window_title, button_name)
-        self.execute("C:\\vmcloak\\click.exe \"%s\" \"%s\"" % (
-            window_title, button_name), async=True)
+        log.debug(
+            "Clicking (async) window '%s' button '%s'",
+            window_title, button_name
+        )
+        self.execute(
+            "C:\\vmcloak\\click.exe \"%s\" \"%s\"" %
+            (window_title, button_name), async=True
+        )
 
     def resolution(self, width, height):
         """Set the screen resolution of this Virtual Machine."""
-        self.execute("C:\\Python27\\python.exe C:\\vmcloak\\resolution.py "
-                     "%s %s" % (width, height))
+        self.execute(
+            "C:\\Python27\\python.exe C:\\vmcloak\\resolution.py %s %s" %
+            (width, height)
+        )

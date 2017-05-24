@@ -1,6 +1,7 @@
 0.4.4, TBD
 
     Tweak: Support multiple versions of the requests dependency.
+    Tweak: Ignore proxies defined in environment variables (thanks Kolano).
 
 0.4.3, April 28th, 2017
 
