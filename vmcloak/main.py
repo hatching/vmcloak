@@ -117,12 +117,13 @@ def clone(name, outname):
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
          netmask, gateway, dns, cpus, ramsize, vramsize, tempdir, resolution,
-         vm_visible, vrde, debug, verbose):
+         vm_visible, vrde, vrde_port, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -237,7 +238,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         m.hostonly(nictype=h.nictype, adapter=adapter)
 
         if vrde:
-            m.vrde()
+            m.vrde(port=vrde_port)
 
         log.info("Starting the Virtual Machine %r to install Windows.", name)
         m.start_vm(visible=vm_visible)
@@ -266,9 +267,10 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 @click.argument("dependencies", nargs=-1)
 @click.option("--vm-visible", is_flag=True)
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("-r", "--recommended", is_flag=True, help="Install recommended packages.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
-def install(name, dependencies, vm_visible, vrde, recommended, debug):
+def install(name, dependencies, vm_visible, vrde, vrde_port, recommended, debug):
     if debug:
         vrde = True
         log.setLevel(logging.DEBUG)
@@ -290,7 +292,7 @@ def install(name, dependencies, vm_visible, vrde, recommended, debug):
 
     if image.vm == "virtualbox":
         if vrde:
-            m.vrde()
+            m.vrde(port=vrde_port)
         m.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
@@ -377,8 +379,9 @@ def install(name, dependencies, vm_visible, vrde, recommended, debug):
 @click.argument("name")
 @click.option("--vm-visible", is_flag=True)
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
-def modify(name, vm_visible, vrde, debug):
+def modify(name, vm_visible, vrde, vrde_port, debug):
     if debug:
         vrde = True
         log.setLevel(logging.DEBUG)
@@ -399,7 +402,7 @@ def modify(name, vm_visible, vrde, debug):
     m, h = initvm(image)
 
     if vrde:
-        m.vrde()
+        m.vrde(port=vrde_port)
     m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
 
