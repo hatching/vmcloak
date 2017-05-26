@@ -1,3 +1,7 @@
 .gitignore
 docs/_build
 *.pyc
+
+build/
+dist/
+*.egg-info

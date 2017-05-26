@@ -50,6 +50,7 @@ class Agent(object):
 
     def execute(self, command, async=False):
         """Execute a command."""
+        log.debug("Excecuting command in VM: {}".format(command))
         if async:
             return self.post("/execute", command=command, async="true")
         else:

@@ -221,7 +221,7 @@ class VirtualBox(Machinery):
     def mouse(self, type):
         return self._call("modifyvm", self.name, mouse=type)
 
-    def vrde(self, port, password):
+    def vrde(self, port=3389, password=""):
         return self._call("modifyvm", self.name, vrde="on", vrdeport=port,
                           vrdeproperty="VNCPassword=%s" % password)
 
