@@ -10,7 +10,7 @@ class Silverlight(Dependency):
     exes = [
         {
             "arch": "x86",
-            "version": "5.0.61118.0"
+            "version": "5.0.61118.0",
             "urls": [
                 "https://download.microsoft.com/download/5/5/7/55748E53-D673-4225-8072-4C7A377BB513/runtime/Silverlight.exe"
             ],
@@ -18,7 +18,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "amd64",
-            "version": "5.0.61118.0"
+            "version": "5.0.61118.0",
             "urls": [
                 "https://download.microsoft.com/download/5/5/7/55748E53-D673-4225-8072-4C7A377BB513/runtime/Silverlight_x64.exe"
             ],
@@ -26,7 +26,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "x86",
-            "version": "5.1.40620.0"
+            "version": "5.1.40620.0",
             "urls": [
                 "https://download.microsoft.com/download/5/A/4/5A4F7D41-D714-42B4-9F5F-A2B0B985CBAC/40620.00/Silverlight.exe",
             ],
@@ -34,7 +34,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "amd64",
-            "version": "5.1.40620.0"
+            "version": "5.1.40620.0",
             "urls": [
                 "https://download.microsoft.com/download/5/A/4/5A4F7D41-D714-42B4-9F5F-A2B0B985CBAC/40620.00/Silverlight_x64.exe",
             ],
@@ -42,7 +42,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "x86",
-            "version": "5.1.50709.0"
+            "version": "5.1.50709.0",
             "urls": [
                 "https://download.microsoft.com/download/7/7/6/7765A6A5-4B02-41DE-B7AF-067C92C581BD/50709.00/Silverlight.exe",
             ],
@@ -50,7 +50,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "amd64",
-            "version": "5.1.50709.0"
+            "version": "5.1.50709.0",
             "urls": [
                 "https://download.microsoft.com/download/7/7/6/7765A6A5-4B02-41DE-B7AF-067C92C581BD/50709.00/Silverlight_x64.exe",
             ],
@@ -58,7 +58,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "x86",
-            "version": "5.1.50905.0"
+            "version": "5.1.50905.0",
             "urls": [
                 "https://download.microsoft.com/download/8/6/A/86AC5F63-A0C9-4868-8CC5-C653B189E4B6/50905.00/Silverlight.exe",
             ],
@@ -66,7 +66,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "amd64",
-            "version": "5.1.50905.0"
+            "version": "5.1.50905.0",
             "urls": [
                 "https://download.microsoft.com/download/8/6/A/86AC5F63-A0C9-4868-8CC5-C653B189E4B6/50905.00/Silverlight_x64.exe",
             ],
@@ -74,7 +74,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "x86",
-            "version": "5.1.50906.0"
+            "version": "5.1.50906.0",
             "urls": [
                 "https://download.microsoft.com/download/3/F/5/3F5B3DEC-A698-4B6A-8BB9-A1A554EA103C/50906.00/Silverlight.exe",
             ],
@@ -82,7 +82,7 @@ class Silverlight(Dependency):
         },
         {
             "arch": "amd64",
-            "version": "5.1.50906.0"
+            "version": "5.1.50906.0",
             "urls": [
                 "https://download.microsoft.com/download/3/F/5/3F5B3DEC-A698-4B6A-8BB9-A1A554EA103C/50906.00/Silverlight_x64.exe",
             ],
