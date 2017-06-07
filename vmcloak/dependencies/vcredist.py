@@ -23,6 +23,7 @@ class VcRedist(Dependency):
 
     exes = [
         {
+            # 6.00.2900.2180
             "version": "2005",
             "arch": "x86",
             "urls": [
@@ -39,6 +40,7 @@ class VcRedist(Dependency):
             "sha1": "90a3d2a139c1a106bfccd98cbbd7c2c1d79f5ebe"
         },
         {
+            # 6.00.3790.0
             "version": "2005sp1",
             "arch": "x86",
             "urls": [
@@ -57,20 +59,24 @@ class VcRedist(Dependency):
             "sha1": "756f2c773d4733e3955bf7d8f1e959a7f5634b1a"
         },
         {
+            # 9.0.21022.08
             "version": "2008",
             "arch": "x86",
             "urls": [
-                "https://download.microsoft.com/download/d/d/9/dd9a82d0-52ef-40db-8dab-795376989c03/vcredist_x86.exe",
+                "https://download.microsoft.com/download/1/1/1/1116b75a-9ec3-481a-a3c8-1777b5381140/vcredist_x86.exe",
             ],
             "sha1": "56719288ab6514c07ac2088119d8a87056eeb94a"
         },
         {
             "version": "2008",
             "arch": "amd64",
-            "url": "https://download.microsoft.com/download/d/2/4/d242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe",
+            "urls": [
+                "https://download.microsoft.com/download/d/2/4/d242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe",
+            ],
             "sha1": "5580072a056fdd50cdf93d470239538636f8f3a9"
         },
         {
+            # 9.0.30729.17
             "version": "2008sp1",
             "arch": "x86",
             "urls": [
@@ -89,6 +95,7 @@ class VcRedist(Dependency):
             "sha1": "13674c43652b941dafd2049989afce63cb7c517b"
         },
         {
+            # 10.0.30319.01
             "version": "2010",
             "arch": "x86",
             "urls": [
@@ -105,6 +112,7 @@ class VcRedist(Dependency):
             "sha1": "b330b760a8f16d5a31c2dc815627f5eb40861008"
         },
         {
+            # 10.0.40219.01
             "version": "2010sp1",
             "arch": "x86",
             "urls": [
@@ -123,6 +131,55 @@ class VcRedist(Dependency):
             "sha1": "027d0c2749ec5eb21b031f46aee14c905206f482"
         },
         {
+            # 11.0.50727.1
+            "version": "2012",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x86.exe",
+            ],
+            "sha1": "407951838ef622bbfd2e359f0019453dc9a124ed"
+        },
+        {
+            "version": "2012",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x64.exe",
+            ],
+            "sha1": "60727ca083e3625a76c3edbba22b40d8a35ffd6b"
+        },
+        {
+            "version": "2012u1",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU1/vcredist_x86.exe",
+            ],
+            "sha1": "d292afddbae41acb2a1dfe647e15336ad7375c6f"
+        },
+        {
+            "version": "2012u1",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU1/vcredist_x64.exe",
+            ],
+            "sha1": "abe47e4996cf0409a794c1844f1fa8404032edb2"
+        },
+        {
+            "version": "2012u3",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU3/vcredist_x86.exe",
+            ],
+            "sha1": "7d6f654c16f9ce534bb2c4b1669d7dc039c433c9"
+        },
+        {
+            "version": "2012u3",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU3/vcredist_x64.exe",
+            ],
+            "sha1": "c4ac45564e801e1bfd87936cac8a76c5754cdbd4"
+        },
+        {
             "version": "2012u4",
             "arch": "x86",
             "urls": [
@@ -139,6 +196,7 @@ class VcRedist(Dependency):
             "sha1": "1a5d93dddbc431ab27b1da711cd3370891542797"
         },
         {
+            # 12.0.30501.0
             "version": "2013",
             "arch": "x86",
             "urls": [
@@ -157,10 +215,30 @@ class VcRedist(Dependency):
             "sha1": "8bf41ba9eef02d30635a10433817dbb6886da5a2"
         },
         {
+            # 12.0.40649.0
+            # https://support.microsoft.com/en-us/help/3138367/update-for-visual-c-2013-and-visual-c-redistributable-package
+            "version": "2013u4",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x86.exe",
+            ],
+            "sha1": "a2889d057d63da00f2f8ab9c4ed1e127bdf5db68"
+        },
+        {
+            "version": "2013u4",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe",
+            ],
+            "sha1": "c990b86c2f8064c53f1de8c0bffe2d1c463aaa88"
+        },
+        {
+            # 12.0.40660.0
+            # https://support.microsoft.com/en-us/help/3179560/update-for-visual-c-2013-and-visual-c-redistributable-package
             "version": "2013u5",
             "arch": "x86",
             "urls": [
-                "http://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x86.exe",
+                "https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x86.exe",
             ],
             "sha1": "2a07a32330d5131665378836d542478d3e7bd137"
         },
@@ -168,11 +246,12 @@ class VcRedist(Dependency):
             "version": "2013u5",
             "arch": "amd64",
             "urls": [
-                "http://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x64.exe",
+                "https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x64.exe",
             ],
             "sha1": "261c2e77d288a513a9eb7849cf5afca6167d4fa2"
         },
         {
+            # 14.0.23026.0
             "version": "2015",
             "arch": "x86",
             "urls": [
@@ -191,6 +270,41 @@ class VcRedist(Dependency):
             "sha1": "3155cb0f146b927fcc30647c1a904cd162548c8c"
         },
         {
+            # 14.0.24212.0
+            "version": "2015u1",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/6/D/F/6DF3FF94-F7F9-4F0B-838C-A328D1A7D0EE/vc_redist.x86.exe",
+            ],
+            "sha1": "89f20df555625e1796a60bba0fbd2f6bbc627370"
+        },
+        {
+            "version": "2015u1",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/6/D/F/6DF3FF94-F7F9-4F0B-838C-A328D1A7D0EE/vc_redist.x64.exe",
+            ],
+            "sha1": "cd2fce1bf61637b2536b66ee52a9662473bbdc82"
+        },
+        {
+            # 14.0.24123.0
+            "version": "2015u2",
+            "arch": "x86",
+            "urls": [
+                "https://download.microsoft.com/download/0/6/4/064F84EA-D1DB-4EAA-9A5C-CC2F0FF6A638/vc_redist.x86.exe",
+            ],
+            "sha1": "e99e5b17b0ad882833bbdc8cf798dc56f9947a5e"
+        },
+        {
+            "version": "2015u2",
+            "arch": "amd64",
+            "urls": [
+                "https://download.microsoft.com/download/0/6/4/064F84EA-D1DB-4EAA-9A5C-CC2F0FF6A638/vc_redist.x64.exe",
+            ],
+            "sha1": "ff15c4f5da3c54f88676e6b44f3314b173835c28"
+        },
+        {
+            # 14.0.24215.1
             "version": "2015u3",
             "arch": "x86",
             "urls": [
