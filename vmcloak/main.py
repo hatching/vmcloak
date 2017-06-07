@@ -14,7 +14,7 @@ from sqlalchemy.orm.session import make_transient
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
-from vmcloak.dependencies import Python27
+from vmcloak.dependencies import Python
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
@@ -189,6 +189,16 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 
     reso_width, reso_height = resolution.split("x")
 
+    bootstrap = tempfile.mkdtemp(dir=tempdir)
+
+    vmcloak_dir = os.path.join(bootstrap, "vmcloak")
+    os.mkdir(vmcloak_dir)
+
+    # Download the Python dependency and set it up for bootstrapping the VM.
+    d = Python(i=Image(osversion=osversion))
+    d.download()
+    shutil.copy(d.filepath, vmcloak_dir)
+
     settings = dict(
         GUEST_IP=ip,
         AGENT_PORT=port,
@@ -199,22 +209,15 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         RESO_WIDTH=reso_width,
         RESO_HEIGHT=reso_height,
         INTERFACE=h.interface,
+        PYTHONINSTALLER=d.exe["filename"],
+        PYTHONWINDOW=d.exe["window_name"],
+        PYTHONPATH=d.exe["install_path"],
     )
-
-    bootstrap = tempfile.mkdtemp(dir=tempdir)
-
-    vmcloak_dir = os.path.join(bootstrap, "vmcloak")
-    os.mkdir(vmcloak_dir)
 
     # Write the configuration values for bootstrap.bat.
     with open(os.path.join(vmcloak_dir, "settings.bat"), "wb") as f:
         for key, value in settings.items():
             print>>f, "set %s=%s" % (key, value)
-
-    # Download the Python dependency and set it up for bootstrapping the VM.
-    d = Python27(i=Image(osversion=osversion))
-    d.download()
-    shutil.copy(d.filepath, vmcloak_dir)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
     hdd_path = os.path.join(image_path, "%s.vdi" % name)
