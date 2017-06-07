@@ -8,13 +8,41 @@ from vmcloak.abstract import Dependency
 class Pillow(Dependency):
     name = "pillow"
     recommended = True
+    default = "2.9.0"
     exes = [
         {
+            "arch": "amd64",
+            "version": "2.9.0",
+            "urls": [
+                "https://pypi.python.org/packages/2.7/P/Pillow/Pillow-2.9.0.win-amd64-py2.7.exe",
+            ],
+            "sha1": "3ab2d0f594da58568930bbdedc76ba1e77f8fd48",
+        },
+        {
+            "arch": "x86",
+            "version": "2.9.0",
             "urls": [
                 "https://pypi.python.org/packages/2.7/P/Pillow/Pillow-2.9.0.win32-py2.7.exe",
                 "https://cuckoo.sh/vmcloak/Pillow-2.9.0.win32-py2.7.exe",
             ],
             "sha1": "1138f6db53b54943cbe7cf237c4df7e9255ca034",
+        },
+        {
+            "arch": "amd64",
+            "version": "3.4.2",
+            "urls": [
+                "https://pypi.python.org/packages/20/fd/feb18c21ce98ef377e4b7417707bf4bc15fc29f0972e612e294e6e11ae1a/Pillow-3.4.2.win-amd64-py2.7.exe",
+
+            ],
+            "sha1": "879cdfbe9206c9b4059d0a3c7f339a02a20d0ee5",
+        },
+        {
+            "arch": "x86",
+            "version": "3.4.2",
+            "urls": [
+                "https://pypi.python.org/packages/59/59/ece120265d3918f75b43dda870566e58d675c3e865bf63f520e7f01425e5/Pillow-3.4.2.win32-py2.7.exe",
+            ],
+            "sha1": "46778e4c41cb721b035fb72b82e17bcaba94c077",
         },
     ]
 
