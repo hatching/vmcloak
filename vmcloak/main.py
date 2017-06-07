@@ -118,12 +118,13 @@ def clone(name, outname):
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
          netmask, gateway, dns, cpus, ramsize, vramsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, debug, verbose):
+         vm_visible, vrde, vrde_port, python_version, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -195,7 +196,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
     os.mkdir(vmcloak_dir)
 
     # Download the Python dependency and set it up for bootstrapping the VM.
-    d = Python(i=Image(osversion=osversion))
+    d = Python(i=Image(osversion=osversion), version=python_version)
     d.download()
     shutil.copy(d.filepath, vmcloak_dir)
 
