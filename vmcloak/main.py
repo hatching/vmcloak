@@ -196,7 +196,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
     os.mkdir(vmcloak_dir)
 
     # Download the Python dependency and set it up for bootstrapping the VM.
-    d = Python(i=Image(osversion=osversion), version=python_version)
+    d = Python(i=Image(osversion=osversion), h=h, version=python_version)
     d.download()
     shutil.copy(d.filepath, vmcloak_dir)
 
