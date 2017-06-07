@@ -20,6 +20,13 @@ class DotNet(Dependency):
             "sha1": "58da3d74db353aad03588cbb5cea8234166d8b99",
         },
         {
+            "version": "4.5",
+            "urls": [
+                "https://download.microsoft.com/download/b/a/4/ba4a7e71-2906-4b2d-a0e1-80cf16844f5f/dotnetfx45_full_x86_x64.exe",
+            ],
+            "sha1": "b2ff712ca0947040ca0b8e9bd7436a3c3524bb5d",
+        },
+        {
             "version": "4.5.1",
             "urls": [
                 "https://download.microsoft.com/download/1/6/7/167F0D79-9317-48AE-AEDB-17120579F8E2/NDP451-KB2858728-x86-x64-AllOS-ENU.exe",
@@ -55,6 +62,13 @@ class DotNet(Dependency):
                 "https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe",
             ],
             "sha1": "a70f856bda33d45ad0a8ad035f73092441715431",
+        },
+        {
+            "version": "4.7",
+            "urls": [
+                "https://download.microsoft.com/download/D/D/3/DD35CC25-6E9C-484B-A746-C5BE0C923290/NDP47-KB3186497-x86-x64-AllOS-ENU.exe",
+            ],
+            "sha1": "76054141a492ba307595250bda05ad4e0694cdc3",
         },
     ]
 
