@@ -10,18 +10,6 @@ class Python(Dependency):
     default = "2.7.6"
     exes = [
         {
-            "arch": "amd64",
-            "version": "2.7.6",
-            "urls": [
-                "https://www.python.org/ftp/python/2.7.6/python-2.7.6.amd64.msi",
-            ],
-            "sha1": "405290650b85042f389a8fbf06549c35458afd05",
-            "filename": "python-2.7.6.amd64.msi",
-            "window_name": "Python 2.7.6 (64-bit) Setup",
-            "install_path": "C:\\Python27",
-        },
-        {
-            "arch": "x86",
             "version": "2.7.6",
             "urls": [
                 "https://www.python.org/ftp/python/2.7.6/python-2.7.6.msi",
@@ -33,18 +21,6 @@ class Python(Dependency):
             "install_path": "C:\\Python27",
         },
         {
-            "arch": "amd64",
-            "version": "2.7.13",
-            "urls": [
-                "https://www.python.org/ftp/python/2.7.13/python-2.7.13.amd64.msi",
-            ],
-            "sha1": "d9113142bae8829365c595735e1ad1f9f5e2894c",
-            "filename": "python-2.7.13.amd64.msi",
-            "window_name": "Python 2.7.13 (64-bit) Setup",
-            "install_path": "C:\\Python27",
-        },
-        {
-            "arch": "x86",
             "version": "2.7.13",
             "urls": [
                 "https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi",
