@@ -13,6 +13,24 @@ WEB_JAVA_SECURITY_LEVEL=H
 WEB_ANALYTICS=Disable
 """
 
+java7deploymentconfig = """
+deployment.system.config=file:///C:/Windows/Sun/Java/Deployment/deployment.properties
+deployment.system.config.mandatory=false
+"""
+
+java7deploymentproperties = """
+deployment.security.level=medium
+deployment.security.jsse.hostmismatch.warning=false
+deployment.security.mixcode=disable
+deployment.security.blacklist.check=false
+deployment.security.sandbox.awtwarningwindow=false
+deployment.javaws.shortcut=always
+deployment.javaws.associations=always
+deployment.webjava.enabled=true
+deployment.insecure.jres=never
+deployment.expiration.check.enabled=false
+"""
+
 class Java(Dependency):
     name = "java"
     default = "7"
@@ -282,6 +300,8 @@ class Java(Dependency):
 
         if self.version.startswith("7"):
             self.a.execute("C:\\java.exe /s WEB_JAVA=1 WEB_JAVA_SECURITY_LEVEL=M SPONSORS=0", async=True)
+            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.config", deploymentconfig)
+            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.properties", deploymentproperties)
         else:
             self.a.upload("C:\\config.cfg", config)
             self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", async=True)
