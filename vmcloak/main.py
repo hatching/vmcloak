@@ -26,6 +26,7 @@ from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.vm import VirtualBox
 from vmcloak.constants import VMCLOAK_VM_MODES
+from vmcloak.abstract import wait_process_exit
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
@@ -436,8 +437,11 @@ def register(vmname, cuckoo, tags):
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
 def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
-                hostname, adapter, vm_visible):
+                hostname, adapter, vm_visible, vrde, vrde_port, interactive):
     m, h = initvm(image, name=vmname, multi=True, ramsize=ramsize, cpus=cpus)
+
+    if vrde:
+        m.vrde(port=vrde_port)
 
     m.start_vm(visible=vm_visible)
 
@@ -459,9 +463,19 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
         width, height = resolution.split("x")
         a.resolution(width, height)
 
-    a.remove("C:\\vmcloak")
     a.static_ip(ipaddr, image.netmask, image.gateway, h.interface)
 
+    if interactive:
+        a.upload("C:\\vmcloak\\interactive.txt",
+            "Please make your final changes to this VM. When you're done, close this window and we'll create a snapshot.")
+        a.execute("notepad.exe C:\\vmcloak\\interactive.txt")
+
+        log.info("You've started the snapshot creation in interactive mode.")
+        log.info("Please make your last changes to the VM.")
+        log.info("When you're done close the spawned notepad process in the VM to take a snapshot.")
+        wait_process_exit("notepad.exe")
+
+    a.remove("C:\\vmcloak")
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
     m.stopvm()
 
@@ -481,9 +495,12 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--adapter", help="Hostonly adapter for this VM.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--count", type=int, help="The amount of snapshots to make.")
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
 @click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count, debug):
+             adapter, vm_visible, count, vrde, vrde_port, interactive, debug):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -510,7 +527,8 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     if not count:
         snapshot = do_snapshot(
             image, vmname, ipaddr, resolution, ramsize, cpus,
-            hostname or random_string(8, 16), adapter, vm_visible
+            hostname or random_string(8, 16), adapter, vm_visible,
+            vrde, vrde_port, interactive
         )
         session.add(snapshot)
     else:
@@ -524,7 +542,8 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         for x in xrange(count):
             snapshot = do_snapshot(
                 image, "%s%d" % (vmname, x + 1), ipaddr, resolution,
-                ramsize, cpus, hostname, adapter, vm_visible
+                ramsize, cpus, hostname, adapter, vm_visible,
+                vrde, vrde_port, interactive
             )
             session.add(snapshot)
 
