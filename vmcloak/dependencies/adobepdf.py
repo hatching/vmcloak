@@ -289,10 +289,40 @@ class AdobePdf(Dependency):
         )
 
         # allow URL access
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/FeatureLockdown.html
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" "
             "/v iURLPerms /t REG_DWORD /d 2 /f" % self.version.split(".")[0]
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\"
+            "FeatureLockDown\\cDefaultLaunchURLPerms\" "
+            "/v iUnknownURLPerms /t REG_DWORD /d 2 /f".format(self.version.split(".")[0])
+        )
+
+        # allow opening of all embedded files
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/Attachments.html
+        self.a.execute(
+            "reg delete \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\"
+            "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
+            "/v tBuiltInPermList /f".format(self.version.split(".")[0])
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\"
+            "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
+            "/v iUnlistedAttachmentTypePerm /t REG_DWORD /d 2 /f".format(self.version.split(".")[0])
+        )
+
+        # enable flash content
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/FeatureLockdown.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\{}.0\\FeatureLockDown\" "
+            "/v bEnableFlash /t REG_DWORD /d 1 /f".format(self.version.split(".")[0])
         )
 
         # FIXME: really needed ?
