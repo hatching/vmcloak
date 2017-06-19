@@ -383,6 +383,7 @@ class Dependency(object):
         self.a = a
         self.i = i
         self.version = version or self.default
+        self.arch = h.arch
         self.settings = settings
         self.exe = None
         self.filename = None
@@ -403,7 +404,7 @@ class Dependency(object):
             if "version" in exe and exe["version"] != self.version:
                 continue
 
-            if "arch" in exe and exe["arch"] != h.arch:
+            if "arch" in exe and exe["arch"] != self.arch:
                 continue
 
             self.exe = exe
