@@ -15,20 +15,30 @@ WEB_ANALYTICS=Disable
 
 java7deploymentconfig = """
 deployment.system.config=file:///C:/Windows/Sun/Java/Deployment/deployment.properties
-deployment.system.config.mandatory=false
+deployment.system.config.mandatory=true
 """
 
 java7deploymentproperties = """
-deployment.security.level=medium
+deployment.security.level=MEDIUM
+deployment.security.level.locked
 deployment.security.jsse.hostmismatch.warning=false
-deployment.security.mixcode=disable
+deployment.security.jsse.hostmismatch.warning.locked
+deployment.security.mixcode=DISABLE
+deployment.security.mixcode.locked
 deployment.security.blacklist.check=false
+deployment.security.blacklist.check.locked
 deployment.security.sandbox.awtwarningwindow=false
-deployment.javaws.shortcut=always
-deployment.javaws.associations=always
+deployment.security.sandbox.awtwarningwindow.locked
+deployment.security.revocation.check=NO_CHECK
+deployment.security.revocation.check.locked
+deployment.javaws.shortcut=ALWAYS
+deployment.javaws.shortcut.locked
 deployment.webjava.enabled=true
-deployment.insecure.jres=never
+deployment.webjava.enabled.locked
+deployment.insecure.jres=NEVER
+deployment.insecure.jres.locked
 deployment.expiration.check.enabled=false
+deployment.expiration.check.enabled.locked
 """
 
 class Java(Dependency):
@@ -1011,9 +1021,9 @@ class Java(Dependency):
         version = self.version.strip("jdk")
 
         if version.startswith("7"):
-            self.a.execute("C:\\java.exe /s WEB_JAVA=1 WEB_JAVA_SECURITY_LEVEL=M SPONSORS=0", async=True)
-            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.config", deploymentconfig)
-            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.properties", deploymentproperties)
+            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.config", java7deploymentconfig)
+            self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.properties", java7deploymentproperties)
+            self.a.execute("C:\\java.exe /s", async=True)
         else:
             self.a.upload("C:\\config.cfg", config)
             self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", async=True)
