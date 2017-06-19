@@ -26,7 +26,6 @@ from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
 from vmcloak.vm import VirtualBox
 from vmcloak.constants import VMCLOAK_VM_MODES
-from vmcloak.abstract import wait_process_exit
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
@@ -467,13 +466,13 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 
     if interactive:
         a.upload("C:\\vmcloak\\interactive.txt",
-            "Please make your final changes to this VM. When you're done, close this window and we'll create a snapshot.")
-        a.execute("notepad.exe C:\\vmcloak\\interactive.txt")
+                 "Please make your final changes to this VM. When you're"
+                 "done, close this window and we'll create a snapshot.")
 
-        log.info("You've started the snapshot creation in interactive mode.")
+        log.info("You've started the snapshot creation in interactive mode!")
         log.info("Please make your last changes to the VM.")
-        log.info("When you're done close the spawned notepad process in the VM to take a snapshot.")
-        wait_process_exit("notepad.exe")
+        log.info("When you're done close the spawned notepad process in the VM to take the final snapshot.")
+        a.execute("notepad.exe C:\\vmcloak\\interactive.txt", async=False)
 
     a.remove("C:\\vmcloak")
     m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
