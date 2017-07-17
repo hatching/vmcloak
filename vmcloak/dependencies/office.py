@@ -67,3 +67,39 @@ class Office(Dependency):
 class Office2007(Office, Dependency):
     """Backwards compatibility."""
     name = "office2007"
+
+class Office2003(Office, Dependency):
+    """Install Office 2003 using a MST file."""
+    name = "office2003"
+    
+    def init(self):
+        self.isopath = None
+        self.mstpath = None
+
+    def check(self):
+        if not self.mstpath:
+            log.error("Please provide a MST file for Office.")
+            return False
+
+        if not self.isopath or not os.path.isfile(self.isopath):
+            log.error("Please provide the Office installer ISO file.")
+            return False
+    
+    def run(self):
+        if self.i.vm == "virtualbox":
+            self.disable_autorun()
+            self.m.attach_iso(self.isopath)
+
+        self.a.upload(
+            "C:\\office2003.MST",
+            open(self.mstpath, "rb").read()
+        )
+        self.a.execute("D:\\setup.exe TRANSFORMS=C:\\office2003.MST /qb")
+
+        # Wait until setup.exe is no longer running.
+        self.wait_process_exit("setup.exe")
+
+        self.a.remove("C:\\office2003.MST")
+
+        if self.i.vm == "virtualbox":
+            self.m.detach_iso()
