@@ -1,14 +1,14 @@
 # Copyright (C) 2014-2016 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
-# Costum Dependency submitted by Marc Ohm.
+# Custom Dependency submitted by Marc Ohm.
 
 import os.path
 
 from vmcloak.abstract import Dependency
 
-class Costum(Dependency):
-    name = "costum"
+class Custom(Dependency):
+    name = "custom"
     
     def init(self):
         self.exepath = None
