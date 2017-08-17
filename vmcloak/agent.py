@@ -120,7 +120,7 @@ class Agent(object):
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
         if isinstance(contents, basestring):
-            contents = io.BytesIO(contents)
+            contents = io.StringIO(contents)
         self.postfile("/store", {"file": contents}, filepath=filepath)
 
     def click(self, window_title, button_name):
