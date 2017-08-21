@@ -42,19 +42,19 @@ setup(
     },
     install_requires=[
         "click==6.6",
-        "jinja2==2.8",
+        "jinja2==2.9.6",
         "pyyaml==3.12",
         "sqlalchemy==1.0.8",
     ],
     extras_require={
         ":sys_platform == 'win32'": [
-            "requests>=2.7.0",
+            "requests>=2.13.0",
         ],
         ":sys_platform == 'darwin'": [
-            "requests>=2.7.0",
+            "requests>=2.13.0",
         ],
         ":sys_platform == 'linux2'": [
-            "requests[security]>=2.7.0",
+            "requests[security]>=2.13.0",
         ],
     },
 )
