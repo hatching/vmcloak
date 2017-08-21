@@ -2,6 +2,8 @@
 
     Tweak: Support multiple versions of the requests dependency.
     Tweak: Ignore proxies defined in environment variables (thanks Kolano).
+    Tweak: Fix setup issue with Microsoft Office (thanks scrublullz, razuz).
+    Tweak: Loosen up dependencies to install alongside Cuckoo (thanks razuz).
 
 0.4.3, April 28th, 2017
 
