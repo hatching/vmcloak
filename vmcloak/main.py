@@ -138,12 +138,16 @@ def clone(name, outname):
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
+@click.option("--paravirtprovider", default="default",
+              help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
          gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, python_version, debug, verbose):
+         vm_visible, vrde, vrde_port, python_version, paravirtprovider, debug,
+         verbose):
+
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -252,6 +256,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
     if vm == "virtualbox":
         m.create_vm()
         m.os_type(osversion)
+        m.paravirtprovider(paravirtprovider)
         m.cpus(cpus)
         m.mouse("usbtablet")
         m.ramsize(ramsize)
