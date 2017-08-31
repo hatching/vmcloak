@@ -57,6 +57,7 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
+        m.paravirtprovider(image.paravirtualization)
 
     return m, h
 
