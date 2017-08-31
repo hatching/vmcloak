@@ -63,6 +63,7 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
+        m.paravirtprovider(image.paravirtprovider)
 
     return m, h
 
@@ -281,7 +282,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
                       netmask=netmask, gateway=gateway,
-                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm))
+                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
+                      paravirtprovider=paravirtprovider))
     session.commit()
 
 @main.command()
