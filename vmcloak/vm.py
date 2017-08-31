@@ -225,6 +225,9 @@ class VirtualBox(Machinery):
         return self._call("modifyvm", self.name, vrde="on", vrdeport=port,
                           vrdeproperty="VNCPassword=%s" % password)
 
+    def paravirtprovider(self, provider):
+        return self._call("modifyvm", self.name, paravirtprovider=provider)
+
     def export(self, filepath):
         return self._call(
             "export", self.name, "--output", filepath, "--vsys", "0",

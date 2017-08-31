@@ -116,12 +116,14 @@ def clone(name, outname):
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
+@click.option("--paravirtprovider", default="default",
+              help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
          netmask, gateway, dns, cpus, ramsize, vramsize, tempdir, resolution,
-         vm_visible, debug, verbose):
+         vm_visible, paravirtprovider, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -226,6 +228,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
     if vm == "virtualbox":
         m.create_vm()
         m.os_type(osversion)
+        m.paravirtprovider(paravirtprovider)
         m.cpus(cpus)
         m.mouse("usbtablet")
         m.ramsize(ramsize)
