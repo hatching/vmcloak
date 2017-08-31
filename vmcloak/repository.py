@@ -55,6 +55,7 @@ class Image(Base):
     cpus = Column(Integer)
     ramsize = Column(Integer)
     vramsize = Column(Integer)
+    paravirtprovider = Column(String(32))
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
