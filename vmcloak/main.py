@@ -113,6 +113,7 @@ def clone(name, outname):
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
 @click.option("--vramsize", default=16, help="Video memory size")
+@click.option("--hddsize", type=int, default=256, help="HDD size *1024")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
@@ -120,8 +121,8 @@ def clone(name, outname):
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
          win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
-         netmask, gateway, dns, cpus, ramsize, vramsize, tempdir, resolution,
-         vm_visible, debug, verbose):
+         netmask, gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir,
+         resolution, vm_visible, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -230,7 +231,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         m.mouse("usbtablet")
         m.ramsize(ramsize)
         m.vramsize(vramsize)
-        m.create_hd(hdd_path)
+        m.create_hd(hdd_path, hddsize * 1024)
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, adapter=adapter)
 
