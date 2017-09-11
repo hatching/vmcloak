@@ -12,13 +12,13 @@ class Sysmon(Dependency):
         {
             "version": "6.0.2",
             "arch": "amd64",
-            "url": "https://live.sysinternals.com/Sysmon64.exe",
+            "url": "https://cuckoo.sh/vmcloak/Sysmon64.exe",
             "sha1": "849b8dfaf9159afdc14d514b2243d4d5ba2ff9a4",
         },
         {
             "version": "6.0.2",
             "arch": "x86",
-            "url": "https://live.sysinternals.com/Sysmon.exe",
+            "url": "https://cuckoo.sh/vmcloak/Sysmon.exe",
             "sha1": "199f1773123652d7e958468c280426aff6e16d78",
         },
     ]
