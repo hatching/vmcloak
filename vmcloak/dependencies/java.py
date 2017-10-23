@@ -47,6 +47,7 @@ class Java(Dependency):
     recommended = True
     exes = [
         # http://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html
+        # https://www.java.com/pt_BR/download/manual.jsp
         {
             "version": "jdk7",
             "url": "https://cuckoo.sh/vmcloak/jdk-7-windows-i586.exe",
@@ -1012,6 +1013,60 @@ class Java(Dependency):
             ],
             "sha1": "a3a75ebdab5079aac1b3c2f2a4666296214f0417",
             "filename": "jre-8u131-windows-x64.exe",
+        },
+        {
+            "arch": "x86",
+            "version": "8u141",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=224927_336fa29ff2bb4ef291e347e091f7f4a7",
+            ],
+            "sha1": "74445e1c2c932f87ad90a55fb5da182f57dd637d",
+            "filename": "jre-8u141-windows-i586.exe",
+        },
+        {
+            "arch": "amd64",
+            "version": "8u141",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=224929_336fa29ff2bb4ef291e347e091f7f4a7",
+            ],
+            "sha1": "77cfba433ca2057e6aef6ac1f82f3a3679bf8533",
+            "filename": "jre-8u141-windows-x64.exe",
+        },
+        {
+            "arch": "x86",
+            "version": "8u144",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=225353_090f390dda5b47b9b721c7dfaa008135",
+            ],
+            "sha1": "49901a5961c2cdd9a46930d4008a8f8d0b1aad27",
+            "filename": "jre-8u144-windows-i586.exe",
+        },
+        {
+            "arch": "amd64",
+            "version": "8u144",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=225355_090f390dda5b47b9b721c7dfaa008135",
+            ],
+            "sha1": "f1c74179507212cd853a87fa3b6a9ea764dea4ed",
+            "filename": "jre-8u144-windows-x64.exe",
+        },
+        {
+            "arch": "x86",
+            "version": "8u151",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=227550_e758a0de34e24606bca991d704f6dcbf",
+            ],
+            "sha1": "94f6903ef5514405131298fc351af9467adf945d",
+            "filename": "jre-8u151-windows-i586.exe",
+        },
+        {
+            "arch": "amd64",
+            "version": "8u151",
+            "urls": [
+                "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=227552_e758a0de34e24606bca991d704f6dcbf",
+            ],
+            "sha1": "57747ce996b5b2f1786601b04a0b0355fc82493a",
+            "filename": "jre-8u151-windows-x64.exe",
         },
     ]
 
