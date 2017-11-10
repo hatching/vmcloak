@@ -5,7 +5,6 @@
 
 from setuptools import setup
 
-
 setup(
     name="VMCloak",
     version="0.4.4",
@@ -42,7 +41,7 @@ setup(
     },
     install_requires=[
         "click==6.6",
-        "jinja2>=2.8",
+        "jinja2==2.9.6",
         "pyyaml==3.12",
         "sqlalchemy==1.0.8",
     ],
