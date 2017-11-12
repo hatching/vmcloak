@@ -55,6 +55,13 @@ class Agent(object):
         else:
             return self.post("/execute", command=command)
 
+    def execpy(self, filepath, async=False):
+        """Execute a Python file."""
+        if async:
+            return self.post("/execpy", filepath=filepath, async="true")
+        else:
+            return self.post("/execpy", filepath=filepath)
+
     def remove(self, path):
         """Remove a file or entire directory."""
         self.post("/remove", path=path)
@@ -122,6 +129,10 @@ class Agent(object):
         if isinstance(contents, basestring):
             contents = io.StringIO(contents)
         self.postfile("/store", {"file": contents}, filepath=filepath)
+
+    def retrieve(self, filepath):
+        """Retrieve a file from the Agent."""
+        return self.post("/retrieve", filepath=filepath).content
 
     def click(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons."""
