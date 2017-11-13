@@ -127,7 +127,7 @@ class Agent(object):
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
         if isinstance(contents, basestring):
-            contents = io.StringIO(contents)
+            contents = io.BytesIO(str(contents))
         self.postfile("/store", {"file": contents}, filepath=filepath)
 
     def retrieve(self, filepath):
