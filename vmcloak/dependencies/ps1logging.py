@@ -6,8 +6,8 @@ import time
 
 from vmcloak.abstract import Dependency
 
-class PSLogging(Dependency):
-    name = "pslogging"
+class PS1Logging(Dependency):
+    name = "ps1logging"
     default = "3109118"
     depends = [
         "win7sp", "dotnet:4.6.1", "kb:2819745", "kb:3109118"
