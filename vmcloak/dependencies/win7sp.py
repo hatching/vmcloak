@@ -6,6 +6,7 @@ from vmcloak.abstract import Dependency
 
 class Win7sp(Dependency):
     name = "win7sp"
+    default = "1"
     exes = [
         {
             "version": "1",
