@@ -117,6 +117,30 @@ class KB(Dependency):
             "url": "https://cuckoo.sh/vmcloak/Windows6.1-KB2888049-x86.msu",
             "sha1": "65b4c7a5773fab177d20c8e49d773492e55e8d76",
         },
+        {
+            "version": "2819745",
+            "target": "win7x64",
+            "url": "https://cuckoo.sh/vmcloak/Windows6.1-KB2819745-x64-MultiPkg.msu",
+            "sha1": "5d40d059b9ea7f1d596f608a07cca49e4537dc15",
+        },
+        {
+            "version": "2819745",
+            "target": "win7x86",
+            "url": "https://cuckoo.sh/vmcloak/Windows6.1-KB2819745-x86-MultiPkg.msu",
+            "sha1": "378bd9f96b8c898b86bb0c0b92f2c9c000748c5e",
+        },
+        {
+            "version": "3109118",
+            "target": "win7x64",
+            "url": "https://cuckoo.sh/vmcloak/Windows6.1-KB3109118-v4-x64.msu",
+            "sha1": "ae0cac3e0571874dbc963dabbfa7d17d45db582c",
+        },
+        {
+            "version": "3109118",
+            "target": "win7x86",
+            "url": "https://cuckoo.sh/vmcloak/Windows6.1-KB3109118-v4-x86.msu",
+            "sha1": "378bd9f96b8c898b86bb0c0b92f2c9c000748c5e",
+        },
     ]
 
     def run(self):
