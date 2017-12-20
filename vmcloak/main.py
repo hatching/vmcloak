@@ -334,6 +334,17 @@ def install(name, dependencies, vm_visible, recommended, debug):
                     else:
                         dversion = None
 
+                    if depend in dependencies:
+                        index = dependencies.index(depend)
+                        if dversion:
+                            log.error("You specified %s. "
+                                      "Will be reinstalling as: %s %s "
+                                      , dependencies[index], depend, dversion)
+                        else:
+                            log.error("You specified %s. "
+                                      "Will be reinstalling as: %s "
+                                      , dependencies[index], depend)
+
                     if dversion:
                         log.info("Installing child dependency %s %s..", depend, dversion)
                     else:
