@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2015-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -6,12 +6,10 @@ from vmcloak.abstract import Dependency
 
 class Python27(Dependency):
     name = "python27"
-    exes = [
-        {
-            "url": "https://cuckoo.sh/vmcloak/python-2.7.6.msi",
-            "sha1": "c5d71f339f7edd70ecd54b50e97356191347d355",
-        },
-    ]
+    exes = [{
+        "url": "https://cuckoo.sh/vmcloak/python-2.7.6.msi",
+        "sha1": "c5d71f339f7edd70ecd54b50e97356191347d355",
+    }]
 
     def run(self):
         """There are no installation procedures for this dependency as it is

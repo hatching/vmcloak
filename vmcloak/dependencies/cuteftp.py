@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2016-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -9,13 +9,11 @@ from vmcloak.abstract import Dependency
 class Cuteftp(Dependency):
     name = "cuteftp"
     default = "9.0.5"
-    exes = [
-        {
-            "version": "9.0.5",
-            "url": "https://cuckoo.sh/vmcloak/cuteftp.exe",
-            "sha1": "1d8497b3f31f76168eb2573efe60dcefb3422e1d",
-        },
-    ]
+    exes = [{
+        "version": "9.0.5",
+        "url": "https://cuckoo.sh/vmcloak/cuteftp.exe",
+        "sha1": "1d8497b3f31f76168eb2573efe60dcefb3422e1d",
+    }]
 
     def run(self):
         self.upload_dependency("C:\\%s" % self.filename)
