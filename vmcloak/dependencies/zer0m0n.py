@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Jurriaan Bremer.
+# Copyright (C) 2017-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -97,9 +97,10 @@ import re
 import subprocess
 import sys
 
+bcdedit = "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe"
+
 out = subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/copy", "{current}", "/d", "Secret",
+    bcdedit, "/copy", "{current}", "/d", "Secret",
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 guid = re.search("({[a-z0-9-]+})", out)
@@ -109,28 +110,23 @@ if not guid:
 guid = guid.group(1)
 
 subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/timeout", "10",
+    bcdedit, "/timeout", "10",
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/set", guid, "nointegritychecks", "1",
+    bcdedit, "/set", guid, "nointegritychecks", "1",
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/set", guid, "path", "\\\\Windows\\\\System32\\\\osloader.exe",
+    bcdedit, "/set", guid, "path", "\\\\Windows\\\\System32\\\\osloader.exe",
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/set", guid, "kernel", "ntkrnlmp.exe",
+    bcdedit, "/set", guid, "kernel", "ntkrnlmp.exe",
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 subprocess.check_output([
-    "C:\\\\Windows\\\\Sysnative\\\\bcdedit.exe",
-    "/default", guid,
+    bcdedit, "/default", guid,
 ], stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         """.strip()
 
@@ -138,12 +134,14 @@ subprocess.check_output([
         winload = self.a.retrieve("C:\\Windows\\Sysnative\\winload.exe")
         winload = self.patch_winload(winload)
         if not winload:
+            log.error("Unknown winload.exe file, can't patch!")
             return
         self.a.upload("C:\\Windows\\Sysnative\\osloader.exe", winload)
 
         ntoskrnl = self.a.retrieve("C:\\Windows\\Sysnative\\ntoskrnl.exe")
         ntoskrnl = self.patch_ntoskrnl(ntoskrnl)
         if not ntoskrnl:
+            log.error("Unknown ntoskrnl.exe file, can't patch!")
             return
         self.a.upload("C:\\Windows\\Sysnative\\ntkrnlmp.exe", ntoskrnl)
 

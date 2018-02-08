@@ -1,10 +1,11 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import click
 import logging
 import os.path
+import requests
 import shutil
 import tempfile
 import time
@@ -540,6 +541,29 @@ def export(name, filepath):
     m.remove_hd()
     m.compact_hd(image.path)
     m.delete_vm()
+
+@main.command()
+@click.argument("ipaddr")
+@click.argument("port", required=False, default=8000)
+def zer0m0n(ipaddr, port):
+    log.setLevel(logging.INFO)
+
+    log.info("Checking if we can reach the VM..")
+    a = Agent(ipaddr, port)
+
+    try:
+        status = a.ping()
+    except requests.RequestException:
+        log.error("Couldn't reach the VM, is it up-and-running? Aborting..")
+        return
+
+    if not isinstance(status, dict) or status.get("status") != "Cuckoo Agent!":
+        log.error("Agent in VM isn't the new Cuckoo Agent? Aborting..")
+        return
+
+    log.info("Patching zer0m0n-related files.")
+    vmcloak.dependencies.names["zer0m0n"](a=a).run()
+    log.info("Good to go, now *reboot* and make a new *snapshot* of your VM!")
 
 def list_dependencies():
     print "Name", "version", "target", "sha1"
