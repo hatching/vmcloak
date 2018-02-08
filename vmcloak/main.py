@@ -439,7 +439,7 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
     a.remove("C:\\vmcloak")
     a.static_ip(ipaddr, image.netmask, image.gateway, h.interface)
 
-    m.snapshot("vmcloak", "Snapshot created by VM Cloak.")
+    m.snapshot("vmcloak", "Snapshot created by VMCloak.")
     m.stopvm()
 
     # Create a database entry for this snapshot.
