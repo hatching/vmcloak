@@ -6,13 +6,13 @@ from vmcloak.abstract import Dependency
 
 class Win7sp(Dependency):
     name = "win7sp"
+    default = "1"
     exes = [{
         "version": "1",
         "target": "win7x64",
         "url": "https://cuckoo.sh/vmcloak/windows6.1-KB976932-X64.exe",
         "sha1": "74865ef2562006e51d7f9333b4a8d45b7a749dab",
-    },
-    {
+    }, {
         "version": "1",
         "target": "win7x86",
         "url": "https://cuckoo.sh/vmcloak/windows6.1-KB976932-X86.exe",
