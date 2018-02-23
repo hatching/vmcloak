@@ -15,7 +15,7 @@ from sqlalchemy.orm.session import make_transient
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
-from vmcloak.dependencies import Python27
+from vmcloak.dependencies import Python
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
@@ -118,15 +118,19 @@ def clone(name, outname):
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
-def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
-         win10x64, product, vm, iso_mount, serial_key, ip, port, adapter,
-         netmask, gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir,
-         resolution, vm_visible, debug, verbose):
+def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
+         product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
+         gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
+         vm_visible, vrde, vrde_port, python_version, debug, verbose):
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
+        vrde = True
         log.setLevel(logging.DEBUG)
 
     session = Session()
@@ -188,6 +192,16 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 
     reso_width, reso_height = resolution.split("x")
 
+    bootstrap = tempfile.mkdtemp(dir=tempdir)
+
+    vmcloak_dir = os.path.join(bootstrap, "vmcloak")
+    os.mkdir(vmcloak_dir)
+
+    # Download the Python dependency and set it up for bootstrapping the VM.
+    d = Python(i=Image(osversion=osversion), h=h, version=python_version)
+    d.download()
+    shutil.copy(d.filepath, vmcloak_dir)
+
     settings = dict(
         GUEST_IP=ip,
         AGENT_PORT=port,
@@ -198,22 +212,15 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         RESO_WIDTH=reso_width,
         RESO_HEIGHT=reso_height,
         INTERFACE=h.interface,
+        PYTHONINSTALLER=d.exe["filename"],
+        PYTHONWINDOW=d.exe["window_name"],
+        PYTHONPATH=d.exe["install_path"],
     )
-
-    bootstrap = tempfile.mkdtemp(dir=tempdir)
-
-    vmcloak_dir = os.path.join(bootstrap, "vmcloak")
-    os.mkdir(vmcloak_dir)
 
     # Write the configuration values for bootstrap.bat.
     with open(os.path.join(vmcloak_dir, "settings.bat"), "wb") as f:
         for key, value in settings.items():
             print>>f, "set %s=%s" % (key, value)
-
-    # Download the Python dependency and set it up for bootstrapping the VM.
-    d = Python27(i=Image(osversion=osversion))
-    d.download()
-    shutil.copy(d.filepath, vmcloak_dir)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
     hdd_path = os.path.join(image_path, "%s.vdi" % name)
@@ -235,6 +242,9 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
         m.create_hd(hdd_path, hddsize * 1024)
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, adapter=adapter)
+
+        if vrde:
+            m.vrde(port=vrde_port)
 
         log.info("Starting the Virtual Machine %r to install Windows.", name)
         m.start_vm(visible=vm_visible)
@@ -262,10 +272,13 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86,
 @click.argument("name")
 @click.argument("dependencies", nargs=-1)
 @click.option("--vm-visible", is_flag=True)
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("-r", "--recommended", is_flag=True, help="Install recommended packages.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
-def install(name, dependencies, vm_visible, recommended, debug):
+def install(name, dependencies, vm_visible, vrde, vrde_port, recommended, debug):
     if debug:
+        vrde = True
         log.setLevel(logging.DEBUG)
 
     session = Session()
@@ -284,6 +297,8 @@ def install(name, dependencies, vm_visible, recommended, debug):
     m, h = initvm(image)
 
     if image.vm == "virtualbox":
+        if vrde:
+            m.vrde(port=vrde_port)
         m.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
@@ -383,7 +398,14 @@ def install(name, dependencies, vm_visible, recommended, debug):
 @main.command()
 @click.argument("name")
 @click.option("--vm-visible", is_flag=True)
-def modify(name, vm_visible):
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
+def modify(name, vm_visible, vrde, vrde_port, debug):
+    if debug:
+        vrde = True
+        log.setLevel(logging.DEBUG)
+
     session = Session()
 
     image = session.query(Image).filter_by(name=name).first()
@@ -399,6 +421,8 @@ def modify(name, vm_visible):
 
     m, h = initvm(image)
 
+    if vrde:
+        m.vrde(port=vrde_port)
     m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
 
@@ -428,8 +452,11 @@ def register(vmname, cuckoo, tags):
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
 def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
-                hostname, adapter, vm_visible):
+                hostname, adapter, vm_visible, vrde, vrde_port, interactive):
     m, h = initvm(image, name=vmname, multi=True, ramsize=ramsize, cpus=cpus)
+
+    if vrde:
+        m.vrde(port=vrde_port)
 
     m.start_vm(visible=vm_visible)
 
@@ -451,9 +478,18 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
         width, height = resolution.split("x")
         a.resolution(width, height)
 
+    if interactive:
+        a.upload("C:\\vmcloak\\interactive.txt",
+                 "Please make your final changes to this VM. When you're"
+                 "done, close this window and we'll create a snapshot.")
+
+        log.info("You've started the snapshot creation in interactive mode!")
+        log.info("Please make your last changes to the VM.")
+        log.info("When you're done close the spawned notepad process in the VM to take the final snapshot.")
+        a.execute("notepad.exe C:\\vmcloak\\interactive.txt", async=False)
+
     a.remove("C:\\vmcloak")
     a.static_ip(ipaddr, image.netmask, image.gateway, h.interface)
-
     m.snapshot("vmcloak", "Snapshot created by VMCloak.")
     m.stopvm()
 
@@ -473,9 +509,12 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--adapter", help="Hostonly adapter for this VM.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--count", type=int, help="The amount of snapshots to make.")
+@click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
+@click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
 @click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count, debug):
+             adapter, vm_visible, count, vrde, vrde_port, interactive, debug):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -502,7 +541,8 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     if not count:
         snapshot = do_snapshot(
             image, vmname, ipaddr, resolution, ramsize, cpus,
-            hostname or random_string(8, 16), adapter, vm_visible
+            hostname or random_string(8, 16), adapter, vm_visible,
+            vrde, vrde_port, interactive
         )
         session.add(snapshot)
     else:
@@ -516,7 +556,8 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         for x in xrange(count):
             snapshot = do_snapshot(
                 image, "%s%d" % (vmname, x + 1), ipaddr, resolution,
-                ramsize, cpus, hostname, adapter, vm_visible
+                ramsize, cpus, hostname, adapter, vm_visible,
+                vrde, vrde_port, interactive
             )
             session.add(snapshot)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2017 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -50,6 +50,7 @@ class Agent(object):
 
     def execute(self, command, async=False):
         """Execute a command."""
+        log.debug("Executing command in VM: %s", command)
         if async:
             return self.post("/execute", command=command, async="true")
         else:

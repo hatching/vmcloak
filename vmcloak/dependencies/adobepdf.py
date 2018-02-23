@@ -2,7 +2,12 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import logging
+
 from vmcloak.abstract import Dependency
+from vmcloak.exceptions import DependencyError
+
+log = logging.getLogger(__name__)
 
 class AdobePdf(Dependency):
     name = "adobepdf"
@@ -45,6 +50,15 @@ class AdobePdf(Dependency):
         "url": "https://cuckoo.sh/vmcloak/AdbeRdr1014_en_US.exe",
         "sha1": "fe6808d5d11e94dc5581f33ed386ce552f0c84d6",
     }, {
+        "version": "11.0.0",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.00/en_US/AdbeRdr11000_en_US.exe",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.00/en_US/AdbeRdr11000_en_US.exe",
+            "https://cuckoo.sh/vmcloak/AdbeRdr11000_en_US.exe",
+        ],
+        "sha1": "e7dd04e037c40b160a2f01db438dba9ea0b12c52",
+        "filename": "AdbeRdr11000_en_US.exe",
+    }, {
         "version": "11.0.2",
         "url": "https://cuckoo.sh/vmcloak/AdbeRdr11002_en_US.exe",
         "sha1": "e1d9e57f08e169fb1c925f8ded93e5f5efe5cda3",
@@ -74,25 +88,134 @@ class AdobePdf(Dependency):
         "sha1": "53b367bff07a63ee07cf1cd090360b75d3fc6bfb",
     }, {
         "version": "11.0.10",
-        "url": "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.10/en_US/AdbeRdr11010_en_US.exe",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.10/en_US/AdbeRdr11010_en_US.exe",
+            "https://cuckoo.sh/vmcloak/AdbeRdr11010_en_US.exe",
+        ],
         "sha1": "98b2b838e6c4663fefdfd341dfdc596b1eff355c",
+        "filename": "AdbeRdr11010_en_US.exe",
+    }, {
+        "version": "11.0.11",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.11/misc/AdbeRdrUpd11011.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.11/misc/AdbeRdrUpd11011.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11011.msp",
+        ],
+        "sha1": "182eb5b4ca71e364f62e412cdaec65e7937417e4",
+        "filename": "AdbeRdrUpd11011.msp",
+    }, {
+        "version": "11.0.12",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.12/misc/AdbeRdrUpd11012.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.12/misc/AdbeRdrUpd11012.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11012.msp",
+        ],
+        "sha1": "c5a5f2727dd7dabe0fcf96ace644751ac27872e7",
+        "filename": "AdbeRdrUpd11012.msp",
+    }, {
+        "version": "11.0.13",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.13/misc/AdbeRdrUpd11013.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.13/misc/AdbeRdrUpd11013.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11013.msp",
+        ],
+        "sha1": "89317596ffe50e35c136ef204ac911cbf83b14d9",
+        "filename": "AdbeRdrUpd11013.msp",
+    }, {
+        "version": "11.0.14",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.14/misc/AdbeRdrUpd11014.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.14/misc/AdbeRdrUpd11014.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11014.msp",
+        ],
+        "sha1": "d7b990117d8a6bbc4380663b7090cd60d2103079",
+        "filename": "AdbeRdrUpd11014.msp",
+    }, {
+        "version": "11.0.16",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.16/misc/AdbeRdrUpd11016.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.16/misc/AdbeRdrUpd11016.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11016.msp",
+        ],
+        "sha1": "ca825c50ed96a2fec6056c94c1bb44eedbaed890",
+        "filename": "AdbeRdrUpd11016.msp",
+    }, {
+        "version": "11.0.17",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.17/misc/AdbeRdrUpd11017.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.17/misc/AdbeRdrUpd11017.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11017.msp",
+        ],
+        "sha1": "c5fe501856be635566e864fe76f6d6a7ff3874ca",
+        "filename": "AdbeRdrUpd11017.msp",
+    }, {
+        "version": "11.0.18",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.18/misc/AdbeRdrUpd11018.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.18/misc/AdbeRdrUpd11018.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11018.msp",
+        ],
+        "sha1": "420d64c064cd9904836a60066a222c64b0ea060e",
+        "filename": "AdbeRdrUpd11018.msp",
+    }, {
+        "version": "11.0.19",
+        "urls": [
+            "http://ardownload.adobe.com/pub/adobe/reader/win/11.x/11.0.19/misc/AdbeRdrUpd11019.msp",
+            "ftp://ftp.adobe.com/pub/adobe/reader/win/11.x/11.0.19/misc/AdbeRdrUpd11019.msp",
+            "https://cuckoo.sh/vmcloak/AdbeRdrUpd11019.msp",
+        ],
+        "sha1": "98fdf7a15fb2486ee7257767296d4f7a0a62ac92",
+        "filename": "AdbeRdrUpd11019.msp",
     }]
 
     def run(self):
-        self.upload_dependency("C:\\%s" % self.filename)
-        self.a.execute(
-            "C:\\%s /sAll /msi /norestart /quiet ALLUSERS=1 EULA_ACCEPT=YES" %
-            self.filename
-        )
+        if self.version.startswith("11") and self.filename.endswith(".msp"):
+            log.debug(
+                "We have a MSI upgrade package, we need the vanilla "
+                "AdbeRdr installer."
+            )
 
-        self.a.remove("C:\\%s" % self.filename)
+            orig_exe, self.exe = self.exe, None
+            for exe in self.exes:
+                if exe["version"] == "11.0.0":
+                    self.exe = exe
+                    break
+            else:
+                log.error(
+                    "Could not find AdbeRdr v11.0 which is required for %s",
+                    self.filename
+                )
+                raise DependencyError
+
+            self.download()
+
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "C:\\%s -nos_oC:\\AdobeFiles -nos_ne" % self.filename
+            )
+            self.a.remove("C:\\%s" % self.filename)
+
+            self.exe = orig_exe
+            self.download()
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "msiexec /i C:\\AdobeFiles\\AcroRead.msi "
+                "/update C:\\%s /norestart /passive "
+                "ALLUSERS=1 EULA_ACCEPT=YES" % self.filename
+            )
+            self.a.remove("C:\\%s" % self.filename)
+            self.a.remove("C:\\AdobeFiles")
+        else:
+            self.upload_dependency("C:\\%s" % self.filename)
+            self.a.execute(
+                "C:\\%s /sAll /msi /norestart /passive "
+                "ALLUSERS=1 EULA_ACCEPT=YES" % self.filename
+            )
+
+            self.a.remove("C:\\%s" % self.filename)
 
         # add needed registry keys to skip Licence Agreement
-        self.a.execute(
-            "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
-            "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" " %
-            self.version.split(".")[0]
-        )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
             "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" "
@@ -113,16 +236,83 @@ class AdobePdf(Dependency):
             self.version.split(".")[0]
         )
 
-        # allow URL access
+        # disable the updater completely
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/Updater-Win.html
         self.a.execute(
-            "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
-            "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" " %
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v bUpdater /t REG_DWORD /d 0 /f" % self.version.split(".")[0]
+        )
+
+        # disable the sandboxing (protected mode)
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/protectedmode.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v bProtectedMode /t REG_DWORD /d 0 /f" %
             self.version.split(".")[0]
         )
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/protectedview.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v iProtectedView /t REG_DWORD /d 0 /f" %
+            self.version.split(".")[0]
+        )
+
+        # disable enchanced security
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/enhanced.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v bEnhancedSecurityStandalone /t REG_DWORD /d 0 /f" %
+            self.version.split(".")[0]
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v bEnhancedSecurityInBrowser /t REG_DWORD /d 0 /f" %
+            self.version.split(".")[0]
+        )
+
+        # allow URL access
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/FeatureLockdown.html
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" "
             "/v iURLPerms /t REG_DWORD /d 2 /f" % self.version.split(".")[0]
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
+            "FeatureLockDown\\cDefaultLaunchURLPerms\" "
+            "/v iUnknownURLPerms /t REG_DWORD /d 2 /f" %
+            self.version.split(".")[0]
+        )
+
+        # allow opening of all embedded files
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/Attachments.html
+        self.a.execute(
+            "reg delete \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
+            "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
+            "/v tBuiltInPermList /f" % self.version.split(".")[0]
+        )
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
+            "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
+            "/v iUnlistedAttachmentTypePerm /t REG_DWORD /d 2 /f" %
+            self.version.split(".")[0]
+        )
+
+        # enable flash content
+        # https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/FeatureLockdown.html
+        self.a.execute(
+            "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
+            "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
+            "/v bEnableFlash /t REG_DWORD /d 1 /f" %
+            self.version.split(".")[0]
         )
 
         # FIXME: really needed ?
