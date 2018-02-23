@@ -193,7 +193,7 @@ class Flash(Dependency):
 
         mms = (
             "SilentAutoUpdateEnable=0\r\n"
-            "AutoUpdateDisable=1\r\n""
+            "AutoUpdateDisable=1\r\n"
             "ProtectedMode=0\r\n"
         )
 
