@@ -1,7 +1,13 @@
-0.4.5, TBD
+0.4.5, February 23rd, 2018
 
     New: Disable PatchGuard and Driver Signature Enforcement through the
         zer0m0n VMCloak dependency.
+    New: VRDE integration, multiple URLs per dependency, use requests instead
+        of wget, many more dependency versions, non-fixed "latest" dependency
+        support, interactive snapshots, weakening of ie11/java/flash (many
+        thanks to Jop van der Lelie for all of this).
+    New: WMF4, PowerShell logging, and Sysmon dependencies (thanks haam3r).
+    Tweak: provide virtual HDD size (thanks razuz).
 
 0.4.4, August 22nd, 2017
 
