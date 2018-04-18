@@ -195,6 +195,18 @@ class VirtualBox(Machinery):
         """Enable or disable the usage of Hardware Virtualization."""
         self._call("modifyvm", self.name, hwvirtex="on" if enable else "off")
 
+    def uart(self, port, path):
+        iobase, irq = {1: (0x3F8, 4),
+                       2: (0x2F8, 3),
+                       3: (0x3E8, 4),
+                       4: (0x2E8, 3)}[port]
+        # Enable
+        self._call("modifyvm", self.name, "--uart%s" % port, "0x%x" % iobase,
+                   str(irq))
+        # Set path
+        self._call("modifyvm", self.name, "--uartmode%s" % port, "server",
+                   path)
+
     def start_vm(self, visible=False):
         return self._call("startvm", self.name,
                           type_="gui" if visible else "headless")

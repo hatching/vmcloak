@@ -20,7 +20,8 @@ from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
-from vmcloak.repository import image_path, Session, Image, Snapshot, iso_dst_path
+from vmcloak.repository import (vms_path, image_path, Session, Image, Snapshot,
+                                iso_dst_path)
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
@@ -32,7 +33,7 @@ logging.basicConfig()
 log = logging.getLogger("vmcloak")
 log.setLevel(logging.ERROR)
 
-def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None):
+def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None, serial=None):
     handlers = {
         "winxp": WindowsXP,
         "win7x86": Windows7x86,
@@ -58,6 +59,8 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
+        if serial:
+            m.uart(1, serial)
 
     return m, h
 
@@ -452,7 +455,8 @@ def register(vmname, cuckoo, tags):
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
 def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
-                hostname, adapter, vm_visible, vrde, vrde_port, interactive):
+                hostname, adapter, vm_visible, vrde, vrde_port, interactive,
+                serial):
     m, h = initvm(image, name=vmname, multi=True, ramsize=ramsize, cpus=cpus)
 
     if vrde:
@@ -513,8 +517,10 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
 @click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
+@click.option("--com1", is_flag=True, help="Enable COM1 for this VM.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count, vrde, vrde_port, interactive, debug):
+             adapter, vm_visible, count, vrde, vrde_port, interactive, debug,
+             com1):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -538,11 +544,15 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     image.mode = "multiattach"
     session.commit()
 
+    serial = None
+
     if not count:
+        if com1:
+            serial = os.path.join(vms_path, vmname, "%s.com1" % vmname)
         snapshot = do_snapshot(
             image, vmname, ipaddr, resolution, ramsize, cpus,
             hostname or random_string(8, 16), adapter, vm_visible,
-            vrde, vrde_port, interactive
+            vrde, vrde_port, interactive, serial
         )
         session.add(snapshot)
     else:
@@ -554,10 +564,13 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
             exit(1)
 
         for x in xrange(count):
+            name = "%s%d" % (vmname, x + 1)
+            if com1:
+                serial = os.path.join(vms_path, name, "%s.com1" % name)
             snapshot = do_snapshot(
-                image, "%s%d" % (vmname, x + 1), ipaddr, resolution,
+                image, name, ipaddr, resolution,
                 ramsize, cpus, hostname, adapter, vm_visible,
-                vrde, vrde_port, interactive
+                vrde, vrde_port, interactive, serial
             )
             session.add(snapshot)
 

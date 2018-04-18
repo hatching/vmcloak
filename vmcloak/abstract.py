@@ -122,6 +122,10 @@ class Machinery(object):
         """Enable or disable the usage of Hardware Virtualization."""
         raise
 
+    def uart(self, port, path):
+        """Add UART/serial port on given Unix-socket path"""
+        raise NotImplementedError
+
     def start_vm(self, visible=False):
         """Start the associated Virtual Machine."""
         raise
