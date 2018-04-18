@@ -134,7 +134,7 @@ class Machinery(object):
         """Take a snapshot of the associated Virtual Machine."""
         raise
 
-    def stopvm(self):
+    def stop_vm(self):
         """Stop the associated Virtual Machine."""
         raise
 

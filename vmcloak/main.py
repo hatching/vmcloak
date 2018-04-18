@@ -2,6 +2,8 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+from __future__ import print_function
+
 import click
 import logging
 import os.path
@@ -16,63 +18,57 @@ import vmcloak.dependencies
 
 from vmcloak.agent import Agent
 from vmcloak.dependencies import Python
-from vmcloak.exceptions import DependencyError
+from vmcloak.exceptions import DependencyError, CommandError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import (vms_path, image_path, Session, Image, Snapshot,
                                 iso_dst_path)
-from vmcloak.winxp import WindowsXP
-from vmcloak.win7 import Windows7x86, Windows7x64
-from vmcloak.win81 import Windows81x86, Windows81x64
-from vmcloak.win10 import Windows10x86, Windows10x64
-from vmcloak.vm import VirtualBox
+from vmcloak.ostype import get_os
 from vmcloak.constants import VMCLOAK_VM_MODES
+
+from vmcloak import repository
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
-log.setLevel(logging.ERROR)
+log.setLevel(logging.WARNING)
 
-def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None, serial=None):
-    handlers = {
-        "winxp": WindowsXP,
-        "win7x86": Windows7x86,
-        "win7x64": Windows7x64,
-        "win81x86": Windows81x86,
-        "win81x64": Windows81x64,
-        "win10x86": Windows10x86,
-        "win10x64": Windows10x64,
-    }
+def init_image_vm(name, vm_visible, user_attr):
+    image = repository.find_image(name)
+    if not image:
+        log.error("Image not found: %s", name)
+        exit(1)
 
-    h = handlers[image.osversion]
-    m = None
+    #if image.mode != "normal":
+    if len(image.snapshots):
+        log.error("You can't modify this image as you have "
+                  "already made snapshots with it!")
+        log.error("Please vmcloak-clone it and update the clone, "
+                  "or delete the snapshots.")
+        log.error("Number of snapshots: %s", len(image.snapshots))
+        exit(1)
 
-    if image.vm == "virtualbox":
-        m = VirtualBox(name=name or image.name)
-        m.create_vm()
-        m.os_type(image.osversion)
-        m.cpus(cpus or image.cpus)
-        m.mouse("usbtablet")
-        m.ramsize(ramsize or image.ramsize)
-        m.vramsize(vramsize or image.vramsize)
-        m.attach_hd(image.path, multi=multi)
-        # Ensure the slot is at least allocated for by an empty drive.
-        m.detach_iso()
-        m.hostonly(nictype=h.nictype, adapter=image.adapter)
-        if serial:
-            m.uart(1, serial)
+    attr = image.attr()
+    attr.update(user_attr)
 
-    return m, h
+    vm = image.platform.create_vm(image.name, attr, False)
+    vm.start_vm(visible=vm_visible)
+    wait_for_host(attr["ipaddr"], attr["port"])
+    return image
 
 @click.group(invoke_without_command=True)
 @click.option("-u", "--user", help="Drop privileges to user.")
-def main(user):
+@click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
+def main(user, verbose):
     user and drop_privileges(user)
+    if verbose:
+        log.setLevel(logging.INFO)
 
 @main.command()
 @click.argument("name")
 @click.argument("outname")
 def clone(name, outname):
+    """Clone an image"""
     session = Session()
 
     image = session.query(Image).filter_by(name=name).first()
@@ -82,7 +78,7 @@ def clone(name, outname):
 
     outpath = os.path.join(image_path, "%s.vdi" % outname)
 
-    m = VirtualBox(None)
+    m = image.VM()
     m.clone_hd(image.path, outpath)
 
     # Retain all fields but update the mode, name & path.
@@ -125,13 +121,11 @@ def clone(name, outname):
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
-@click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
          gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, python_version, debug, verbose):
-    if verbose:
-        log.setLevel(logging.INFO)
+         vm_visible, vrde, vrde_port, python_version, debug):
+    """Create a new image"""
     if debug:
         vrde = True
         log.setLevel(logging.DEBUG)
@@ -147,31 +141,24 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         exit(1)
 
     if winxp:
-        h = WindowsXP()
         osversion = "winxp"
         ramsize = ramsize or 1024
     elif win7x86:
-        h = Windows7x86()
         ramsize = ramsize or 1024
         osversion = "win7x86"
     elif win7x64:
-        h = Windows7x64()
         ramsize = ramsize or 2048
         osversion = "win7x64"
     elif win81x86:
-        h = Windows81x86()
         ramsize = ramsize or 2048
         osversion = "win81x86"
     elif win81x64:
-        h = Windows81x64()
         ramsize = ramsize or 2048
         osversion = "win81x64"
     elif win10x86:
-        h = Windows10x86()
         ramsize = ramsize or 2048
         osversion = "win10x86"
     elif win10x64:
-        h = Windows10x64()
         ramsize = ramsize or 2048
         osversion = "win10x64"
     else:
@@ -180,6 +167,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
             "--win81x86, --win81x64, --win10x86, --win10x64."
         )
         exit(1)
+    h = get_os(osversion)()
 
     mount = h.pickmount(iso_mount)
     if not mount:
@@ -195,7 +183,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
 
     reso_width, reso_height = resolution.split("x")
 
-    bootstrap = tempfile.mkdtemp(dir=tempdir)
+    bootstrap = tempfile.mkdtemp(prefix="vmcloak", dir=tempdir)
 
     vmcloak_dir = os.path.join(bootstrap, "vmcloak")
     os.mkdir(vmcloak_dir)
@@ -223,17 +211,19 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
     # Write the configuration values for bootstrap.bat.
     with open(os.path.join(vmcloak_dir, "settings.bat"), "wb") as f:
         for key, value in settings.items():
-            print>>f, "set %s=%s" % (key, value)
+            print("set %s=%s" % (key, value), file=f)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
     hdd_path = os.path.join(image_path, "%s.vdi" % name)
-    m = VirtualBox(name=name)
 
     if not h.buildiso(mount, iso_path, bootstrap, tempdir):
         shutil.rmtree(bootstrap)
         exit(1)
 
     shutil.rmtree(bootstrap)
+
+    p = repository.platform(vm)
+    m = p.VM(name)
 
     if vm == "virtualbox":
         m.create_vm()
@@ -261,7 +251,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.compact_hd(hdd_path)
         m.delete_vm()
     else:
-        log.info("You can find your deployment ISO image from : %s" % iso_path)
+        # TODO
+        log.info("You can find your deployment ISO image at %s", iso_path)
 
     log.info("Added image %r to the repository.", name)
     session.add(Image(name=name, path=hdd_path, osversion=osversion,
@@ -280,31 +271,17 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
 @click.option("-r", "--recommended", is_flag=True, help="Install recommended packages.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
 def install(name, dependencies, vm_visible, vrde, vrde_port, recommended, debug):
+    """Install dependencies on an image"""
+    user_attr = {}
     if debug:
         vrde = True
         log.setLevel(logging.DEBUG)
+    if vrde:
+        user_attr["vrde"] = vrde_port
 
-    session = Session()
-
-    image = session.query(Image).filter_by(name=name).first()
-    if not image:
-        log.error("Image not found: %s", name)
-        exit(1)
-
-    if image.mode != "normal":
-        log.error("You can't install dependencies in this image as you have "
-                  "already made snapshots with it!")
-        log.error("Please vmcloak-clone it and update the clone.")
-        exit(1)
-
-    m, h = initvm(image)
-
-    if image.vm == "virtualbox":
-        if vrde:
-            m.vrde(port=vrde_port)
-        m.start_vm(visible=vm_visible)
-
-    wait_for_host(image.ipaddr, image.port)
+    image = init_image_vm(name, vm_visible, user_attr)
+    m = image.VM()
+    h = get_os(image.osversion)
 
     a = Agent(image.ipaddr, image.port)
     a.ping()
@@ -405,47 +382,29 @@ def install(name, dependencies, vm_visible, vrde, vrde_port, recommended, debug)
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("-d", "--debug", is_flag=True, help="Install applications in debug mode.")
 def modify(name, vm_visible, vrde, vrde_port, debug):
+    user_attr = {}
     if debug:
         vrde = True
         log.setLevel(logging.DEBUG)
-
-    session = Session()
-
-    image = session.query(Image).filter_by(name=name).first()
-    if not image:
-        log.error("Image not found: %s", name)
-        exit(1)
-
-    if image.mode != "normal":
-        log.error("You can't modify this image as you have already made "
-                  "snapshots with it!")
-        log.error("Please vmcloak-clone it and modify the clone.")
-        exit(1)
-
-    m, h = initvm(image)
-
     if vrde:
-        m.vrde(port=vrde_port)
-    m.start_vm(visible=vm_visible)
-    wait_for_host(image.ipaddr, image.port)
+        user_attr["vrde"] = vrde_port
 
+    image = init_image_vm(name, vm_visible, user_attr)
     log.info("The Virtual Machine has booted and is ready to be modified!")
     log.info("When you shut it down, all changes will be saved.")
 
-    m.wait_for_state(shutdown=True)
-
-    m.remove_hd()
-    m.compact_hd(image.path)
-    m.delete_vm()
+    vm = image.VM()
+    vm.wait_for_state(shutdown=True)
+    vm.remove_hd()
+    vm.compact_hd(image.path)
+    vm.delete_vm()
 
 @main.command()
 @click.argument("vmname")
 @click.argument("cuckoo")
 @click.argument("tags", required=False, default="")
 def register(vmname, cuckoo, tags):
-    session = Session()
-
-    snapshot = session.query(Snapshot).filter_by(vmname=vmname).first()
+    snapshot = repository.find_snapshot(vmname)
     if not snapshot:
         log.error("Snapshot not found: %s", vmname)
         exit(1)
@@ -454,21 +413,17 @@ def register(vmname, cuckoo, tags):
     # But those options will require various changes in Cuckoo as well.
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
-def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
-                hostname, adapter, vm_visible, vrde, vrde_port, interactive,
-                serial):
-    m, h = initvm(image, name=vmname, multi=True, ramsize=ramsize, cpus=cpus)
+def do_snapshot(image, vmname, attr, vm_visible, interactive):
+    vm = image.platform.create_vm(vmname, attr, True)
 
-    if vrde:
-        m.vrde(port=vrde_port)
-
-    m.start_vm(visible=vm_visible)
+    vm.start_vm(visible=vm_visible)
 
     wait_for_host(image.ipaddr, image.port)
     a = Agent(image.ipaddr, image.port)
     a.ping()
 
     # Assign a new hostname.
+    hostname = attr.get("hostname") or random_string(8, 16)
     a.hostname(hostname)
     a.reboot()
     a.kill()
@@ -478,8 +433,8 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
     wait_for_host(image.ipaddr, image.port)
     a.ping()
 
-    if resolution:
-        width, height = resolution.split("x")
+    if attr.get("resolution"):
+        width, height = attr["resolution"].split("x")
         a.resolution(width, height)
 
     if interactive:
@@ -493,14 +448,18 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
         a.execute("notepad.exe C:\\vmcloak\\interactive.txt", async=False)
 
     a.remove("C:\\vmcloak")
-    a.static_ip(ipaddr, image.netmask, image.gateway, h.interface)
-    m.snapshot("vmcloak", "Snapshot created by VMCloak.")
-    m.stopvm()
+    h = get_os(image.osversion)
+    a.static_ip(attr["ipaddr"], attr["netmask"], attr["gateway"], h.interface)
+    vm.snapshot("vmcloak", "Snapshot created by VMCloak.")
+    vm.stop_vm()
 
     # Create a database entry for this snapshot.
-    snapshot = Snapshot(image_id=image.id, vmname=vmname, ipaddr=ipaddr,
-                        port=image.port, hostname=hostname)
-    return snapshot
+    return Snapshot(image_id=image.id, vmname=vmname, hostname=hostname,
+                    ipaddr=attr["ipaddr"], port=attr["port"])
+
+def _if_defined(attr, k, v):
+    if v is not None:
+        attr[k] = v
 
 @main.command()
 @click.argument("name")
@@ -521,6 +480,7 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
              adapter, vm_visible, count, vrde, vrde_port, interactive, debug,
              com1):
+    """Create one or more snapshots from an image"""
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -544,16 +504,20 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     image.mode = "multiattach"
     session.commit()
 
-    serial = None
+    attr = image.attr()
+    attr["ipaddr"] = ipaddr
+    _if_defined(attr, "adapter", adapter)
+    _if_defined(attr, "cpus", cpus)
+    _if_defined(attr, "hostname", hostname)
+    _if_defined(attr, "ramsize", ramsize)
+    _if_defined(attr, "resolution", resolution)
+    if vrde:
+        attr["vrde"] = vrde_port
 
     if not count:
         if com1:
-            serial = os.path.join(vms_path, vmname, "%s.com1" % vmname)
-        snapshot = do_snapshot(
-            image, vmname, ipaddr, resolution, ramsize, cpus,
-            hostname or random_string(8, 16), adapter, vm_visible,
-            vrde, vrde_port, interactive, serial
-        )
+            attr["serial"] = os.path.join(vms_path, vmname, "%s.com1" % vmname)
+        snapshot = do_snapshot(image, vmname, attr, vm_visible, interactive)
         session.add(snapshot)
     else:
         if hostname:
@@ -566,18 +530,16 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         for x in xrange(count):
             name = "%s%d" % (vmname, x + 1)
             if com1:
-                serial = os.path.join(vms_path, name, "%s.com1" % name)
-            snapshot = do_snapshot(
-                image, name, ipaddr, resolution,
-                ramsize, cpus, hostname, adapter, vm_visible,
-                vrde, vrde_port, interactive, serial
-            )
+                attr["serial"] = os.path.join(vms_path, name, "%s.com1" % name)
+            attr["hostname"] = random_string(8, 16)
+            snapshot = do_snapshot(image, name, attr, vm_visible, interactive)
             session.add(snapshot)
 
             # TODO Implement some limits to make sure that the IP address does
             # not "exceed" its provided subnet (and thus also require the user
             # to specify an IP range, rather than an IP address).
             ipaddr = ipaddr_increase(ipaddr)
+            attr["ipaddr"] = ipaddr
             hostname = random_string(8, 16)
 
     session.commit()
@@ -635,26 +597,100 @@ def zer0m0n(ipaddr, port):
     vmcloak.dependencies.names["zer0m0n"](a=a, h=h).run()
     log.info("Good to go, now *reboot* and make a new *snapshot* of your VM!")
 
+###
+
+@main.command()
+@click.argument("name")
+def delvm(name):
+    """Remove VM and delete all its files
+    Will not remove the base image"""
+    is_snapshot, vm = repository.find_vm(name)
+    if not vm:
+        print("Not found:", name)
+        exit(1)
+    try:
+        vm.stop_vm()
+    except CommandError:
+        log.debug("Could not stop VM; maybe it wasn't running")
+    if not is_snapshot:
+        vm.remove_hd() # Detach
+    vm.delete_vm()
+    repository.remove_snapshot(name)
+
+@main.command()
+@click.argument("name")
+def delimg(name):
+    """Delete an image"""
+    image = repository.find_image(name)
+    if not image:
+        print("Not found:", name)
+        exit(1)
+    if image.snapshots:
+        print("Image", name, "still has snapshots. Aborting.")
+        exit(1)
+    try:
+        image.platform.remove_hd(image.path)
+    finally:
+        if not os.path.exists(image.path):
+            repository.remove_image(name)
+
+@main.command()
+@click.argument("name")
+def start(name):
+    """Start a snapshot or VM"""
+    obj = repository.any_from_name(name)
+    platform = obj.platform
+    if isinstance(obj, Image):
+        vm = platform.create_vm_for_image(name, obj)
+    else:
+        vm = obj.VM()
+    vm.start_vm()
+    # TODO: this conflicts with "modify"
+
+@main.command("import")
+def _import():
+    """Import images and snapshots
+    Can also be used to fix paths"""
+    # TODO: make deletion of
+    repository.import_all()
+
+###
+
+@main.group("list")
+def _list():
+    pass
+
+@_list.command("images")
+def list_images():
+    for img in repository.list_images():
+        print("*", img.name, img.platform.name)
+
+@_list.command("snapshots")
+def list_snapshots():
+    snaps = repository.list_snapshots()
+    snaps.sort(key=lambda snap: (snap.image.name, snap.vmname))
+    parent = None
+    for snap in snaps:
+        if snap.image.name != parent:
+            parent = snap.image.name
+            print(parent, " (", snap.platform.name, ")", sep="")
+        print("-", snap.vmname)
+
 def list_dependencies():
-    print "Name", "version", "target", "sha1"
-    print
+    print("Name", "version", "target", "sha1")
+    print()
     for name, d in sorted(vmcloak.dependencies.names.items()):
         if d.exes:
             versionlen = max(len(exe.get("version", "None")) for exe in d.exes)
         else:
             versionlen = 4
-
-        print name
+        print(name)
         for exe in d.exes:
             v = exe.get("version", "None")
-            print "  *" if d.default and d.default == v else "   ",
-            print exe.get("version", "None") + " "*(versionlen - len(v)),
-            print exe.get("target"), exe["sha1"]
-        print
-
-@main.group("list")
-def _list():
-    pass
+            print("  *" if d.default and d.default == v else "   ", end=" ")
+            print(exe.get("version", "None").ljust(versionlen), end=" ")
+            print(exe.get("target"), exe.get("sha1", "?sha1?"))
+        print()
 
 @_list.command("dependencies")
 def _list_dependencies():
