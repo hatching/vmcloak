@@ -608,17 +608,18 @@ def zer0m0n(ipaddr, port):
     a = Agent(ipaddr, port)
 
     try:
-        status = a.ping()
+        status = a.ping().json()
     except requests.RequestException:
         log.error("Couldn't reach the VM, is it up-and-running? Aborting..")
         return
 
-    if not isinstance(status, dict) or status.get("status") != "Cuckoo Agent!":
+    if not isinstance(status, dict) or status.get("message") != "Cuckoo Agent!":
         log.error("Agent in VM isn't the new Cuckoo Agent? Aborting..")
         return
 
+    h = Windows7x64()
     log.info("Patching zer0m0n-related files.")
-    vmcloak.dependencies.names["zer0m0n"](a=a).run()
+    vmcloak.dependencies.names["zer0m0n"](a=a, h=h).run()
     log.info("Good to go, now *reboot* and make a new *snapshot* of your VM!")
 
 def list_dependencies():
