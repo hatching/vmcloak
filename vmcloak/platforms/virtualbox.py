@@ -6,7 +6,7 @@ import logging
 import os
 import subprocess
 import time
-from os.path import exists, join
+from os.path import basename, exists, join
 
 from vmcloak.abstract import Machinery
 from vmcloak.exceptions import CommandError
@@ -53,6 +53,13 @@ def create_vm(name, attr, is_snapshot=True):
     # Ensure the slot is at least allocated for by an empty drive.
     vm.detach_iso()
     vm.hostonly(nictype=nictype, adapter=attr["adapter"])
+    if attr.get("share"):
+        path = attr["share"]
+        if "=" in path:
+            name, path = path.split("=", 1)
+        else:
+            name = basename(path.rstrip("\\/"))
+        vm.share(name, path)
     if attr.get("serial"):
         vm.uart(1, attr["serial"])
     return vm
@@ -187,6 +194,10 @@ class VM(Machinery):
 
     def set_field(self, key, value):
         return _call("setextradata", self.name, key, value)
+
+    def share(self, name, path):
+        return _call("sharedfolder", "add", self.name, "--name", name,
+                     "--hostpath", path)
 
     def modify_mac(self, macaddr=None, index=1):
         if macaddr is None:

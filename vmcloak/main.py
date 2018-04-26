@@ -472,14 +472,15 @@ def _if_defined(attr, k, v):
 @click.option("--adapter", help="Hostonly adapter for this VM.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--count", type=int, help="The amount of snapshots to make.")
+@click.option("--share", help="Add shared folder")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
 @click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
 @click.option("--com1", is_flag=True, help="Enable COM1 for this VM.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count, vrde, vrde_port, interactive, debug,
-             com1):
+             adapter, vm_visible, count, share, vrde, vrde_port, interactive,
+             debug, com1):
     """Create one or more snapshots from an image"""
     if debug:
         log.setLevel(logging.DEBUG)
@@ -511,6 +512,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
     _if_defined(attr, "hostname", hostname)
     _if_defined(attr, "ramsize", ramsize)
     _if_defined(attr, "resolution", resolution)
+    _if_defined(attr, "share", share)
     if vrde:
         attr["vrde"] = vrde_port
 
