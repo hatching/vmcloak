@@ -1,3 +1,9 @@
+0.4.6, TBD
+
+    New: Install the old Cuckoo Agent compatible with cuckoo-modified next to
+        the new Cuckoo Agent.
+    Tweak: Make vmcloak-zer0m0n command work.
+
 0.4.5, February 23rd, 2018
 
     New: Disable PatchGuard and Driver Signature Enforcement through the

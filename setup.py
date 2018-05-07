@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.5",
+    version="0.4.6a1",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     url="http://vmcloak.org/",
