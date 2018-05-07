@@ -2,13 +2,14 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from os.path import join
+import os.path
 
 from vmcloak.abstract import Dependency
 from vmcloak.constants import VMCLOAK_ROOT
 
+# TODO Following only works on 32-bit Python versions.
 REG = "C:\\Windows\\sysnative\\reg.exe"
-RUN = 'HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run'
+RUN = "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 class Modified(Dependency):
     name = "modified"
@@ -18,15 +19,13 @@ class Modified(Dependency):
     bind_port = "8001"
 
     def run(self):
-        bind_port = self.bind_port
-        if self.version:
-            bind_port = self.version
+        # Usage (changing port): "vmcloak install master modified:8002".
+        port = self.version or self.bind_port
 
-        agent = join(VMCLOAK_ROOT, "data", "modified_agent.py")
-        agent_code = open(agent).read()
-        self.a.upload("C:\\modified_agent.py", agent_code)
+        agent = os.path.join(VMCLOAK_ROOT, "data", "modified_agent.py")
+        self.a.upload("C:\\modified_agent.py", open(agent, "rb").read())
 
-        # Use same Python instance as main agent
+        # Use same Python instance as main agent.
         r = self.a.execute("%s query %s /v Agent" % (REG, RUN))
         python = None
         lines = r.json()["stdout"].split("\r\n")
@@ -36,9 +35,10 @@ class Modified(Dependency):
                 python = parts[2]
                 break
         if not python:
-            raise ValueError("Could not determine Python interpreter to  use")
+            raise ValueError("Could not determine Python interpreter to use")
 
-        cmd = "%s C:\\modified_agent.py %s %s" % (python, self.bind_ip, bind_port)
-        self.a.execute(('%s add %s '
-                        '/v AgentModified /t REG_SZ /d '
-                        '"%s" /f') % (REG, RUN, cmd))
+        cmd = "%s C:\\modified_agent.py %s %s" % (python, self.bind_ip, port)
+        self.a.execute(
+            '%s add %s /v AgentModified /t REG_SZ /d "%s" /f' %
+            (REG, RUN, cmd)
+        )
