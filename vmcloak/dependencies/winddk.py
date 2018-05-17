@@ -32,14 +32,12 @@ class WinDDK(Dependency):
             return False
 
     def run(self):
-        if self.i.vm == "virtualbox":
-            self.disable_autorun()
-            self.m.attach_iso(self.isopath)
+        self.disable_autorun()
+        self.m.attach_iso(self.isopath)
 
         cs = " ".join(self.components)
         # KitSetup loves to crash when executed directly
         self.a.execute("cmd /k D:\\KitSetup.exe /install %s /ui-level EXPRESS" % cs)
         self.wait_process_exit("KitSetup.exe")
 
-        if self.i.vm == "virtualbox":
-            self.m.detach_iso()
+        self.m.detach_iso()

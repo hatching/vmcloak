@@ -223,16 +223,17 @@ def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
         log.error("Error registering VM: %s", e)
         return False
 
-def wait_for_host(ipaddr, port):
-    # Wait for the Agent to come up with a timeout of 1 second.
-    while True:
+
+def wait_for_agent(a, timeout=90):
+    """Wait for the Agent to come up."""
+    now = time.time()
+    while (time.time() - now) < timeout:
         try:
-            socket.create_connection((ipaddr, port), 1).close()
-            break
-        except socket.error:
-            log.debug("Waiting for host %s", ipaddr)
-            pass
-        time.sleep(1)
+            a.ping()
+            return
+        except:
+            time.sleep(1)
+    raise IOError("Agent not online within %s second(s)" % timeout)
 
 def drop_privileges(user):
     if not HAVE_PWD:

@@ -51,11 +51,13 @@ class Image(Base):
         return platform(self.vm).VM(self.name)
 
     def attr(self):
+        translate = {"ipaddr": "ip"}
         attr = {}
         for k in ("path", "osversion", "servicepack", "ipaddr", "port",
                   "adapter", "netmask", "gateway", "cpus", "ramsize",
                   "vramsize"):
-            attr[k] = getattr(self, k)
+            field = translate.get(k, k)
+            attr[field] = getattr(self, k)
         return attr
 
 class Snapshot(Base):
@@ -65,7 +67,9 @@ class Snapshot(Base):
     id = Column(Integer, primary_key=True)
     image_id = Column(Integer, ForeignKey("image.id"))
     image = relationship("Image", backref="snapshots")
-    vmname = Column(String(64))
+    # TODO: only (image.vm, vmname) have to be unique, although this doesn't
+    # work with the current directory layout
+    vmname = Column(String(64), nullable=False, unique=True)
     ipaddr = Column(String(32))
     port = Column(Integer)
     hostname = Column(String(32))
@@ -170,10 +174,10 @@ def find_vm(name):
     s = Session()
     img = s.query(Image).filter_by(name=name).first()
     if img:
-        return False, img.VM()
+        return False, img
     snap = s.query(Snapshot).filter_by(vmname=name).first()
     if snap:
-        return True, snap.VM()
+        return True, snap
     return False, None
 
 def find_image(name):

@@ -55,9 +55,8 @@ class Office(Dependency):
             return False
 
     def run(self):
-        if self.i.vm == "virtualbox":
-            self.disable_autorun()
-            self.m.attach_iso(self.isopath)
+        self.disable_autorun()
+        self.m.attach_iso(self.isopath)
 
         self.a.upload(
             "C:\\config.xml",
@@ -309,8 +308,7 @@ class Office(Dependency):
             officever[self.version]
         )
 
-        if self.i.vm == "virtualbox":
-            self.m.detach_iso()
+        self.m.detach_iso()
 
 class Office2007(Office, Dependency):
     """Backwards compatibility."""

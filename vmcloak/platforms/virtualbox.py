@@ -4,22 +4,25 @@
 
 import logging
 import os
+import os.path
 import subprocess
 import time
 from os.path import basename, exists, join
 
-from vmcloak.abstract import Machinery
-from vmcloak.exceptions import CommandError
-from vmcloak.paths import get_path
-from vmcloak.rand import random_mac
-from vmcloak.repository import vms_path
+from vmcloak.conf import load_hwconf
 from vmcloak.data.config import VBOX_CONFIG
+from vmcloak.exceptions import CommandError
 from vmcloak.ostype import network_interface
+from vmcloak.paths import get_path
+from vmcloak.platforms import Machinery
+from vmcloak.rand import random_mac, random_serial, random_uuid
+from vmcloak.repository import vms_path, image_path
 
 log = logging.getLogger(__name__)
 name = "VirtualBox"
-vboxmanage = get_path("vboxmanage")
+disk_format = "vdi"
 
+vboxmanage = get_path("vboxmanage")
 
 def _call(*args, **kwargs):
     cmd = [vboxmanage] + list(args)
@@ -36,23 +39,34 @@ def _call(*args, **kwargs):
     except Exception as e:
         # CalledProcessError
         log.error("[-] Error running command: %s", e)
-        raise CommandError
+        raise CommandError(str(e))
 
     return ret.strip()
 
-def create_vm(name, attr, is_snapshot=True):
+def _set_common_attr(vm, attr):
     nictype = network_interface(attr["osversion"])
-    vm = VM(name)
-    vm.create_vm()
     vm.os_type(attr["osversion"])
     vm.cpus(attr["cpus"])
     vm.mouse("usbtablet")
     vm.ramsize(attr["ramsize"])
     vm.vramsize(attr["vramsize"])
-    vm.attach_hd(attr["path"], multi=is_snapshot)
-    # Ensure the slot is at least allocated for by an empty drive.
-    vm.detach_iso()
     vm.hostonly(nictype=nictype, adapter=attr["adapter"])
+    if attr.get("vrde"):
+        vm.vrde(port=attr["vrde_port"])
+
+def _create_vm(name, attr, iso_path=None, is_snapshot=True):
+    vm = VM(name)
+    vm.create_vm()
+    _set_common_attr(vm, attr)
+    if is_snapshot:
+        vm.attach_hd(attr["path"], multi=True)
+    else:
+        vm.create_hd(attr["path"], attr["hddsize"] * 1024)
+    if iso_path:
+        vm.attach_iso(iso_path)
+    else:
+        # Ensure the slot is at least allocated for by an empty drive.
+        vm.detach_iso()
     if attr.get("share"):
         path = attr["share"]
         if "=" in path:
@@ -64,17 +78,6 @@ def create_vm(name, attr, is_snapshot=True):
         vm.uart(1, attr["serial"])
     return vm
 
-def create_vm_for_image(name, image, is_snapshot=False):
-    """Create a VM instance for an image
-    Changes will be written to disk"""
-    if vm_exists(name):
-        # We should really check if it has the same properties
-        return VM(name)
-    return create_vm(name, image, None, False)
-
-def vm_exists(name):
-    return exists(join(vms_path, name))
-
 def remove_vm(name, preserve_hd=False):
     vm = VM(name)
     if preserve_hd:
@@ -84,11 +87,98 @@ def remove_vm(name, preserve_hd=False):
 def remove_hd(path):
     _call("closemedium", "disk", path, delete=True)
 
+#
+# Platform API
+#
+
+def create_new_image(name, _, iso_path, attr):
+    """Create a VM instance for an image
+    Changes will be written to disk"""
+    _create_vm(name, attr, iso_path=iso_path, is_snapshot=False)
+
+    log.info("Starting the Virtual Machine %r to install Windows.", name)
+    m = VM(name)
+    m.start_vm(visible=attr.get("vm_visible", False))
+    wait_for_shutdown(name)
+
+def create_snapshot_vm(image, name, attr):
+    _create_vm(name, attr, is_snapshot=True)
+
+def create_snapshot(name):
+    vm = VM(name)
+    vm.snapshot("vmcloak", "Snapshot created by VMCloak.")
+    vm.stop_vm()
+
+def start_image_vm(image, user_attr=None):
+    """Start transient VM"""
+    attr = image.attr()
+    if user_attr:
+        attr.update(user_attr)
+    _create_vm(image.name, attr, is_snapshot=False)
+
+def remove_vm_data(name, path=None):
+    vm = VM(name)
+    path = os.path.join(vms_path, name)
+    if not os.path.exists(path):
+        # Just in case...
+        try:
+            vm.unregister_vm()
+        except CommandError:
+            pass
+        return
+    try:
+        status = vm.vminfo("VMState")
+        if status != "poweroff":
+            # Force shutdown
+            vm.stop_vm()
+            wait_for_shutdown(name)
+    except CommandError:
+        pass
+    try:
+        # VBox should not accidentally delete the image
+        vm.remove_hd()
+    except CommandError:
+        pass
+    vm.delete_vm()
+
+def wait_for_shutdown(name):
+    m = VM(name)
+    return m.wait_for_state(shutdown=True)
+
+def clone_disk(image, target):
+    m = VM(image.name)
+    m.clone_hd(image.path, target)
+
+def export_vm(image, target):
+    m = _create_vm(image.name, image.attr(), is_snapshot=False)
+    m.export(target)
+    m.remove_hd()
+    m.compact_hd(image.path)
+    m.delete_vm()
+
+def restore_snapshot(name, snap_name):
+    m = VM(name)
+    m.restore_snapshot(snap_name)
+
+# --
+
 class VM(Machinery):
     """Helper class to deal with VirtualBox VMs"""
     FIELDS = VBOX_CONFIG
 
+    def __init__(self, *args, **kwargs):
+        Machinery.__init__(self, *args, **kwargs)
+        self.network_idx = 0
+
+    def network_index(self):
+        """Get the index for the next network interface."""
+        ret = self.network_idx
+        self.network_idx += 1
+        return ret
+
     def vminfo(self, element=None):
+        """Returns a dictionary with all available information for the
+        Virtual Machine."""
         ret = {}
         lines = _call("showvminfo", self.name, machinereadable=True)
         for line in lines.split("\n"):
@@ -105,30 +195,42 @@ class VM(Machinery):
             ret[key] = value
         return ret if element is None else ret.get(element)
 
-    def wait_for_state(self, shutdown=False):
-        while True:
+    def wait_for_state(self, shutdown=False, timeout=30):
+        now = time.time()
+        while (time.time() - now) < timeout:
             try:
                 status = self.vminfo("VMState")
                 if shutdown and status == "poweroff":
-                    break
+                    return True
             except CommandError:
                 pass
 
             time.sleep(1)
+        return False
 
     def create_vm(self):
+        """Create a new Virtual Machine."""
         _call("createvm", name=self.name, basefolder=vms_path, register=True)
 
+    def unregister_vm(self):
+        """Delete an existing Virtual Machine but not any associated files."""
+        _call("unregistervm", self.name)
+
     def delete_vm(self):
+        """Delete an existing Virtual Machine and its associated files."""
         _call("unregistervm", self.name, delete=True)
 
     def ramsize(self, ramsize):
+        """Modify the amount of RAM available for this Virtual Machine."""
         return _call("modifyvm", self.name, memory=ramsize)
 
     def vramsize(self, vramsize):
+        """Modify the amount of Video memory available for this Virtual
+        Machine."""
         return _call("modifyvm", self.name, vram=vramsize)
 
     def os_type(self, osversion):
+        """Set the OS type."""
         operating_systems = {
             "winxp": "WindowsXP",
             "win7x86": "Windows7",
@@ -139,9 +241,10 @@ class VM(Machinery):
             "win10x64": "Windows10_64",
         }
         return _call("modifyvm", self.name,
-                          ostype=operating_systems[osversion])
+                     ostype=operating_systems[osversion])
 
     def create_hd(self, hdd_path, fsize=256*1024):
+        """Create a harddisk."""
         _call("createhd", filename=hdd_path, size=fsize)
         _call("storagectl", self.name, name="IDE", add="ide")
         _call("storageattach", self.name, storagectl="IDE",
@@ -172,14 +275,17 @@ class VM(Machinery):
         _call("modifyhd", hdd_path, compact=True)
 
     def clone_hd(self, hdd_inpath, hdd_outpath):
+        """Clone a harddisk."""
         _call("clonehd", hdd_inpath, hdd_outpath)
 
     def remove_hd(self):
+        """Remove a harddisk."""
         time.sleep(1) # ...
         _call("storagectl", self.name, portcount=0,
                    name="IDE", remove=True)
 
     def cpus(self, count):
+        """Set the number of CPUs to assign to this Virtual Machine."""
         _call("modifyvm", self.name, cpus=count, ioapic="on")
 
     def attach_iso(self, iso_path):
@@ -188,11 +294,13 @@ class VM(Machinery):
                    type_="dvddrive", port=1, device=0, medium=iso_path)
 
     def detach_iso(self):
+        """Detach the ISO file in the DVDRom drive."""
         time.sleep(1)
         _call("storageattach", self.name, storagectl="IDE",
                    type_="dvddrive", port=1, device=0, medium="emptydrive")
 
     def set_field(self, key, value):
+        """Set a specific field of a Virtual Machine."""
         return _call("setextradata", self.name, key, value)
 
     def share(self, name, path):
@@ -200,6 +308,7 @@ class VM(Machinery):
                      "--hostpath", path)
 
     def modify_mac(self, macaddr=None, index=1):
+        """Modify the MAC address of a Virtual Machine."""
         if macaddr is None:
             macaddr = random_mac()
 
@@ -211,6 +320,7 @@ class VM(Machinery):
         return macaddr
 
     def hostonly(self, nictype, macaddr=None, adapter=None):
+        """Configure a hostonly adapter for the Virtual Machine."""
         index = self.network_index() + 1
         if not adapter:
             if os.name == "posix":
@@ -235,6 +345,7 @@ class VM(Machinery):
         return self.modify_mac(macaddr, index)
 
     def nat(self, nictype, macaddr=None):
+        """Configure NAT for the Virtual Machine."""
         index = self.network_index() + 1
 
         nic = {
@@ -250,6 +361,7 @@ class VM(Machinery):
         _call("modifyvm", self.name, hwvirtex="on" if enable else "off")
 
     def uart(self, port, path):
+        """Add UART/serial port on given Unix-socket path"""
         iobase, irq = {1: (0x3F8, 4),
                        2: (0x2F8, 3),
                        3: (0x3E8, 4),
@@ -262,10 +374,12 @@ class VM(Machinery):
                    path)
 
     def start_vm(self, visible=False):
+        """Start the associated Virtual Machine."""
         return _call("startvm", self.name,
                           type_="gui" if visible else "headless")
 
     def snapshot(self, label, description=""):
+        """Take a snapshot of the associated Virtual Machine."""
         return _call("snapshot", self.name, "take", label,
                           description=description, live=True)
 
@@ -279,9 +393,11 @@ class VM(Machinery):
         return _call("snapshot", self.name, "delete", label)
 
     def stop_vm(self):
+        """Stop the associated Virtual Machine."""
         return _call("controlvm", self.name, "poweroff")
 
     def list_settings(self):
+        """List all settings of a Virtual Machine."""
         return _call("getextradata", self.name, "enumerate")
 
     def mouse(self, type):
@@ -300,3 +416,42 @@ class VM(Machinery):
             vendorurl="http://cuckoosandbox.org/",
             description="Cuckoo Sandbox Virtual Machine created by VMCloak",
         )
+
+    def init_vm(self, profile):
+        """Initialize fields as specified by `FIELDS`."""
+        hwconf = load_hwconf(profile=profile)
+
+        def _init_vm(path, fields):
+            for key, value in fields.items():
+                key = path + "/" + key
+                if isinstance(value, dict):
+                    _init_vm(key, value)
+                else:
+                    if isinstance(value, tuple):
+                        k, v = value
+                        if k not in hwconf or not hwconf[k]:
+                            value = "To be filled by O.E.M."
+                        else:
+                            if k not in config:
+                                config[k] = random.choice(hwconf[k])
+
+                            value = config[k][v]
+
+                            # Some values have to be generated randomly.
+                            if value is not None:
+                                if value.startswith("<SERIAL>"):
+                                    length = int(value.split()[-1])
+                                    value = random_serial(length)
+                                elif value.startswith("<UUID>"):
+                                    value = random_uuid()
+
+                    if value is None:
+                        value = "To be filled by O.E.M."
+
+                    log.debug("Setting %r to %r.", key, value)
+                    ret = self.set_field(key, value)
+                    if ret:
+                        log.debug(ret)
+
+        config = {}
+        _init_vm("", self.FIELDS)

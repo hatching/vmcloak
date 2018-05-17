@@ -18,4 +18,5 @@ def network_interface(os_version):
     return o.nictype
 
 def get_os(os_version):
-    return os_types[os_version]
+    h = os_types[os_version]
+    return h()

@@ -6,7 +6,7 @@ import io
 import logging
 import requests
 
-from vmcloak.misc import wait_for_host
+from vmcloak.misc import wait_for_agent
 
 log = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ class Agent(object):
             pass
 
         # Now wait until the Agent is reachable on the new IP address.
-        wait_for_host(ipaddr, self.port)
+        wait_for_agent(self)
         self.ipaddr = ipaddr
 
     def dns_server(self, ipaddr):
