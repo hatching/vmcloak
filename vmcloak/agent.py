@@ -115,8 +115,8 @@ class Agent(object):
             pass
 
         # Now wait until the Agent is reachable on the new IP address.
-        wait_for_agent(self)
         self.ipaddr = ipaddr
+        wait_for_agent(self)
 
     def dns_server(self, ipaddr):
         """Set the IP address of the DNS server."""

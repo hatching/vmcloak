@@ -69,8 +69,8 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=False):
     if attr.get("vm_visible"):
         # Doesn't really work?
         args.extend(["--graphics", "sdl"])
-    elif attr.get("vnc", True):
-        port = attr.get("vnc_port", 5900)
+    elif attr.get("vrde"):
+        port = attr["vrde"]
         args.extend(["--graphics", "vnc,port=%s" % port])
     if iso_path:
         # Install a new image
@@ -107,7 +107,7 @@ def create_snapshot_vm(image, name, attr):
 
     _create_vm(name, attr, is_snapshot=True)
 
-def create_snapshot(name, vmpath):
+def create_snapshot(name):
     virsh("snapshot-create-as",
           name,
           "--name", "vmcloak",

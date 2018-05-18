@@ -6,7 +6,8 @@ This document describes how VMCloak supports KVM through libvirt.
 Dependencies:
 
 * qemu-kvm
-* libvirt-daemon
+* qemu-utils
+* libvirt-daemon-system
 * libvirt-clients
 * virtinst
 
@@ -61,3 +62,10 @@ Networking
 VMCloak supports assigning VMs to specific networks via the ``--adapter``
 option.
 However, it will not create or start networks automatically.
+
+
+VNC
+---
+
+You can use the vrde/vrde-port options to enable VNC.
+Note that libvirt requires that the port is above 5900.

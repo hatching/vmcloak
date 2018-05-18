@@ -550,7 +550,7 @@ def snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
     # the old adapter (or use IPv6-LL)
     _if_defined(attr, "adapter", adapter)
 
-    if vrde or ctx.debug:
+    if vrde or ctx.meta["debug"]:
         attr["vrde"] = vrde_port
 
     for vmname, ip, port in vm_iter(count, vmname, attr["ip"], vrde_port):
