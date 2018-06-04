@@ -51,8 +51,11 @@ def _set_common_attr(vm, attr):
     vm.ramsize(attr["ramsize"])
     vm.vramsize(attr["vramsize"])
     vm.hostonly(nictype=nictype, adapter=attr["adapter"])
-    if attr.get("vrde"):
-        vm.vrde(port=attr["vrde_port"])
+    port = attr.get("vrde")
+    if port:
+        if port is True:
+            port = 3389
+        vm.vrde(port=port)
 
 def _create_vm(name, attr, iso_path=None, is_snapshot=True):
     vm = VM(name)
@@ -86,9 +89,6 @@ def remove_vm(name, preserve_hd=False):
     if preserve_hd:
         vm.remove_hd()
     vm.delete_vm()
-
-def remove_hd(path):
-    _call("closemedium", "disk", path, delete=True)
 
 #
 # Platform API
@@ -147,9 +147,9 @@ def remove_vm_data(name, path=None):
         pass
     vm.delete_vm()
 
-def wait_for_shutdown(name):
+def wait_for_shutdown(name, timeout=None):
     m = VM(name)
-    return m.wait_for_state(shutdown=True)
+    return m.wait_for_state(shutdown=True, timeout=timeout)
 
 def clone_disk(image, target):
     m = VM(image.name)
@@ -165,6 +165,9 @@ def export_vm(image, target):
 def restore_snapshot(name, snap_name):
     m = VM(name)
     m.restore_snapshot(snap_name)
+
+def remove_hd(path):
+    _call("closemedium", "disk", path, delete=True)
 
 # --
 
@@ -203,7 +206,7 @@ class VM(Machinery):
 
     def wait_for_state(self, shutdown=False, timeout=30):
         now = time.time()
-        while (time.time() - now) < timeout:
+        while timeout is None or (time.time() - now) < timeout:
             try:
                 status = self.vminfo("VMState")
                 if shutdown and status == "poweroff":

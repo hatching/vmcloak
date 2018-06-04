@@ -390,7 +390,7 @@ def install(ctx, name, dependencies, vm_visible, vrde, vrde_port, recommended, d
                 break
 
         a.shutdown()
-        p.wait_for_shutdown(image.name)
+        p.wait_for_shutdown(image.name, 30)
     finally:
         p.remove_vm_data(image.name, os.path.join(vms_path, image.name))
 
@@ -662,12 +662,10 @@ def delimg(name):
         exit(1)
     image.platform.remove_vm_data(name, os.path.join(vms_path, name))
     try:
-        if os.path.exists(image.path):
-            log.info("Removing image %s", image.path)
-            os.remove(image.path)
+        log.info("Removing image %s", image.path)
+        image.platform.remove_hd(image.path)
     finally:
-        if not os.path.exists(image.path):
-            repository.remove_image(name)
+        repository.remove_image(name)
 
 @main.command("import")
 def _import():

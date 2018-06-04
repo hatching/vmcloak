@@ -135,7 +135,7 @@ def remove_vm_data(name, path):
     if path and os.path.exists(path):
         shutil.rmtree(path)
 
-def wait_for_shutdown(name):
+def wait_for_shutdown(name, timeout=None):
     while True:
         state = _vm_state(name)
         if state == "running":
@@ -155,6 +155,9 @@ def export_vm(image, target):
 
 def restore_snapshot(name, snap_name):
     virsh("restore", name, snap_name)
+
+def remove_hd(path):
+    os.remove(path)
 
 #
 # Helper class for dependencies
