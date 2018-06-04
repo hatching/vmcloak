@@ -60,6 +60,9 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=True):
     _set_common_attr(vm, attr)
     if is_snapshot:
         vm.attach_hd(attr["path"], multi=True)
+    elif os.path.exists(attr["path"]):
+        # TODO: assume caller has checked this is OK
+        vm.attach_hd(attr["path"])
     else:
         vm.create_hd(attr["path"], attr["hddsize"] * 1024)
     if iso_path:
@@ -115,6 +118,9 @@ def start_image_vm(image, user_attr=None):
     if user_attr:
         attr.update(user_attr)
     _create_vm(image.name, attr, is_snapshot=False)
+
+    m = VM(image.name)
+    m.start_vm(visible=attr.get("vm_visible", False))
 
 def remove_vm_data(name, path=None):
     vm = VM(name)
