@@ -931,6 +931,38 @@ class Java(Dependency):
         ],
         "sha1": "57747ce996b5b2f1786601b04a0b0355fc82493a",
         "filename": "jre-8u151-windows-x64.exe",
+    }, {
+        "arch": "x86",
+        "version": "8u161",
+        "urls": [
+            "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=230540_2f38c3b165be4555a1fa6e98c45e0808",
+        ],
+        "sha1": "db4cf75d3977ac49b6e279096c72f4324b8500c9",
+        "filename": "jre-8u161-windows-i586.exe",
+    }, {
+        "arch": "amd64",
+        "version": "8u161",
+        "urls": [
+            "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=230542_2f38c3b165be4555a1fa6e98c45e0808",
+        ],
+        "sha1": "1e04211c7477aa2c759e0318cfa075a76ab59149",
+        "filename": "jre-8u161-windows-x64.exe",
+    }, {
+        "arch": "x86",
+        "version": "8u171",
+        "urls": [
+            "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233170_512cd62ec5174c3487ac17c61aaa89e8",
+        ],
+        "sha1": "7cbaa19dc3bb016ad112e918295057b3fbb3e5a6",
+        "filename": "jre-8u171-windows-i586.exe",
+    }, {
+        "arch": "amd64",
+        "version": "8u171",
+        "urls": [
+            "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233172_512cd62ec5174c3487ac17c61aaa89e8",
+        ],
+        "sha1": "2005ac9eed42c842b00fba0c38375073e1730071",
+        "filename": "jre-8u171-windows-x64.exe",
     }]
 
     def run(self):
