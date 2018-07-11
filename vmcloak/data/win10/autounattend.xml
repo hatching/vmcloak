@@ -11,6 +11,8 @@
                 <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
                 <NetworkLocation>Work</NetworkLocation>
                 <ProtectYourPC>3</ProtectYourPC>
+		        <SkipUserOOBE>true</SkipUserOOBE>
+		        <SkipMachineOOBE>true</SkipMachineOOBE>
             </OOBE>
             <AutoLogon>
                 <Enabled>true</Enabled>
