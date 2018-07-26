@@ -2,6 +2,9 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 from vmcloak.abstract import WindowsAutounattended
 
 class Windows7(WindowsAutounattended):
