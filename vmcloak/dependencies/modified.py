@@ -8,7 +8,6 @@ from vmcloak.abstract import Dependency
 from vmcloak.constants import VMCLOAK_ROOT
 
 # TODO Following only works on 32-bit Python versions.
-REG = "C:\\Windows\\sysnative\\reg.exe"
 RUN = "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 class Modified(Dependency):
@@ -25,6 +24,12 @@ class Modified(Dependency):
         agent = os.path.join(VMCLOAK_ROOT, "data", "modified_agent.py")
         self.a.upload("C:\\modified_agent.py", open(agent, "rb").read())
 
+        # Determine what OS we're running as sysnative only exists on 64bit Vista onwards, all 32bit Windows do not have sysnative.
+        if self.i.osversion == "winxp" or self.i.osversion == "win7x86" or self.i.osversion == "win81x86" or self.i.osversion == "win10x86":
+            REG = "C:\\Windows\\System32\\reg.exe"
+        if self.i.osversion == "win7x64" or self.i.osversion == "win81x64" or self.i.osversion == "win10x64":
+            REG = "C:\\Windows\\sysnative\\reg.exe"
+        
         # Use same Python instance as main agent.
         r = self.a.execute("%s query %s /v Agent" % (REG, RUN))
         python = None
