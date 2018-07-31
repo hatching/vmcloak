@@ -4,7 +4,6 @@
 
 import logging
 import os.path
-import shutil
 import subprocess
 import time
 
@@ -95,6 +94,15 @@ def _vm_state(name):
 # Platform API
 #
 
+def prepare_snapshot(name, attr):
+    # Keep it in the root dir so libvirt doesn't create a storage
+    # pool per VM
+    path = os.path.join(vms_path, "%s.%s" % (name, disk_format))
+    attr["path"] = path
+    if os.path.exists(path):
+        return False
+    return vms_path
+
 def create_new_image(name, _, iso_path, attr):
     if os.path.exists(attr["path"]):
         raise ValueError("Image %s already exists" % attr["path"])
@@ -123,7 +131,7 @@ def start_image_vm(image, user_attr=None):
         attr.update(user_attr)
     _create_vm(image.name, attr)
 
-def remove_vm_data(name, path):
+def remove_vm_data(name):
     """Remove VM definitions and snapshots but keep disk image intact"""
     log.info("Cleanup VM %s", name)
     if _vm_state(name):
@@ -131,9 +139,9 @@ def remove_vm_data(name, path):
         # TODO: will fail if there are more snapshots
         virsh("snapshot-delete", name, "--metadata", "vmcloak", check=False)
         virsh("undefine", name, check=False)
-    path = os.path.join(vms_path, name)
-    if path and os.path.exists(path):
-        shutil.rmtree(path)
+    path = os.path.join(vms_path, "%s.%s" % (name, disk_format))
+    if os.path.exists(path):
+        os.remove(path)
 
 def wait_for_shutdown(name, timeout=None):
     while True:

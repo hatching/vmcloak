@@ -62,7 +62,7 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=True):
     vm.create_vm()
     _set_common_attr(vm, attr)
     if is_snapshot:
-        vm.attach_hd(attr["path"], multi=True)
+        vm.attach_hd(attr["imgpath"], multi=True)
     elif os.path.exists(attr["path"]):
         # TODO: assume caller has checked this is OK
         vm.attach_hd(attr["path"])
@@ -94,6 +94,15 @@ def remove_vm(name, preserve_hd=False):
 # Platform API
 #
 
+def prepare_snapshot(name, attr):
+    """We don't need to snapshot the disk, test if the snapshot
+    exists instead."""
+    base = os.path.join(vms_path, name)
+    path = os.path.join(base, "%s.vbox" % name)
+    if os.path.exists(path):
+        return False
+    return base
+
 def create_new_image(name, _, iso_path, attr):
     """Create a VM instance for an image
     Changes will be written to disk"""
@@ -106,6 +115,8 @@ def create_new_image(name, _, iso_path, attr):
 
 def create_snapshot_vm(image, name, attr):
     _create_vm(name, attr, is_snapshot=True)
+    m = VM(name)
+    m.start_vm(visible=attr.get("vm_visible", False))
 
 def create_snapshot(name):
     vm = VM(name)
@@ -122,7 +133,7 @@ def start_image_vm(image, user_attr=None):
     m = VM(image.name)
     m.start_vm(visible=attr.get("vm_visible", False))
 
-def remove_vm_data(name, path=None):
+def remove_vm_data(name):
     vm = VM(name)
     path = os.path.join(vms_path, name)
     if not os.path.exists(path):

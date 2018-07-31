@@ -260,7 +260,7 @@ def init(ctx, name, iso, vm, **attr):
         log.exception("Failed to create %r:", name)
         return
     finally:
-        p.remove_vm_data(name, os.path.join(vms_path, name))
+        p.remove_vm_data(name)
         if remove_iso:
             os.remove(iso_path)
 
@@ -392,7 +392,7 @@ def install(ctx, name, dependencies, vm_visible, vrde, vrde_port, recommended, d
         a.shutdown()
         p.wait_for_shutdown(image.name, 30)
     finally:
-        p.remove_vm_data(image.name, os.path.join(vms_path, image.name))
+        p.remove_vm_data(image.name)
 
 @main.command()
 @click.argument("name")
@@ -539,7 +539,7 @@ def snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
     attr = image.attr()
     attr["imgpath"] = attr.pop("path")
     attr["ip"] = ip
-    attr["visible"] = vm_visible
+    attr["vm_visible"] = vm_visible
     _if_defined(attr, "cpus", cpus)
     _if_defined(attr, "hostname", hostname)
     _if_defined(attr, "ramsize", ramsize)
@@ -554,19 +554,19 @@ def snapshot(ctx, name, vmname, ip, resolution, ramsize, cpus, hostname,
         attr["vrde"] = vrde_port
 
     for vmname, ip, port in vm_iter(count, vmname, attr["ip"], vrde_port):
-        vmpath = os.path.join(vms_path, vmname)
-        if os.path.exists(vmpath):
+        vmdir = p.prepare_snapshot(vmname, attr)
+        if not vmdir:
             log.warning("Not creating %r because it exists", vmname)
             continue
-        os.makedirs(vmpath)
+        if not os.path.exists(vmdir):
+            os.makedirs(vmdir)
         if "vrde" in attr:
             attr["vrde"] = port
         if com1:
-            attr["serial"] = os.path.join(vmpath, "%s.com1" % vmname)
+            attr["serial"] = os.path.join(vmdir, "%s.com1" % vmname)
         if not hostname:
             attr["hostname"] = random_string(8, 16)
         attr["ip"] = ip
-        attr["path"] = os.path.join(vmpath, "%s.%s" % (vmname, p.disk_format))
         snapshot = _snapshot(image, vmname, attr, interactive)
         session.add(snapshot)
 
@@ -646,7 +646,7 @@ def delvm(name):
     if not obj:
         print("Not found:", name)
         exit(1)
-    obj.platform.remove_vm_data(name, os.path.join(vms_path, name))
+    obj.platform.remove_vm_data(name)
     repository.remove_snapshot(name)
 
 @main.command()
@@ -660,7 +660,7 @@ def delimg(name):
     if image.snapshots:
         print("Image", name, "still has snapshots. Aborting.")
         exit(1)
-    image.platform.remove_vm_data(name, os.path.join(vms_path, name))
+    image.platform.remove_vm_data(name)
     try:
         log.info("Removing image %s", image.path)
         image.platform.remove_hd(image.path)
