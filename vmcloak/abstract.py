@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -14,7 +14,10 @@ import time
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.exceptions import DependencyError
-from vmcloak.misc import copytreelower, copytreeinto, sha1_file, ini_read
+from vmcloak.misc import (
+    copytreelower, copytreeinto, sha1_file, ini_read, filename_from_url,
+    download_file
+)
 from vmcloak.paths import get_path
 from vmcloak.rand import random_serial, random_uuid, random_string
 from vmcloak.repository import deps_path
@@ -29,7 +32,6 @@ GENISOIMAGE_WARNINGS = [
     " without (standard) Rock Ridge extensions. It is highly recommended to"
     " add Rock Ridge",
 ]
-
 
 class Machinery(object):
     FIELDS = {}
@@ -382,6 +384,7 @@ class Dependency(object):
         self.a = a
         self.i = i
         self.version = version or self.default
+        self.arch = h.arch
         self.settings = settings
         self.exe = None
         self.filename = None
@@ -402,7 +405,7 @@ class Dependency(object):
             if "version" in exe and exe["version"] != self.version:
                 continue
 
-            if "arch" in exe and exe["arch"] != h.arch:
+            if "arch" in exe and exe["arch"] != self.arch:
                 continue
 
             self.exe = exe
@@ -414,21 +417,48 @@ class Dependency(object):
 
         # Download the dependency (if there is any to download).
         if self.exe:
-            self.filename = os.path.basename(self.exe["url"])
             self.download()
 
         if self.check() is False:
             raise DependencyError
 
     def download(self):
-        url, sha1 = self.exe["url"], self.exe["sha1"]
-        self.filepath = os.path.join(deps_path, os.path.basename(url))
-        if not os.path.exists(self.filepath) or \
-                sha1_file(self.filepath) != sha1:
-            subprocess.call(["wget", "-O", self.filepath, url])
+        urls = []
+        if "urls" in self.exe:
+            urls.extend(self.exe["urls"])
+        else:
+            urls.append(self.exe["url"])
 
-        if sha1_file(self.filepath) != sha1:
-            log.error("The checksum of %s doesn't match!", self.name)
+        if "filename" in self.exe:
+            self.filename = self.exe["filename"]
+        else:
+            for url in urls:
+                self.filename = filename_from_url(url)
+                break
+
+        self.filepath = os.path.join(deps_path, self.filename)
+        if (os.path.exists(self.filepath) and "sha1" in self.exe and
+                sha1_file(self.filepath) == self.exe["sha1"]):
+            return
+
+        for url in urls:
+            download_file(url, self.filepath)
+
+            if not os.path.exists(self.filepath):
+                continue
+
+            if "version" in self.exe and self.exe["version"] == "latest":
+                log.info("Got latest version '{}' from '{}', no checksum available!".format(self.filename, url))
+                break
+
+            if sha1_file(self.filepath) == self.exe["sha1"]:
+                log.info("Got file '{}' from '{}', with matching checksum.".format(self.filename, url))
+                break
+            else:
+                log.warn("The checksum of '{}' from '{}' didn't match!".format(self.filename, url))
+                os.remove(self.filepath)
+
+        if not os.path.exists(self.filepath):
             raise DependencyError
 
     def init(self):

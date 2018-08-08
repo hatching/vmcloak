@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -6,12 +6,15 @@ import hashlib
 import importlib
 import logging
 import os
+import requests
 import shutil
 import socket
 import stat
 import struct
 import subprocess
 import sys
+import time
+import urllib2
 
 from ConfigParser import ConfigParser
 
@@ -224,11 +227,12 @@ def wait_for_host(ipaddr, port):
     # Wait for the Agent to come up with a timeout of 1 second.
     while True:
         try:
-            log.debug("Waiting for host %s", ipaddr)
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
+            log.debug("Waiting for host %s", ipaddr)
             pass
+        time.sleep(1)
 
 def drop_privileges(user):
     if not HAVE_PWD:
@@ -270,3 +274,32 @@ def ipaddr_increase(ipaddr):
     """Increases the IP address."""
     addr = struct.unpack(">I", socket.inet_aton(ipaddr))[0]
     return socket.inet_ntoa(struct.pack(">I", addr + 1))
+
+def filename_from_url(url):
+    """Return the filename from a given url."""
+    return os.path.basename(urllib2.urlparse.urlparse(url).path)
+
+def download_file(url, filepath):
+    """Download the file from url and store it in the given filepath."""
+    user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"
+    headers = {
+        "User-Agent": user_agent,
+    }
+
+    start = time.time()
+
+    try:
+        r = requests.get(url, headers=headers).content
+    except requests.RequestException as e:
+        log.warn("Failed to download file from '%s', got error: %s", url, e)
+        return
+
+    log.debug(
+        "Successfully downloaded file '{}' ({:.2f}MB) from '{}' in "
+        "'{:.2f}' second(s) ({:.2f}MB/s)".format(
+            filename_from_url(url), len(r) / 1024.**2.,
+            url, time.time() - start, len(r) / (time.time() - start)
+        )
+    )
+
+    open(filepath, "wb").write(r)

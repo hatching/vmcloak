@@ -14,23 +14,23 @@ reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpd
 sc config wuauserv start= disabled
 net stop wuauserv
 
-echo Installing Python 2.7.6.
-start C:\vmcloak\python-2.7.6.msi
-C:\vmcloak\click.exe "Python 2.7.6 Setup" "Next >"
-C:\vmcloak\click.exe "Python 2.7.6 Setup" "Next >"
-C:\vmcloak\click.exe "Python 2.7.6 Setup" "Next >"
-C:\vmcloak\click.exe "Python 2.7.6 Setup" "Finish"
+echo Installing Python
+start C:\vmcloak\%PYTHONINSTALLER%
+C:\vmcloak\click.exe "%PYTHONWINDOW%" "Next >"
+C:\vmcloak\click.exe "%PYTHONWINDOW%" "Next >"
+C:\vmcloak\click.exe "%PYTHONWINDOW%" "Next >"
+C:\vmcloak\click.exe "%PYTHONWINDOW%" "Finish"
 
 echo Installing the Agent.
 copy C:\vmcloak\agent.py C:\agent.py
 if "%DEBUG%" == "yes" (
-    set PYTHON=C:\Python27\Python.exe
+    set PYTHON=%PYTHONPATH%\python.exe
 ) else (
-    set PYTHON=C:\Python27\Pythonw.exe
+    set PYTHON=%PYTHONPATH%\pythonw.exe
 )
 
 echo Setting the resolution.
-C:\Python27\Python.exe C:\vmcloak\resolution.py %RESO_WIDTH% %RESO_HEIGHT%
+%PYTHONPATH%\python.exe C:\vmcloak\resolution.py %RESO_WIDTH% %RESO_HEIGHT%
 
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d "%PYTHON% C:\agent.py 0.0.0.0 %AGENT_PORT%" /f
 

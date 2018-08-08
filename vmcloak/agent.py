@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2017 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -50,10 +50,18 @@ class Agent(object):
 
     def execute(self, command, async=False):
         """Execute a command."""
+        log.debug("Executing command in VM: %s", command)
         if async:
             return self.post("/execute", command=command, async="true")
         else:
             return self.post("/execute", command=command)
+
+    def execpy(self, filepath, async=False):
+        """Execute a Python file."""
+        if async:
+            return self.post("/execpy", filepath=filepath, async="true")
+        else:
+            return self.post("/execpy", filepath=filepath)
 
     def remove(self, path):
         """Remove a file or entire directory."""
@@ -120,8 +128,12 @@ class Agent(object):
     def upload(self, filepath, contents):
         """Upload a file to the Agent."""
         if isinstance(contents, basestring):
-            contents = io.BytesIO(contents)
+            contents = io.BytesIO(str(contents))
         self.postfile("/store", {"file": contents}, filepath=filepath)
+
+    def retrieve(self, filepath):
+        """Retrieve a file from the Agent."""
+        return self.post("/retrieve", filepath=filepath).content
 
     def click(self, window_title, button_name):
         """Identify a window by its title and click one of its buttons."""

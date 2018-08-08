@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-# Copyright (C) 2014-2017 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from setuptools import setup
 
-
 setup(
     name="VMCloak",
-    version="0.4.4a2",
+    version="0.4.5",
     author="Jurriaan Bremer",
     author_email="jbr@cuckoo.sh",
     url="http://vmcloak.org/",
@@ -42,19 +40,20 @@ setup(
     },
     install_requires=[
         "click==6.6",
-        "jinja2==2.8",
+        "jinja2==2.9.6",
+        "pefile2==1.2.11",
         "pyyaml==3.12",
         "sqlalchemy==1.0.8",
     ],
     extras_require={
         ":sys_platform == 'win32'": [
-            "requests>=2.7.0",
+            "requests>=2.13.0",
         ],
         ":sys_platform == 'darwin'": [
-            "requests>=2.7.0",
+            "requests>=2.13.0",
         ],
         ":sys_platform == 'linux2'": [
-            "requests[security]>=2.7.0",
+            "requests[security]>=2.13.0",
         ],
     },
 )

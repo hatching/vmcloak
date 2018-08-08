@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -8,11 +8,6 @@ import os
 log = logging.getLogger(__name__)
 
 PATHS = {
-    "wget": [
-        "/usr/bin/wget",
-        "/usr/local/bin/wget",
-        "/usr/pkg/bin/wget"
-    ],
     "genisoimage": [
         "/usr/bin/genisoimage",
         "/usr/pkg/bin/genisoimage",
@@ -27,10 +22,6 @@ PATHS = {
 }
 
 INSTALL = {
-    "wget": {
-        "Linux": "apt-get install wget",
-        "NetBSD": "pkgin install wget",
-    },
     "genisoimage": {
         "Linux": "apt-get install genisoimage",
         "NetBSD": "pkgin install cdrkit",
