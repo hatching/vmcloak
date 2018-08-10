@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import lxml.etree
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
@@ -304,7 +305,7 @@ class WindowsAutounattended(OperatingSystem):
 
     def _autounattend_xml(self, product):
         values = {
-            "PRODUCTKEY": self.serial_key,
+            # "PRODUCTKEY": self.serial_key,
             "COMPUTERNAME": random_string(8, 14),
             "USERNAME": random_string(8, 12),
             "PASSWORD": random_string(8, 16),
@@ -313,7 +314,37 @@ class WindowsAutounattended(OperatingSystem):
             "INTERFACE": self.interface,
         }
 
-        buf = open(os.path.join(self.path, "autounattend.xml"), "rb").read()
+        xml_doc = lxml.etree.fromstring(open(os.path.join(self.path, "autounattend.xml"), "rb").read())
+
+        # Get the proper component tag to work with
+        # We *should* be able to pick this up with a single findall... but that doesn't work for some reason
+
+        # for multiple activation key (MAK) keys:
+        # TODO - add serial key type and update xml files to remove those sections
+        if self.serial_key_type == "mak":
+            shell_setup_component = next(z for z in xml_doc.findall(".//component", namespaces=xml_doc.nsmap)
+                                         if z.get("name") == 'Microsoft-Windows-Shell-Setup')
+            product_key = lxml.etree.Element("ProductKey")
+            product_key.text = self.serial_key
+            shell_setup_component.append(product_key)
+
+            # Need to re-assign xml_doc to be the modified XML
+            xml_doc = shell_setup_component.getroottree()
+        else:
+            setup_userdata_xml = next(z for z in xml_doc.findall(".//component/UserData", namespaces=xml_doc.nsmap)
+                                      if z.getparent().get("name") == 'Microsoft-Windows-Setup')
+            product_key = lxml.etree.Element("ProductKey")
+            child_key = lxml.etree.SubElement(product_key, "Key")
+            child_key.text = self.serial_key
+            willshowui = lxml.etree.SubElement(product_key,"WillShowUI")
+            willshowui.text = "OnError"
+
+            setup_userdata_xml.append(product_key)
+
+            xml_doc = setup_userdata_xml.getroottree()
+
+        # buf = open(os.path.join(self.path, "autounattend.xml"), "rb").read()
+        buf = lxml.etree.tostring(xml_doc)
         for key, value in values.items():
             buf = buf.replace("@%s@" % key, value)
 

@@ -1,3 +1,4 @@
 lockfile
 sphinx
 setuptools
+lxml
