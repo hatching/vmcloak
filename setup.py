@@ -44,6 +44,7 @@ setup(
         "pefile2==1.2.11",
         "pyyaml==3.12",
         "sqlalchemy==1.0.8",
+        "lxml"
     ],
     extras_require={
         ":sys_platform == 'win32'": [

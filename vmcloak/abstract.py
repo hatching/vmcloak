@@ -208,6 +208,7 @@ class OperatingSystem(object):
         self.data_path = os.path.join(VMCLOAK_ROOT, "data")
         self.path = os.path.join(self.data_path, self.name)
         self.serial_key = None
+        self.serial_key_type = "default"
 
         if self.name is None:
             raise Exception("Name has to be provided for OS handler")
@@ -227,6 +228,9 @@ class OperatingSystem(object):
     def set_serial_key(self, serial_key):
         """Abstract method for checking a serial key if provided and otherwise
         use a default serial key if available."""
+
+    def set_serial_key_type(self, serial_key_type):
+        """Abstract method for setting the serial key type"""
 
     def pickmount(self, isomount=None):
         """Picks the first available mounted directory."""
@@ -397,6 +401,14 @@ class WindowsAutounattended(OperatingSystem):
 
         # https://technet.microsoft.com/en-us/library/jj612867.aspx
         self.serial_key = serial_key or self.dummy_serial_key
+        return True
+
+    def set_serial_key_type(self, serial_key_type):
+        if serial_key_type not in ["default","mak"]:
+            log.error("Invalid serial key type selected %s. Possible options are 'default' or 'mak'" % serial_key_type)
+            return False
+
+        self.serial_key_type = serial_key_type
         return True
 
 class Dependency(object):

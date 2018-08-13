@@ -105,6 +105,7 @@ def clone(name, outname):
 @click.option("--vm", default="virtualbox", help="Virtual Machinery.")
 @click.option("--iso-mount", help="Mounted ISO Windows installer image.")
 @click.option("--serial-key", help="Windows Serial Key.")
+@click.option("--serial-key-type", help="Windows serial key type.", type=click.Choice(["default","mak"]), default="default")
 @click.option("--ip", default="192.168.56.2", help="Guest IP address.")
 @click.option("--port", default=8000, help="Port to run the Agent on.")
 @click.option("--adapter", default="vboxnet0", help="Network adapter.")
@@ -124,7 +125,7 @@ def clone(name, outname):
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
-         product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
+         product, vm, iso_mount, serial_key, serial_key_type, ip, port, adapter, netmask,
          gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
          vm_visible, vrde, vrde_port, python_version, debug, verbose):
     if verbose:
@@ -186,6 +187,9 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         exit(1)
 
     if not h.set_serial_key(serial_key):
+        exit(1)
+
+    if not h.set_serial_key_type(serial_key_type):
         exit(1)
 
     h.configure(tempdir=tempdir, product=product)
