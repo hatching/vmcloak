@@ -321,13 +321,14 @@ class WindowsAutounattended(OperatingSystem):
         xml_doc = lxml.etree.fromstring(open(os.path.join(self.path, "autounattend.xml"), "rb").read())
 
         # Get the proper component tag to work with
-        # We *should* be able to pick this up with a single findall... but that doesn't work for some reason
+        # We *should* be able to pick this up with a single findall...
+        # but that doesn't work for some reason - searching by attributes doesn't return anything
 
         # for multiple activation key (MAK) keys:
-        # TODO - add serial key type and update xml files to remove those sections
         if self.serial_key_type == "mak":
             shell_setup_component = next(z for z in xml_doc.findall(".//component", namespaces=xml_doc.nsmap)
-                                         if z.get("name") == 'Microsoft-Windows-Shell-Setup')
+                                         if z.get("name") == 'Microsoft-Windows-Shell-Setup' and
+                                         z.getparent().get("pass") == "specialize")
             product_key = lxml.etree.Element("ProductKey")
             product_key.text = self.serial_key
             shell_setup_component.append(product_key)
