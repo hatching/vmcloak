@@ -413,7 +413,7 @@ def modify(ctx, name, vm_visible, vrde, vrde_port):
         log.warning("When you shut it down, all changes will be saved.")
         p.wait_for_shutdown(image.name)
     finally:
-        p.remove_vm_data(image.name, os.path.join(vms_path, image.name))
+        p.remove_vm_data(image.name)
 
 @main.command()
 @click.argument("vmname")
@@ -485,6 +485,13 @@ def vm_iter(count, name, ip, port):
             # not "exceed" its provided subnet (and thus also require the user
             # to specify an IP range, rather than an IP address).
             ip = ipaddr_increase(ip)
+
+@main.command()
+@click.argument("name")
+@click.option("--vm", default="virtualbox", help="Virtual Machinery.")
+def cleanup(name, vm):
+    p = repository.platform(vm)
+    p.remove_vm_data(name)
 
 @main.command()
 @click.argument("name")

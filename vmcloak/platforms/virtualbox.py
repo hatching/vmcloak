@@ -13,7 +13,6 @@ from vmcloak.conf import load_hwconf
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.exceptions import CommandError
 from vmcloak.ostype import network_interface
-from vmcloak.paths import get_path
 from vmcloak.platforms import Machinery
 from vmcloak.rand import random_mac, random_serial, random_uuid
 from vmcloak.repository import vms_path, image_path
@@ -22,7 +21,7 @@ log = logging.getLogger(__name__)
 name = "VirtualBox"
 disk_format = "vdi"
 
-vboxmanage = get_path("vboxmanage")
+vboxmanage = "vboxmanage"
 
 def _call(*args, **kwargs):
     cmd = [vboxmanage] + list(args)
@@ -33,8 +32,11 @@ def _call(*args, **kwargs):
         else:
             cmd += ["--" + k.rstrip("_"), str(v)]
 
+    friendly_cmd = " ".join(
+        repr(c) if any(bad in c for bad in " \"'") else c for c in cmd
+    )
     try:
-        log.debug("Running command: %s", cmd)
+        log.debug("Run: %s", friendly_cmd)
         ret = subprocess.check_output(cmd)
     except Exception as e:
         # CalledProcessError
@@ -136,27 +138,30 @@ def start_image_vm(image, user_attr=None):
 def remove_vm_data(name):
     vm = VM(name)
     path = os.path.join(vms_path, name)
-    if not os.path.exists(path):
-        # Just in case...
-        try:
-            vm.unregister_vm()
-        except CommandError:
-            pass
-        return
+    # Hopefully...
+    vm_exists = True
+    status = ""
     try:
         status = vm.vminfo("VMState")
+    except CommandError:
+        vm_exists = False
+    if vm_exists:
         if status != "poweroff":
             # Force shutdown
             vm.stop_vm()
             wait_for_shutdown(name)
-    except CommandError:
-        pass
-    try:
         # VBox should not accidentally delete the image
-        vm.remove_hd()
-    except CommandError:
-        pass
-    vm.delete_vm()
+        try:
+            vm.remove_hd()
+        except CommandError:
+            pass
+        vm.delete_vm()
+
+    if os.path.exists(path):
+        log.error(
+            "Path %s still exists, you may need to delete it manually",
+            path
+        )
 
 def wait_for_shutdown(name, timeout=None):
     m = VM(name)
