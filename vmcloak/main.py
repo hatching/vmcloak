@@ -7,6 +7,7 @@ import logging
 import os.path
 import requests
 import shutil
+import subprocess
 import tempfile
 import time
 
@@ -15,12 +16,16 @@ from sqlalchemy.orm.session import make_transient
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
+from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.dependencies import Python
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
-from vmcloak.repository import image_path, Session, Image, Snapshot, iso_dst_path
+from vmcloak.repository import (
+    image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
+    db_migratable
+)
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
@@ -58,13 +63,25 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         # Ensure the slot is at least allocated for by an empty drive.
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
+        m.paravirtprovider(image.paravirtprovider)
 
     return m, h
 
 @click.group(invoke_without_command=True)
 @click.option("-u", "--user", help="Drop privileges to user.")
-def main(user):
+@click.pass_context
+def main(ctx, user):
     user and drop_privileges(user)
+
+    if db_migratable():
+        log.error(
+            "Database schema version mismatch. Expected: '%s'. "
+            "Optionally make a backup and then apply automatic database "
+            "migration by using: 'vmcloak migrate'" % SCHEMA_VERSION
+        )
+
+        if ctx.invoked_subcommand != "migrate":
+            exit(1)
 
 @main.command()
 @click.argument("name")
@@ -121,12 +138,16 @@ def clone(name, outname):
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
+@click.option("--paravirtprovider", default="default",
+              help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
          gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, python_version, debug, verbose):
+         vm_visible, vrde, vrde_port, python_version, paravirtprovider, debug,
+         verbose):
+
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
@@ -235,6 +256,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
     if vm == "virtualbox":
         m.create_vm()
         m.os_type(osversion)
+        m.paravirtprovider(paravirtprovider)
         m.cpus(cpus)
         m.mouse("usbtablet")
         m.ramsize(ramsize)
@@ -265,7 +287,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
                       netmask=netmask, gateway=gateway,
-                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm))
+                      cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
+                      paravirtprovider=paravirtprovider))
     session.commit()
 
 @main.command()
@@ -621,6 +644,25 @@ def zer0m0n(ipaddr, port):
     log.info("Patching zer0m0n-related files.")
     vmcloak.dependencies.names["zer0m0n"](a=a, h=h).run()
     log.info("Good to go, now *reboot* and make a new *snapshot* of your VM!")
+
+@main.command()
+@click.option("--revision", default="head", help="Migrate to a certain revision")
+def migrate(revision):
+    log.setLevel(logging.INFO)
+
+    if not db_migratable():
+        log.info("Database schema is already at the latest version")
+        exit(0)
+
+    try:
+        subprocess.check_call(
+            ["alembic", "upgrade", "%s" % revision],
+            cwd=os.path.join(VMCLOAK_ROOT, "data", "db_migration")
+        )
+    except subprocess.CalledProcessError as e:
+        log.exception("Database migration failed: %s", e)
+        exit(1)
+    log.info("Database migration successful!")
 
 def list_dependencies():
     print "Name", "version", "target", "sha1"
