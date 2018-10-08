@@ -9,7 +9,7 @@ from sqlalchemy import Integer, Text, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SCHEMA_VERSION = "34c908159434"
+SCHEMA_VERSION = "5a5957711538"
 
 conf_path = os.path.join(os.getenv("HOME"), ".vmcloak")
 image_path = os.path.join(conf_path, "image")
