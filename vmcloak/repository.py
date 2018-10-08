@@ -9,6 +9,8 @@ from sqlalchemy import Integer, Text, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+SCHEMA_VERSION = "34c908159434"
+
 conf_path = os.path.join(os.getenv("HOME"), ".vmcloak")
 image_path = os.path.join(conf_path, "image")
 vms_path = os.path.join(conf_path, "vms")
@@ -19,6 +21,20 @@ repository = os.path.join(conf_path, "repository.db")
 engine = create_engine("sqlite:///%s" % repository)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
+
+class AlembicVersion(Base):
+    """Database schema version. Used for automatic database migrations."""
+    __tablename__ = "alembic_version"
+
+    version_num = Column(String(32), nullable=False, primary_key=True)
+
+def db_migratable():
+    ses = Session()
+    try:
+        v = ses.query(AlembicVersion.version_num).first()
+        return v is None or v.version_num != SCHEMA_VERSION
+    finally:
+        ses.close()
 
 class Image(Base):
     """Represents each image that is created and altered along the way."""
@@ -54,7 +70,21 @@ class Snapshot(Base):
 if not os.path.isdir(conf_path):
     os.mkdir(conf_path)
 
-Base.metadata.create_all(engine)
+db_exists = os.path.exists(repository)
+if not db_exists:
+    Base.metadata.create_all(engine)
+    ses = Session()
+    try:
+        v = AlembicVersion()
+        v.version_num = SCHEMA_VERSION
+        ses.add(v)
+        ses.commit()
+    finally:
+        ses.close()
+
+elif db_exists:
+    if not engine.dialect.has_table(engine, AlembicVersion.__tablename__):
+        AlembicVersion.__table__.create(engine)
 
 if not os.path.isdir(image_path):
     os.mkdir(image_path)

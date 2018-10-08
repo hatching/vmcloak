@@ -7,6 +7,7 @@ import logging
 import os.path
 import requests
 import shutil
+import subprocess
 import tempfile
 import time
 
@@ -15,12 +16,16 @@ from sqlalchemy.orm.session import make_transient
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
+from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.dependencies import Python
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
-from vmcloak.repository import image_path, Session, Image, Snapshot, iso_dst_path
+from vmcloak.repository import (
+    image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
+    db_migratable
+)
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
@@ -63,8 +68,19 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
 
 @click.group(invoke_without_command=True)
 @click.option("-u", "--user", help="Drop privileges to user.")
-def main(user):
+@click.pass_context
+def main(ctx, user):
     user and drop_privileges(user)
+
+    if db_migratable():
+        log.error(
+            "Database schema version mismatch. Expected: '%s'. "
+            "Optionally make a backup and then apply automatic database "
+            "migration by using: 'vmcloak migrate'" % SCHEMA_VERSION
+        )
+
+        if ctx.invoked_subcommand != "migrate":
+            exit(1)
 
 @main.command()
 @click.argument("name")
@@ -621,6 +637,25 @@ def zer0m0n(ipaddr, port):
     log.info("Patching zer0m0n-related files.")
     vmcloak.dependencies.names["zer0m0n"](a=a, h=h).run()
     log.info("Good to go, now *reboot* and make a new *snapshot* of your VM!")
+
+@main.command()
+@click.option("--revision", default="head", help="Migrate to a certain revision")
+def migrate(revision):
+    log.setLevel(logging.INFO)
+
+    if not db_migratable():
+        log.info("Database schema is already at the latest version")
+        exit(0)
+
+    try:
+        subprocess.check_call(
+            ["alembic", "upgrade", "%s" % revision],
+            cwd=os.path.join(VMCLOAK_ROOT, "data", "db_migration")
+        )
+    except subprocess.CalledProcessError as e:
+        log.exception("Database migration failed: %s", e)
+        exit(1)
+    log.info("Database migration successful!")
 
 def list_dependencies():
     print "Name", "version", "target", "sha1"
