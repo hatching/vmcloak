@@ -1,10 +1,12 @@
-0.4.6, TBD
+0.4.6, October 9th, 2018
 
     New: Install the old Cuckoo Agent compatible with cuckoo-modified next to
         the new Cuckoo Agent.
     Tweak: Make vmcloak-zer0m0n command work.
     Tweak: Make Windows 10 >= 1703 work (thanks samwakel).
     Tweak: Bump Sysmon to include 8.0.0 (thanks haam3r).
+    New: Introduce --paravirtprovider flag (thanks razu).
+    New: Database migrations (thanks RicoVZ).
 
 0.4.5, February 23rd, 2018
 
