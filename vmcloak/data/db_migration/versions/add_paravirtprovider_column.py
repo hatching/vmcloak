@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Jurriaan Bremer.
+# Copyright (C) 2018 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -11,8 +11,8 @@ Create Date: 2018-10-08 17:22:15.370000
 """
 
 # Revision identifiers, used by Alembic.
-revision = '5a5957711538'
-down_revision = '34c908159434'
+revision = "5a5957711538"
+down_revision = "34c908159434"
 
 from alembic import op
 import sqlalchemy as sa
