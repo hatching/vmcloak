@@ -275,7 +275,7 @@ class OperatingSystem(object):
             return False
 
         args = [
-            isocreate, "-quiet", "-b", "boot.img", "-o", newiso,
+            isocreate, "-quiet", "-b", "boot.img", "-allow-limited-size", "-o", newiso,
         ] + self.genisoargs + [outdir]
 
         log.debug("Executing genisoimage: %s", " ".join(args))
