@@ -1,4 +1,5 @@
-# Copyright (C) 2014-2016 Jurriaan Bremer.
+# Copyright (C) 2014-2017 Jurriaan Bremer.
+# Copyright (C) 2018 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -224,6 +225,9 @@ class VirtualBox(Machinery):
     def vrde(self, port=3389, password=""):
         return self._call("modifyvm", self.name, vrde="on", vrdeport=port,
                           vrdeproperty="VNCPassword=%s" % password)
+
+    def paravirtprovider(self, provider):
+        return self._call("modifyvm", self.name, paravirtprovider=provider)
 
     def export(self, filepath):
         return self._call(
