@@ -124,6 +124,7 @@ def remove_vm_data(name):
 
 def wait_for_shutdown(name, timeout=None):
     # TODO: timeout
+    m = machines.get(name)
     end = None
     if timeout:
         end = time.time() + timeout
