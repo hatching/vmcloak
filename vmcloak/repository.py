@@ -97,7 +97,7 @@ if not os.path.isdir(iso_dst_path):
 
 def platform(name):
     full = 'vmcloak.platforms.' + name
-    m  = modules.get(full)
+    m = modules.get(full)
     if not m:
         m = __import__(full)
         m = getattr(m.platforms, name)
@@ -187,5 +187,4 @@ def find_image(name):
 def image_has_snapshots(name):
     s = Session()
     t = s.query(Snapshot).filter_by(Snapshot.image.name==name).first()
-    print(t)
     return t
