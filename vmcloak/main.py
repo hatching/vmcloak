@@ -226,8 +226,8 @@ def _create_iso(iso_path, attr):
 def init(ctx, name, iso, vm, **attr):
     """Create a new image"""
     attr["debug"] = ctx.meta["debug"]
-    if attr["debug"]:
-        attr["vrde"] = True
+    if attr["vrde"] or attr["debug"]:
+        attr["vrde"] = attr["vrde_port"]
 
     try:
         p = repository.platform(vm)
