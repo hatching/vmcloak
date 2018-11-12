@@ -47,13 +47,18 @@ def _create_vm(name, attr, iso_path=None, is_snapshot=False):
 
     args = QEMU_AMD64 + [
         "-smp", "1,sockets=1,cores=%s,threads=1" % attr["cpus"],
+        "-realtime", "mlock=off",
+        "-rtc", "base=localtime,driftfix=slew",
         "-m", "%s" % attr["ramsize"],
         "-netdev", "type=bridge,br=%s,id=net0" % net,
         "-device", "rtl8139,netdev=net0",
-        "-drive", "file=%s,format=qcow2,if=none,id=drive-ide0-0-0" % attr["path"],
-        "-device", "ide-hd,bus=ide.0,unit=0,drive=drive-ide0-0-0,id=ide0-0-0,bootindex=2",
-        "-drive", "%sif=none,id=drive-ide0-0-1,readonly=on" % iso,
-        "-device", "ide-cd,bus=ide.0,unit=1,drive=drive-ide0-0-1,id=ide0-0-1,bootindex=1"
+
+        "-drive", "file=%s,format=qcow2,if=none,id=disk" % attr["path"],
+        "-device", "ich9-ahci,id=ahci",
+        "-device", "ide-drive,bus=ahci.0,unit=0,drive=disk,bootindex=2",
+
+        "-drive", "%sif=none,id=cdrom,readonly=on" % iso,
+        "-device", "ide-cd,bus=ahci.1,unit=0,drive=cdrom,bootindex=1"
     ]
 
     if attr.get("vrde"):
