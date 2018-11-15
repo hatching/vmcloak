@@ -679,7 +679,7 @@ def list_dependencies():
             v = exe.get("version", "None")
             print "  *" if d.default and d.default == v else "   ",
             print exe.get("version", "None") + " "*(versionlen - len(v)),
-            print exe.get("target"), exe["sha1"]
+            print exe.get("target"), exe.get("sha1")
         print
 
 @main.group("list")
