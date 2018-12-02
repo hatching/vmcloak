@@ -1,4 +1,5 @@
 # Copyright (C) 2014-2018 Jurriaan Bremer.
+# Copyright (C) 2018 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -27,10 +28,10 @@ log = logging.getLogger(__name__)
 
 GENISOIMAGE_WARNINGS = [
     "Warning: creating filesystem that does not conform to ISO-9660.",
-    "Warning: creating filesystem that does not conform to ISO-9660."
-    " Warning: creating filesystem with (nonstandard) Joliet extensions but"
-    " without (standard) Rock Ridge extensions. It is highly recommended to"
-    " add Rock Ridge",
+    "Warning: creating filesystem that does not conform to ISO-9660. "
+    "Warning: creating filesystem with (nonstandard) Joliet extensions but "
+    "without (standard) Rock Ridge extensions. It is highly recommended to "
+    "add Rock Ridge",
 ]
 
 class Machinery(object):
@@ -299,7 +300,7 @@ class WindowsAutounattended(OperatingSystem):
     dummy_serial_key = None
     genisoargs = [
         "-no-emul-boot", "-iso-level", "2", "-udf", "-J", "-l", "-D", "-N",
-        "-joliet-long", "-relaxed-filenames",
+        "-joliet-long", "-relaxed-filenames", "-allow-limited-size",
     ]
 
     def _autounattend_xml(self, product):
