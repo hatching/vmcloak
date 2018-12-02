@@ -1,9 +1,7 @@
 # Copyright (C) 2015-2018 Jurriaan Bremer.
+# Copyright (C) 2018 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
-# Firefox Dependency submitted by Jason Lewis.
-# https://download-installer.cdn.mozilla.net/pub/firefox/releases/41.0.2/win32/en-US/Firefox%20Setup%2041.0.2.exe
-# file was renamed Firefox_Setup_41.0.2.exe to avoid issues with spaces.
 
 from vmcloak.abstract import Dependency
 
@@ -14,6 +12,10 @@ class Firefox(Dependency):
         "version": "41.0.2",
         "url": "https://cuckoo.sh/vmcloak/Firefox_Setup_41.0.2.exe",
         "sha1": "c5118ca76f0cf6ecda5d2b9292bf191525c9627a",
+    }, {
+        "version": "60.0.2",
+        "url": "https://cuckoo.sh/vmcloak/Firefox Setup 60.0.2.exe",
+        "sha1": "565c5ddca3e4acbc30a550f312d3a1a7fd8d8bce",
     }]
 
     def run(self):
