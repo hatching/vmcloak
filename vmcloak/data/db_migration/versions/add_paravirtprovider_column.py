@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Hatching B.V.
+# Copyright (C) 2018-2019 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column(
-        "image", sa.Column("paravirtprovider", sa.String(32), nullable=True)
+        "image", sa.Column("paravirtprovider", sa.String(32), default="default")
     )
 
 def downgrade():
