@@ -1,4 +1,5 @@
 # Copyright (C) 2017-2018 Jurriaan Bremer.
+# Copyright (C) 2019 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -10,8 +11,8 @@ from vmcloak.abstract import Dependency
 
 log = logging.getLogger(__name__)
 
-class Zer0m0n(Dependency):
-    name = "zer0m0n"
+class Onemon(Dependency):
+    name = "onemon"
     recommended = True
 
     # Disable ntoskrnl validation in winload.
@@ -149,3 +150,8 @@ subprocess.check_output([
         self.a.execpy("C:\\pgdsepatch.py", True)
         time.sleep(2)
         self.a.remove("C:\\pgdsepatch.py")
+
+class Zer0m0n(Onemon, Dependency):
+    """Backwards compatibility."""
+    name = "zer0m0n"
+    recommended = False
