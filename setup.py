@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2018 Jurriaan Bremer.
-# Copyright (C) 2018 Hatching B.V.
+# Copyright (C) 2018-2019 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -7,10 +7,10 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.6",
-    author="Jurriaan Bremer",
-    author_email="jbr@cuckoo.sh",
-    url="http://vmcloak.org/",
+    version="0.4.7",
+    author="Hatching B.V.",
+    author_email="info@hatching.io",
+    url="https://github.com/hatching/vmcloak",
     packages=[
         "vmcloak",
         "vmcloak.data",

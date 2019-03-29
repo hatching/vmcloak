@@ -3,6 +3,9 @@
     Tweak: Set a default version for Firefox (thanks samwakel).
     Tweak: Include a more recent Firefox (60.0.2).
     Tweak: Fix issue with 4GB+ 64-bit Windows 10 images.
+    Tweak: Update Cuckoo Agent to 0.10.
+    New: Microsoft Edge dependency.
+    Tweak: Include alembic dependency.
 
 0.4.6, October 9th, 2018
 
