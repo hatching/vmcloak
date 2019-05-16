@@ -666,7 +666,7 @@ def migrate(revision):
     log.info("Database migration successful!")
 
 def list_dependencies():
-    print "Name", "version", "target", "sha1"
+    print "Name", "version", "target", "sha1", "arch",
     print
     for name, d in sorted(vmcloak.dependencies.names.items()):
         if d.exes:
@@ -679,8 +679,20 @@ def list_dependencies():
             v = exe.get("version", "None")
             print "  *" if d.default and d.default == v else "   ",
             print exe.get("version", "None") + " "*(versionlen - len(v)),
-            print exe.get("target"), exe["sha1"]
+            print exe.get("target"), exe.get("sha1", "None"),
+            print exe.get("arch", "")
         print
+
+def list_vms():
+    session = Session()
+    vms = []
+    try:
+        vms = session.query(Snapshot).all()
+    finally:
+        session.close()
+
+    for vm in vms:
+        print vm.vmname, vm.ipaddr
 
 @main.group("list")
 def _list():
@@ -693,3 +705,7 @@ def _list_dependencies():
 @_list.command("deps")
 def _list_deps():
     list_dependencies()
+
+@_list.command("vms")
+def _list_vms():
+    list_vms()
