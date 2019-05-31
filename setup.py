@@ -44,7 +44,7 @@ setup(
         "jinja2==2.9.6",
         "pefile2==1.2.11",
         "pyyaml==3.12",
-        "sqlalchemy==1.0.8",
+        "sqlalchemy==1.3.3",
         "alembic>=1.0.7, <1.1",
     ],
     extras_require={
