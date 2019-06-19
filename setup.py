@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.7",
+    version="0.4.8",
     author="Hatching B.V.",
     author_email="info@hatching.io",
     url="https://github.com/hatching/vmcloak",
