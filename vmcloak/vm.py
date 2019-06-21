@@ -7,10 +7,12 @@ import logging
 import os
 import subprocess
 import time
+import re
 
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
-from vmcloak.exceptions import CommandError
+from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT
+from vmcloak.exceptions import VMWareError, CommandError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
 from vmcloak.repository import vms_path
@@ -238,3 +240,204 @@ class VirtualBox(Machinery):
             vendorurl="http://cuckoosandbox.org/",
             description="Cuckoo Sandbox Virtual Machine created by VMCloak",
         )
+
+
+class VMware(Machinery):
+    """Virtualization layer for VMware Workstation using vmrun utility."""
+    FIELDS = {}
+
+    def __init__(self, vmx_path, *args, **kwargs):
+        Machinery.__init__(self, *args, **kwargs)
+        self.vmrun = get_path("vmrun")
+        self.vdiskman = get_path("vmware-vdiskmanager")
+        self.vmx_path = vmx_path
+
+    def _call(self, *args, **kwargs):
+        cmd = list(args)
+
+        for k, v in kwargs.items():
+            if v is None or v is True:
+                cmd += ["--" + k]
+            else:
+                cmd += ["--" + k.rstrip("_"), str(v)]
+
+        try:
+            log.debug("Running command: %s", cmd)
+            ret = subprocess.check_output(cmd)
+        except Exception as e:
+            log.error("[-] Error running command: %s", e)
+            raise CommandError
+
+        return ret.strip()
+
+    def vmx_parse(self):
+        vminfo = dict()
+        if not self.vmx_path.endswith(".vmx"):
+            raise VMWareError("Wrong configuration: vm path not "
+                              "ending witht .vmx: %s" % self.vmx_path)
+
+        if not os.path.exists(self.vmx_path):
+            raise VMWareError("VMX file %s not found" % self.vmx_path)
+
+        with open(self.vmx_path, 'r') as f:
+            content = f.readlines()
+
+        for line in content:
+            match = re.search(r'(?P<key>.*)\s=\s(?P<value>.*)', line.rstrip())
+            if match:
+                key = match.group('key')
+                value = match.group('value')
+                vminfo[key] = value
+        return vminfo
+
+    def modifyvm(self, keyword, value):
+        """On success returns True otherwise False"""
+        if keyword and value:
+            with open(self.vmx_path, 'w') as f:
+                content = f.readlines()
+                if self.vminfo(keyword):
+                    for i, line in enumerate(content):
+                        content[i] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
+                    f.write(content)
+                    return True
+                else:
+                    return False
+        else:
+            return False
+
+    def vminfo(self, element=None):
+        """Returns a dictionary with all available information for the
+        Virtual Machine."""
+        vminf = self.vmx_parse()
+        if element is not None:
+            try:
+                return vminf[element]
+            except KeyError as e:
+                return None
+        else:
+            return vminf
+
+    def create_vm(self):
+        """Create a new Virtual Machine."""
+        raise
+
+    def delete_vm(self):
+        """Delete an existing Virtual Machine and its associated files."""
+        return self._call(self.vmrun, 'deleteVM', self.vmx_path)
+
+    def ramsize(self, ramsize):
+        """Modify the amount of RAM available for this Virtual Machine."""
+        reminder = ramsize % 4 # RAM-size should be a multiple of 4
+        if reminder != 0:
+            ramsize -= reminder
+        return self.modifyvm('memsize', ramsize)
+
+    def vramsize(self, width, height):
+        """Modify the amount of Video memory available for this Virtual
+        Machine."""
+        mem_req = width * height * 4
+        if mem_req > _VMX_vramsize_DEFAULT:
+            vram_size = mem_req
+        else:
+            vram_size = _VMX_vramsize_DEFAULT
+            data = {
+                'reso_height': height,
+                'reso_width': width,
+                'vram_size': vram_size
+            }
+        content = _VMX_SVGA_TEMPLATE % data
+        with open(self.vmx_path, 'w+') as f:
+            f.write(content)
+        return True
+
+    def os_type(self, osversion):
+        """Set the OS type."""
+        # http://sanbarrow.com/vmx/vmx-guestos.html
+        operating_systems = {
+            "winxp": "winxppro",
+            "win7x86": "windows7",
+            "win7x64": "windows7-64",
+            "win81x86": "windows81",
+            "win81x64": "windows81-64",
+            "win10x86": "windows10",
+            "win10x64": "windows10-64",
+        }
+        return self.modifyvm('guestOS', operating_systems[osversion])
+
+    # https://www.vmware.com/pdf/VirtualDiskManager.pdf
+    def create_hd(self, hdd_path, fsize="1GB", adapter_type='ide', disk_type='0'):
+        """Create a harddisk."""
+        if not any(s in fsize for s in ('GB', 'MB', 'KB')):
+            raise CommandError('hdd_size should contain size specifier: %s' % fsize)
+        if not any(a in adapter_type for a in ('ide', 'buslogic', 'lsilogic')):
+            raise CommandError('adapter type is not valid: %s' % adapter_type)
+        # sparse = 0 / flat = 2 disk_type
+        if not any(dt in disk_type for dt in ('0', '2')):
+            raise CommandError('disk type is not valid: %s' % disk_type)
+        return self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a' , adapter_type, hdd_path)
+
+    def immutable_hd(self):
+        """Make a harddisk immutable or normal."""
+        raise
+
+    def remove_hd(self):
+        """Remove a harddisk."""
+        raise
+
+    def clone_hd(self, hdd_inpath, hdd_outpath):
+        """Clone a harddisk."""
+        raise
+
+    def cpus(self, count):
+        """Set the number of CPUs to assign to this Virtual Machine."""
+        raise
+
+    def attach_iso(self, iso):
+        """Attach a ISO file as DVDRom drive."""
+        raise
+
+    def detach_iso(self):
+        """Detach the ISO file in the DVDRom drive."""
+        raise
+
+    def set_field(self, key, value):
+        """Set a specific field of a Virtual Machine."""
+        raise
+
+    def modify_mac(self, mac=None):
+        """Modify the MAC address of a Virtual Machine."""
+        raise
+
+    def network_index(self):
+        """Get the index for the next network interface."""
+        ret = self.network_idx
+        self.network_idx += 1
+        return ret
+
+    def hostonly(self, macaddr=None, index=1):
+        """Configure a hostonly adapter for the Virtual Machine."""
+        raise
+
+    def nat(self, macaddr=None, index=1):
+        """Configure NAT for the Virtual Machine."""
+        raise
+
+    def hwvirt(self, enable=True):
+        """Enable or disable the usage of Hardware Virtualization."""
+        raise
+
+    def start_vm(self, visible=False):
+        """Start the associated Virtual Machine."""
+        raise
+
+    def snapshot(self, label):
+        """Take a snapshot of the associated Virtual Machine."""
+        raise
+
+    def stopvm(self):
+        """Stop the associated Virtual Machine."""
+        raise
+
+    def list_settings(self):
+        """List all settings of a Virtual Machine."""
+        raise

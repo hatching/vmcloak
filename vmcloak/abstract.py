@@ -14,7 +14,7 @@ import time
 
 from vmcloak.conf import load_hwconf
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.exceptions import DependencyError
+from vmcloak.exceptions import DependencyError, CommandError
 from vmcloak.misc import (
     copytreelower, copytreeinto, sha1_file, ini_read, filename_from_url,
     download_file
@@ -42,6 +42,24 @@ class Machinery(object):
     def __init__(self, name):
         self.name = name
         self.network_idx = 0
+
+    def _call(self, *args, **kwargs):
+        cmd = [self.vboxmanage] + list(args)
+
+        for k, v in kwargs.items():
+            if v is None or v is True:
+                cmd += ["--" + k]
+            else:
+                cmd += ["--" + k.rstrip("_"), str(v)]
+
+        try:
+            log.debug("Running command: %s", cmd)
+            ret = subprocess.check_output(cmd)
+        except Exception as e:
+            log.error("[-] Error running command: %s", e)
+            raise CommandError
+
+        return ret.strip()
 
     def vminfo(self, element=None):
         """Returns a dictionary with all available information for the

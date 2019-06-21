@@ -19,6 +19,14 @@ PATHS = {
         "/usr/bin/VBoxManage",
         "/usr/local/bin/VBoxManage",
     ],
+    "vmrun": [
+        "/usr/bin/vmrun",
+        "/usr/local/bin/vmrun",
+    ],
+    "vmware-vdiskmanager": [
+        "/usr/bin/vmware-vdiskmanager",
+        "/usr/local/bin/vmware-vdiskmanager",
+    ],
 }
 
 INSTALL = {

@@ -10,3 +10,7 @@ class DependencyError(Exception):
 
 class SwarmError(Exception):
     pass
+
+class VMWareError(Exception):
+    """VMWare operation error."""
+    pass
