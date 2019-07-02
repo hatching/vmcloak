@@ -17,6 +17,7 @@ setup(
         "vmcloak.data.bootstrap",
         "vmcloak.data.hwconf",
     ],
+    # TODO: add scripts for vmnet0 iface including vmmon, vmnet signing..
     scripts=[
         "bin/vmcloak-gethwconf",
         "bin/vmcloak-iptables",

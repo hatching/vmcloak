@@ -27,6 +27,10 @@ PATHS = {
         "/usr/bin/vmware-vdiskmanager",
         "/usr/local/bin/vmware-vdiskmanager",
     ],
+    "ovftool": [
+        "/usr/bin/ovftool",
+        "/usr/lib/vmware-ovftool/ovftool",
+    ],
 }
 
 INSTALL = {

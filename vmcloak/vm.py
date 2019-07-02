@@ -11,7 +11,8 @@ import re
 
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
-from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT
+from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT,\
+    _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC
 from vmcloak.exceptions import VMWareError, CommandError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
@@ -250,6 +251,7 @@ class VMware(Machinery):
         Machinery.__init__(self, *args, **kwargs)
         self.vmrun = get_path("vmrun")
         self.vdiskman = get_path("vmware-vdiskmanager")
+        self.ovftool = get_path("ovftool")
         self.vmx_path = vmx_path
 
     def _call(self, *args, **kwargs):
@@ -290,20 +292,34 @@ class VMware(Machinery):
                 vminfo[key] = value
         return vminfo
 
-    def modifyvm(self, keyword, value):
+    def modifyvm(self, keyword, value, remove=False):
         """On success returns True otherwise False"""
         if keyword and value:
-            with open(self.vmx_path, 'w') as f:
-                content = f.readlines()
-                if self.vminfo(keyword):
+            try:
+                with open(self.vmx_path, 'w') as f:
+                    content = f.readlines()
                     for i, line in enumerate(content):
-                        content[i] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
+                        keyword_ = re.findall(r'(.*)\s=', line.rstrip())[0]
+                        if keyword in keyword_:
+                            content[i] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
+                        else:
+                            return False
                     f.write(content)
                     return True
-                else:
-                    return False
+            except IOError as e:
+                log.error("I/O error ({0}): {1}".format(e.errno, e.strerror))
+                self.writevar(keyword, value)
         else:
             return False
+
+    def readvar(self, name, var_type="runtimeConfig"):
+        """ Reads a variable from the virtual machine state or
+        runtime configuration as stored in the .vmx file"""
+        return self._call(self.vmrun, 'readVariable', self.vmx_path, var_type, name)
+
+    def writevar(self, name, value, var_type="runtimeConfig"):
+        """ Writes a variable to the virtual machine state or guest. """
+        return self._call(self.vmrun, 'writeVariable', self.vmx_path, var_type, name, value)
 
     def vminfo(self, element=None):
         """Returns a dictionary with all available information for the
@@ -313,6 +329,7 @@ class VMware(Machinery):
             try:
                 return vminf[element]
             except KeyError as e:
+                log.error("vminfo error ({0}): {1}".format(e.errno, e.strerror))
                 return None
         else:
             return vminf
@@ -340,14 +357,27 @@ class VMware(Machinery):
             vram_size = mem_req
         else:
             vram_size = _VMX_vramsize_DEFAULT
-            data = {
-                'reso_height': height,
-                'reso_width': width,
-                'vram_size': vram_size
-            }
+
+        data = {
+            'reso_height': height,
+            'reso_width': width,
+            'vram_size': vram_size
+        }
         content = _VMX_SVGA_TEMPLATE % data
-        with open(self.vmx_path, 'w+') as f:
-            f.write(content)
+        try:
+            with open(self.vmx_path, 'w+') as f:
+                f.write(content)
+        except IOError as e:
+            log.error("I/O error ({0}): {1}".format(e.errno, e.strerror))
+
+            vram_data = content.strip().splitlines()
+            for row in vram_data:
+                match = re.search(r'(?P<key>.*)\s=\s(?P<value>.*)', row.rstrip())
+                if match:
+                    name = match.group('key')
+                    value = match.group('value')
+                    self.writevar(name, value)
+
         return True
 
     def os_type(self, osversion):
@@ -374,39 +404,86 @@ class VMware(Machinery):
         # sparse = 0 / flat = 2 disk_type
         if not any(dt in disk_type for dt in ('0', '2')):
             raise CommandError('disk type is not valid: %s' % disk_type)
-        return self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a' , adapter_type, hdd_path)
+        ret = self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a' , adapter_type, hdd_path)
+        if ret:
+            # attach created vmdk to vmx file
+            data = {
+                'adapter_type': adapter_type,
+                'vmdk_path': hdd_path,
+                'mode': 'independent-persistent' if adapter_type is 'ide' else 'persistent'
+            }
+            content = _VMX_HDD_TEMPLATE % data
+            with open(self.vmx_path, 'w+') as f:
+                f.write(content)
+                return ret
+        else:
+            return ret
 
-    def immutable_hd(self):
+    # https://communities.vmware.com/thread/389673
+    def immutable_hd(self, adapter_type, mode="persistent"):
         """Make a harddisk immutable or normal."""
-        raise
+        if not any(m in mode.lower() for m in ('persistent', 'nonpersistent', 'undoable')):
+            raise CommandError('hdd disk mode is not valid: %s' % mode)
+        keyword = "%s0:0.mode" % adapter_type
+        return self.modifyvm(keyword, mode)
 
-    def remove_hd(self):
+    def remove_hd(self, hdd_path):
         """Remove a harddisk."""
-        raise
+        if not os.path.exists(hdd_path):
+            return False
+        cmd = ['rm', '-rf', hdd_path]
+        try:
+            log.debug("Running command: %s", cmd)
+            ret = subprocess.check_output(cmd)
+        except Exception as e:
+            log.error("[-] Error running command: %s", e)
+            raise CommandError
+        if ret == 0:
+            return True
 
-    def clone_hd(self, hdd_inpath, hdd_outpath):
+
+    def clone_hd(self, hdd_outpath):
         """Clone a harddisk."""
-        raise
+        self._call(self.ovftool, self.vmx_path, hdd_outpath)
 
     def cpus(self, count):
         """Set the number of CPUs to assign to this Virtual Machine."""
-        raise
+        self.writevar('numvcpus', count)
 
+    # http://www.sanbarrow.com/vmx/vmx-cd-settings.html
     def attach_iso(self, iso):
         """Attach a ISO file as DVDRom drive."""
-        raise
+        data_entry = _VMX_CDROM.format(**{'dev_type': 'cdrom-image', 'filename':iso})
+        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
+        for key, value in item_dict.items():
+            self.writevar(key, value)
 
     def detach_iso(self):
         """Detach the ISO file in the DVDRom drive."""
-        raise
+        time.sleep(1)
+        data_entry = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw', 'filename':'auto detect'})
+        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
+        for key, value in item_dict.items():
+            self.writevar(key, value)
 
     def set_field(self, key, value):
         """Set a specific field of a Virtual Machine."""
-        raise
+        self.writevar(key, value)
 
-    def modify_mac(self, mac=None):
+
+    # http://sanbarrow.com/vmx/vmx-network-advanced.html
+    def modify_mac(self, macaddr=None, index=0):
         """Modify the MAC address of a Virtual Machine."""
-        raise
+        if macaddr is None:
+            macaddr = random_mac()
+
+        # VMRun accepts MAC addressed to be out-of-range
+        data_entry = _VMX_MAC.format(**{'index': index, 'addr_type': 'static', 'mac_addr':macaddr})
+        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
+        for key, value in item_dict.items():
+            self.writevar(key, value)
+        return macaddr
+
 
     def network_index(self):
         """Get the index for the next network interface."""
@@ -414,30 +491,117 @@ class VMware(Machinery):
         self.network_idx += 1
         return ret
 
-    def hostonly(self, macaddr=None, index=1):
-        """Configure a hostonly adapter for the Virtual Machine."""
-        raise
 
-    def nat(self, macaddr=None, index=1):
+    # TODO: check existence of vboxnet1 iface on windows OS
+    # http://www.sanbarrow.com/vmx/vmx-network.html
+    def hostonly(self, nictype="e1000", macaddr=None, adapter=None):
+        index = self.network_index()
+        if not adapter:
+            if os.name == "posix":
+                adapter = "vmnet1"
+            else:
+                adapter = "VMWare Host-Only Ethernet Adapter"
+
+        # Ensure our hostonly interface is actually up and running.
+        if subprocess.check_output(['cat', '/sys/class/net/vmnet1/operstate']).strip() != "unknown":
+            log.error("Have you configured %s?", adapter)
+            log.info("Please refer to the documentation to configure it.")
+            log.info("Also, please take case of signing vmmon and vmnet drivers on secure boot OS.")
+            return False
+
+        hostonly_config = _VMX_ETHERNET.format(**{'index': index, 'vdev': nictype, 'conn_type': 'hostonly'})
+        config = dict([item.split(" = ") for item in hostonly_config.strip().split("\n")])
+        for key, value in config.items():
+            self.writevar(key, value)
+
+        return self.modify_mac(macaddr, index)
+
+
+    # TODO: check existence of vboxnet1 iface on windows OS
+    # http://www.sanbarrow.com/vmx/vmx-network.html
+    def nat(self, nictype="e1000", macaddr=None, adapter=None):
         """Configure NAT for the Virtual Machine."""
-        raise
+        index = self.network_index()
+        if not adapter:
+            if os.name == "posix":
+                adapter = "vmnet8"
+            else:
+                adapter = "VMWare NAT Ethernet Adapter"
+
+        # Ensure our hostonly interface is actually up and running.
+        if subprocess.check_output(['cat', '/sys/class/net/vmnet8/operstate']).strip() != "unknown":
+            log.error("Have you configured %s?", adapter)
+            log.info("Please refer to the documentation to configure it.")
+            log.info("Also, please take case of signing vmmon and vmnet drivers on secure boot OS.")
+            return False
+
+        nat_config = _VMX_ETHERNET.format(**{'index': index, 'conn_type': 'nat', 'vdev': nictype})
+        config = dict([item.split(" = ") for item in nat_config.strip().split("\n")])
+        for key, value in config.items():
+            self.writevar(key, value)
+
+        return self.modify_mac(macaddr, index)
+
 
     def hwvirt(self, enable=True):
         """Enable or disable the usage of Hardware Virtualization."""
-        raise
+        if enable:
+            self.writevar("vhv.enable", "TRUE")
+        else:
+            self.writevar("vhv.enable", "FALSE")
 
     def start_vm(self, visible=False):
         """Start the associated Virtual Machine."""
-        raise
+        self._call(self.vmrun, "start", self.vmx_path, "gui" if visible else "nogui")
+
+    def list_snapshots(self):
+        """ Returns a list of snapshots for the specific VMX file """
+        return self._call(self.vmrun, "listSnapshots", self.vmx_path)[1:]
 
     def snapshot(self, label):
-        """Take a snapshot of the associated Virtual Machine."""
-        raise
+        """Take a snapshot of the associated Virtual Machine.
+        IF the VM was ON then VMWare by default put it on a suspended state,
+        that's why we turn it on again!"""
+        self._call(self.vmrun, "snapshot", self.vmx_path, label)
 
-    def stopvm(self):
+    def restore_snapshot(self, label=None):
+        """ Revert to the latest snapshot available """
+        if label:
+            self._call(self.vmrun, "revertToSnapshot", self.vmx_path, label)
+        else:
+            try:
+                self._call(self.vmrun, "revertToSnapshot", self.vmx_path, self.list_snapshots()[-1])
+            except IndexError:
+                log.error("There's no snapshot exists for the VM at %s" % self.vmx_path)
+        self.start_vm()
+
+    def delete_snapshot(self, label, recursive=False):
+        if recursive:
+            self._call(self.vmrun, "deleteSnapshot", self.vmx_path, label, "andDeleteChildren")
+        else:
+            self._call(self.vmrun, "deleteSnapshot", self.vmx_path, label)
+
+    def stopvm(self, powertype="soft"):
         """Stop the associated Virtual Machine."""
-        raise
+        self._call(self.vmrun, "stop", self.vmx_path, powertype)
 
-    def list_settings(self):
-        """List all settings of a Virtual Machine."""
-        raise
+    def remotedisplay(self, port=5901, password=""):
+        if len(password) < 8:
+            log.info("You should provide a password at least 8 characters long.")
+        vnc_config = _VMX_VNC.format(**{'password': password, 'port': port})
+        config = dict([item.split(" = ") for item in vnc_config.strip().split("\n")])
+        for key, value in config.items():
+            self.writevar(key, value)
+
+    def paravirtprovider(self, provider):
+        return self._call("modifyvm", self.name, paravirtprovider=provider)
+
+    def export(self, filepath):
+        return self._call(
+            "export", self.name, "--output", filepath, "--vsys", "0",
+            product="VMCloak",
+            producturl="http://vmcloak.org/",
+            vendor="Cuckoo Sandbox",
+            vendorurl="http://cuckoosandbox.org/",
+            description="Cuckoo Sandbox Virtual Machine created by VMCloak",
+        )
