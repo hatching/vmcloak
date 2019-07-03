@@ -593,15 +593,12 @@ class VMware(Machinery):
         for key, value in config.items():
             self.writevar(key, value)
 
-    def paravirtprovider(self, provider):
-        return self._call("modifyvm", self.name, paravirtprovider=provider)
+    # http://wiki.osx86project.org/wiki/index.php/Virtualization
+    def enableparavirt(self):
+        self._writevar("vmi.present", "TRUE")
 
+    # https://www.virtuallyghetto.com/2019/01/quick-tip-import-ovf-ova-as-vm-template-using-ovftool-4-3-update-1.html
     def export(self, filepath):
-        return self._call(
-            "export", self.name, "--output", filepath, "--vsys", "0",
-            product="VMCloak",
-            producturl="http://vmcloak.org/",
-            vendor="Cuckoo Sandbox",
-            vendorurl="http://cuckoosandbox.org/",
-            description="Cuckoo Sandbox Virtual Machine created by VMCloak",
-        )
+        if filepath.split('.')[-1] != "ovf":
+            filepath += ".ovf"
+        return self._call(self.ovftool, self.vmx_path, "--acceptAllEulas", "--allowAllExtraConfig", filepath)
