@@ -13,7 +13,7 @@ from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT,\
     _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC
-from vmcloak.exceptions import VMWareError, CommandError
+from vmcloak.exceptions import VMWareError, CommandError, VMWareVMXError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
 from vmcloak.repository import vms_path
@@ -40,7 +40,7 @@ class VirtualBox(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command: %s", e)
+            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
             raise CommandError
 
         return ret.strip()
@@ -267,7 +267,7 @@ class VMware(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command: %s", e)
+            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
             raise CommandError
 
         return ret.strip()
@@ -336,7 +336,10 @@ class VMware(Machinery):
 
     def create_vm(self):
         """Create a new Virtual Machine."""
-        raise
+        # displayName = "angr-dev"
+        # guestOS = "ubuntu-64"
+        return self._call("createvm", name=self.name,
+                          basefolder=vms_path, register=True)
 
     def delete_vm(self):
         """Delete an existing Virtual Machine and its associated files."""
@@ -363,20 +366,16 @@ class VMware(Machinery):
             'reso_width': width,
             'vram_size': vram_size
         }
-        content = _VMX_SVGA_TEMPLATE % data
-        try:
-            with open(self.vmx_path, 'w+') as f:
-                f.write(content)
-        except IOError as e:
-            log.error("I/O error ({0}): {1}".format(e.errno, e.strerror))
 
-            vram_data = content.strip().splitlines()
-            for row in vram_data:
-                match = re.search(r'(?P<key>.*)\s=\s(?P<value>.*)', row.rstrip())
-                if match:
-                    name = match.group('key')
-                    value = match.group('value')
-                    self.writevar(name, value)
+        vram_items = _VMX_SVGA_TEMPLATE % data
+        item_dict = dict([item.split(" = ") for item in vram_items.strip().split("\n")])
+
+        try:
+            for key, value in item_dict.items():
+                self.writevar(key, value)
+        except VMWareVMXError as e:
+            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
+            return False
 
         return True
 
@@ -436,7 +435,7 @@ class VMware(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command: %s", e)
+            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
             raise CommandError
         if ret == 0:
             return True

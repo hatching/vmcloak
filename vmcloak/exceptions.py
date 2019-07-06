@@ -12,5 +12,7 @@ class SwarmError(Exception):
     pass
 
 class VMWareError(Exception):
-    """VMWare operation error."""
+    pass
+
+class VMWareVMXError(Exception):
     pass
