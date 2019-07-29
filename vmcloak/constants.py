@@ -10,8 +10,8 @@ VMCLOAK_VM_MODES = ["virtualbox", "iso", "vmware"]
 # https://www.makululinux.com/wp/newwiki/3d-support-for-vmware-guests-on-linux-hosts/
 # https://kb.vmware.com/s/article/1003
 _VMX_SVGA_TEMPLATE = """
-mks.enable3d = “TRUE”
-mks.gl.allowBlacklistedDrivers = “TRUE”
+mks.enable3d = "TRUE"
+mks.gl.allowBlacklistedDrivers = "TRUE"
 svga.autodetect = "FALSE"
 svga.graphicsMemoryKB = "1048576"
 svga.maxHeight = "%(reso_height)s"
@@ -25,15 +25,16 @@ svga.vramSize = "%(vram_size)s"
 # %(adapter_type)s0.virtualDev = "%(virt_dev)s"
 _VMX_HDD_TEMPLATE = """
 %(adapter_type)s0.present = "TRUE"
-%(adapter_type)s0:0.fileName = "%(vmdk_patht)s"
+%(adapter_type)s0:0.fileName = "%(vmdk_path)s"
 %(adapter_type)s0:0.present = "TRUE"
-%(adapter_type)s0:0.mode = "%(mode)s"
+%(adapter_type)s0:0.virtualDev = "%(virtual_dev)s"
 """
 
 _VMX_CDROM = """
-sata0:1.deviceType: "{dev_type}"
-sata0:1.fileName: "{filename}"
-sata0:1.present: "TRUE"
+{adapter_type}0:1.deviceType = "{dev_type}"
+{adapter_type}0:1.fileName = "{filename}"
+{adapter_type}0:1.present = "TRUE"
+{adapter_type}0:1.startConnected = "TRUE"
 """
 
 _VMX_ETHERNET = """
@@ -47,6 +48,14 @@ _VMX_MAC = """
 ethernet{index}.addressType = "{addr_type}"
 ethernet{index}.address = "{mac_addr}"
 ethernet{index}.checkMACAddress = "FALSE"
+"""
+
+_VMX_FLOPPY = """
+floppy0.fileType = "{file_type}"
+floppy0.fileName = "{file_name}"
+floppy0.clientDevice = "FALSE"
+floppy0.autodetect = "TRUE"
+floppy0.present = "{present}"
 """
 
 _VMX_VNC = """

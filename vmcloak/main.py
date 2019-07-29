@@ -245,8 +245,6 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
             print>>f, "set %s=%s" % (key, value)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
-    hdd_path = os.path.join(image_path, "%s.vdi" % name)
-    m = VirtualBox(name=name)
 
     if not h.buildiso(mount, iso_path, bootstrap, tempdir):
         shutil.rmtree(bootstrap)
@@ -255,6 +253,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
     shutil.rmtree(bootstrap)
 
     if vm == "virtualbox":
+        hdd_path = os.path.join(image_path, "%s.vdi" % name)
+        m = VirtualBox(name=name)
         m.create_vm()
         m.os_type(osversion)
         m.paravirtprovider(paravirtprovider)
@@ -262,6 +262,37 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.mouse("usbtablet")
         m.ramsize(ramsize)
         m.vramsize(vramsize)
+        m.create_hd(hdd_path, hddsize * 1024)
+        m.attach_iso(iso_path)
+        m.hostonly(nictype=h.nictype, adapter=adapter)
+
+        if vrde:
+            m.vrde(port=vrde_port)
+
+        log.info("Starting the Virtual Machine %r to install Windows.", name)
+        m.start_vm(visible=vm_visible)
+
+        m.wait_for_state(shutdown=True)
+
+        m.detach_iso()
+        os.unlink(iso_path)
+
+        m.remove_hd()
+        m.compact_hd(hdd_path)
+        m.delete_vm()
+
+    elif vm == "vmware":
+        hdd_path = os.path.join(image_path, "%s.vmdk" % name)
+        vm_path = os.path.join(vms_path, name)
+        os.mkdir(vm_path)
+        vmx_path = os.path.join(vm_path, "%s.vmx" % name)
+        m = VMware(vmx_path, name=name)
+        m.create_vm()
+        m.os_type(osversion)
+        m.enableparavirt()
+        m.cpus(cpus)
+        m.ramsize(ramsize)
+        m.vramsize(reso_width, reso_height)
         m.create_hd(hdd_path, hddsize * 1024)
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, adapter=adapter)

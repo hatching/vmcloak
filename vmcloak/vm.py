@@ -8,11 +8,12 @@ import os
 import subprocess
 import time
 import re
+import codecs
 
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT,\
-    _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC
+    _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC, _VMX_FLOPPY
 from vmcloak.exceptions import VMWareError, CommandError, VMWareVMXError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
@@ -253,6 +254,8 @@ class VMware(Machinery):
         self.vdiskman = get_path("vmware-vdiskmanager")
         self.ovftool = get_path("ovftool")
         self.vmx_path = vmx_path
+        self.vmx_template = os.path.join(os.getcwdu(),
+                                "vmcloak/data/template/template.vmx")
 
     def _call(self, *args, **kwargs):
         cmd = list(args)
@@ -267,7 +270,7 @@ class VMware(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
+            log.error("[-] Error running command: %s" % str(e))
             raise CommandError
 
         return ret.strip()
@@ -292,34 +295,93 @@ class VMware(Machinery):
                 vminfo[key] = value
         return vminfo
 
-    def modifyvm(self, keyword, value, remove=False):
-        """On success returns True otherwise False"""
-        if keyword and value:
+    def isrunning(self):
+        """ Check to see if the VM is running or not """
+        vm_list = self._call(self.vmrun, 'list')
+        instances = re.findall(r'Total running VMs:\s(\d+)', vm_list)
+        running = False
+        #import ipdb; ipdb.set_trace()
+        if len(instances):
+            if int(instances[0]) > 0:
+                vm_list = vm_list.splitlines()[1:]
+                for vm in vm_list:
+                    if os.path.basename(vm) == os.path.basename(self.vmx_path):
+                        running = True
+        return running
+
+    def exists(self, keyword, value=None):
+        """ check the existence of a keyword in VMX config file """
+        found = False
+        line_num = 0
+        pattern = re.compile(r'(?P<keyword>.*)\s=\s"(?P<value>.*)"')
+        if keyword:
             try:
-                with open(self.vmx_path, 'w') as f:
+                with open(self.vmx_path, 'r+') as f:
                     content = f.readlines()
                     for i, line in enumerate(content):
-                        keyword_ = re.findall(r'(.*)\s=', line.rstrip())[0]
-                        if keyword in keyword_:
-                            content[i] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
-                        else:
-                            return False
-                    f.write(content)
-                    return True
+                        # pass shebang
+                        if line.startswith('#!'):
+                            continue
+                        result = re.match(pattern, line.rstrip())
+                        if result:
+                            keyword_,value_ = result.group('keyword'), result.group('value')
+                        if keyword == keyword_:
+                            found = True
+                            line_num = line
+                            if value is None:
+                                value = value_
+                            break
             except IOError as e:
-                log.error("I/O error ({0}): {1}".format(e.errno, e.strerror))
-                self.writevar(keyword, value)
-        else:
+                log.error("I/O error: %s"%e)
+        return found, line_num, value
+
+    def modifyvm(self, keyword, value, remove=False):
+        """On success returns True otherwise False"""
+        try:
+            with open(self.vmx_path, 'r+') as f:
+                content = f.readlines()
+                found, line, _ = self.exists(keyword, value)
+                # just to get rid of quotes!
+                value = re.sub(r'\"(.*)\"', r"\1", value)
+                if found:
+                    content[content.index(line)] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
+                if not found:
+                    attribute = "{0} = \"{1}\"\n".format(keyword, value)
+                    content.append(attribute)
+                f.seek(0)
+                f.truncate()
+                f.write(''.join(content))
+                return True
+        except IOError as e:
+            log.error("I/O error: %s"%str(e))
             return False
 
     def readvar(self, name, var_type="runtimeConfig"):
         """ Reads a variable from the virtual machine state or
         runtime configuration as stored in the .vmx file"""
-        return self._call(self.vmrun, 'readVariable', self.vmx_path, var_type, name)
+        if self.isrunning():
+            return self._call(self.vmrun, 'readVariable', self.vmx_path, var_type, name)
+        else:
+            found, _, value = self.exists(name)
+            if found:
+                return value
+            else:
+                log.error("value not found")
+                return None
 
+    # deprecated: not working while VM is not running!
     def writevar(self, name, value, var_type="runtimeConfig"):
         """ Writes a variable to the virtual machine state or guest. """
         return self._call(self.vmrun, 'writeVariable', self.vmx_path, var_type, name, value)
+
+    def batchmodify(self, items):
+        item_dict = dict([item.split(" = ") for item in items.strip().split("\n")])
+        try:
+            for key, value in item_dict.items():
+                self.modifyvm(key, value)
+        except VMWareVMXError as e:
+            log.error("[-] Error running command: %s" % str(e))
+            return False
 
     def vminfo(self, element=None):
         """Returns a dictionary with all available information for the
@@ -327,19 +389,30 @@ class VMware(Machinery):
         vminf = self.vmx_parse()
         if element is not None:
             try:
-                return vminf[element]
+                value = vminf[element].replace("\"","")
+                if value.isdigit():
+                    return int(value)
+                if value == "TRUE":
+                    return True
+                if value == "FALSE":
+                    return False
+                else:
+                    return value
             except KeyError as e:
-                log.error("vminfo error ({0}): {1}".format(e.errno, e.strerror))
+                log.error("[-] Error running command: %s" % str(e))
                 return None
         else:
             return vminf
 
     def create_vm(self):
         """Create a new Virtual Machine."""
-        # displayName = "angr-dev"
-        # guestOS = "ubuntu-64"
-        return self._call("createvm", name=self.name,
-                          basefolder=vms_path, register=True)
+        with open(self.vmx_template, "r") as f:
+            vmx_tmp = f.read()
+            with codecs.open(self.vmx_path, "w", "utf-8") as fh:
+                content = vmx_tmp.format(**{"displayName": self.name, "guestOS":
+                                            "", "name": self.name, "vmdk_path":
+                                            ""})
+                fh.write(content)
 
     def delete_vm(self):
         """Delete an existing Virtual Machine and its associated files."""
@@ -350,9 +423,9 @@ class VMware(Machinery):
         reminder = ramsize % 4 # RAM-size should be a multiple of 4
         if reminder != 0:
             ramsize -= reminder
-        return self.modifyvm('memsize', ramsize)
+        return self.modifyvm('memsize', str(ramsize))
 
-    def vramsize(self, width, height):
+    def vramsize(self, width=1920, height=1080):
         """Modify the amount of Video memory available for this Virtual
         Machine."""
         mem_req = width * height * 4
@@ -372,9 +445,9 @@ class VMware(Machinery):
 
         try:
             for key, value in item_dict.items():
-                self.writevar(key, value)
+                self.modifyvm(key, value)
         except VMWareVMXError as e:
-            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
+            log.error("[-] Error running command: %s" % str(e))
             return False
 
         return True
@@ -394,8 +467,29 @@ class VMware(Machinery):
         return self.modifyvm('guestOS', operating_systems[osversion])
 
     # https://www.vmware.com/pdf/VirtualDiskManager.pdf
-    def create_hd(self, hdd_path, fsize="1GB", adapter_type='ide', disk_type='0'):
-        """Create a harddisk."""
+    def create_hd(self, hdd_path, virtual_dev="lsislogic", fsize="1GB",
+                  adapter_type='lsilogic', disk_type='0'):
+        """Create a harddisk.
+            0- create a growable virtual disk contained in a single file (monolithicsparse)
+            1-create a growable virtual disk split in to 2GB files (splitsparse)
+            2-create a preallocated virtual disk contained in a single file (monolithicflat)
+            3-create a preallocated virtual disk split into 2GB files (splitflat)
+            4-create a preallocated virtual disk compatible with ESXserver (VMFSflat)
+            5-create a compressed disk optimized for streaming.
+            -----------------------
+            scsi0:0.deviceType = "plainDisk"
+            scsi0:0.deviceType = "PhysicalDrive0"
+            scsi0:0.deviceType = "rawDisk"
+            scsi0:0.deviceType = "scsi-hardDisk"
+            scsi0:0.deviceType = "scsi-passthru"
+            scsi0:0.deviceType = "scsi-nonpassThru-rdm"
+            scsi0:0.deviceType = "scsi-passthru"
+            scsi0:0.deviceType = "scsi-passThru-rdm"
+            ------------------------
+            scsi0.virtualDev = "buslogic"
+            scsi0.virtualDev = "lsislogic"
+            ------------------------
+        """
         if not any(s in fsize for s in ('GB', 'MB', 'KB')):
             raise CommandError('hdd_size should contain size specifier: %s' % fsize)
         if not any(a in adapter_type for a in ('ide', 'buslogic', 'lsilogic')):
@@ -403,20 +497,29 @@ class VMware(Machinery):
         # sparse = 0 / flat = 2 disk_type
         if not any(dt in disk_type for dt in ('0', '2')):
             raise CommandError('disk type is not valid: %s' % disk_type)
+        if self.vminfo("guestOS") == "winxppro" and adapter_type == "buslogic":
+            raise CommandError("""Windows XP doesn't support buslogic by default.
+                               you'd better use this link and mount floppy.
+                               link : https://kb.vmware.com/s/article/2007603""")
         ret = self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a' , adapter_type, hdd_path)
         if ret:
             # attach created vmdk to vmx file
             data = {
-                'adapter_type': adapter_type,
+                'adapter_type': 'scsi',
                 'vmdk_path': hdd_path,
-                'mode': 'independent-persistent' if adapter_type is 'ide' else 'persistent'
+                'virtual_dev': virtual_dev,
+                #'mode': 'independent-persistent' if adapter_type is 'ide' else 'persistent'
             }
             content = _VMX_HDD_TEMPLATE % data
-            with open(self.vmx_path, 'w+') as f:
-                f.write(content)
-                return ret
+            self.batchmodify(content)
         else:
             return ret
+
+    def mount_floppy(self, image, present=True):
+        floppy_config = _VMX_FLOPPY.format(**{'file_type': 'file',
+                                             'file_name':os.path.abspath(image), 'present':
+                                             "TRUE" if present else "FALSE"})
+        return self.batchmodify(floppy_config)
 
     # https://communities.vmware.com/thread/389673
     def immutable_hd(self, adapter_type, mode="persistent"):
@@ -435,11 +538,10 @@ class VMware(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
+            log.error("[-] Error running command: %s" % str(e))
             raise CommandError
         if ret == 0:
             return True
-
 
     def clone_hd(self, hdd_outpath):
         """Clone a harddisk."""
@@ -447,49 +549,41 @@ class VMware(Machinery):
 
     def cpus(self, count):
         """Set the number of CPUs to assign to this Virtual Machine."""
-        self.writevar('numvcpus', count)
+        self.modifyvm('numvcpus', count)
 
     # http://www.sanbarrow.com/vmx/vmx-cd-settings.html
-    def attach_iso(self, iso):
-        """Attach a ISO file as DVDRom drive."""
-        data_entry = _VMX_CDROM.format(**{'dev_type': 'cdrom-image', 'filename':iso})
-        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
-        for key, value in item_dict.items():
-            self.writevar(key, value)
+    def attach_iso(self, iso, adapter_type="sata"):
+        """
+        Attach a ISO file as DVDRom drive.
+        ----------------------------------
+        scsi0:0.deviceType = "cdrom-image"
+        scsi0:0.deviceType = "atapi-cdrom"
+        scsi0:0.deviceType = "cdrom-raw"
+        """
+        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-image',
+                                          'filename':iso, 'adapter_type': adapter_type})
+        return self.batchmodify(iso_config)
 
     def detach_iso(self):
         """Detach the ISO file in the DVDRom drive."""
         time.sleep(1)
-        data_entry = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw', 'filename':'auto detect'})
-        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
-        for key, value in item_dict.items():
-            self.writevar(key, value)
-
-    def set_field(self, key, value):
-        """Set a specific field of a Virtual Machine."""
-        self.writevar(key, value)
-
+        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw', 'filename':'auto detect'})
+        return self.batchmodify(iso_config)
 
     # http://sanbarrow.com/vmx/vmx-network-advanced.html
     def modify_mac(self, macaddr=None, index=0):
         """Modify the MAC address of a Virtual Machine."""
         if macaddr is None:
             macaddr = random_mac()
-
         # VMRun accepts MAC addressed to be out-of-range
-        data_entry = _VMX_MAC.format(**{'index': index, 'addr_type': 'static', 'mac_addr':macaddr})
-        item_dict = dict([item.split(" = ") for item in data_entry.strip().split("\n")])
-        for key, value in item_dict.items():
-            self.writevar(key, value)
-        return macaddr
-
+        mac_config = _VMX_MAC.format(**{'index': index, 'addr_type': 'static', 'mac_addr':macaddr})
+        return self.batchmodify(mac_config)
 
     def network_index(self):
         """Get the index for the next network interface."""
         ret = self.network_idx
         self.network_idx += 1
         return ret
-
 
     # TODO: check existence of vboxnet1 iface on windows OS
     # http://www.sanbarrow.com/vmx/vmx-network.html
@@ -509,12 +603,8 @@ class VMware(Machinery):
             return False
 
         hostonly_config = _VMX_ETHERNET.format(**{'index': index, 'vdev': nictype, 'conn_type': 'hostonly'})
-        config = dict([item.split(" = ") for item in hostonly_config.strip().split("\n")])
-        for key, value in config.items():
-            self.writevar(key, value)
-
+        self.batchmodify(hostonly_config)
         return self.modify_mac(macaddr, index)
-
 
     # TODO: check existence of vboxnet1 iface on windows OS
     # http://www.sanbarrow.com/vmx/vmx-network.html
@@ -526,28 +616,22 @@ class VMware(Machinery):
                 adapter = "vmnet8"
             else:
                 adapter = "VMWare NAT Ethernet Adapter"
-
         # Ensure our hostonly interface is actually up and running.
         if subprocess.check_output(['cat', '/sys/class/net/vmnet8/operstate']).strip() != "unknown":
             log.error("Have you configured %s?", adapter)
             log.info("Please refer to the documentation to configure it.")
             log.info("Also, please take case of signing vmmon and vmnet drivers on secure boot OS.")
             return False
-
         nat_config = _VMX_ETHERNET.format(**{'index': index, 'conn_type': 'nat', 'vdev': nictype})
-        config = dict([item.split(" = ") for item in nat_config.strip().split("\n")])
-        for key, value in config.items():
-            self.writevar(key, value)
-
+        self.batchmodify(nat_config)
         return self.modify_mac(macaddr, index)
-
 
     def hwvirt(self, enable=True):
         """Enable or disable the usage of Hardware Virtualization."""
         if enable:
-            self.writevar("vhv.enable", "TRUE")
+            self.modifyvm("vhv.enable", "TRUE")
         else:
-            self.writevar("vhv.enable", "FALSE")
+            self.modifyvm("vhv.enable", "FALSE")
 
     def start_vm(self, visible=False):
         """Start the associated Virtual Machine."""
@@ -555,7 +639,7 @@ class VMware(Machinery):
 
     def list_snapshots(self):
         """ Returns a list of snapshots for the specific VMX file """
-        return self._call(self.vmrun, "listSnapshots", self.vmx_path)[1:]
+        return self._call(self.vmrun, "listSnapshots", self.vmx_path)
 
     def snapshot(self, label):
         """Take a snapshot of the associated Virtual Machine.
@@ -580,7 +664,7 @@ class VMware(Machinery):
         else:
             self._call(self.vmrun, "deleteSnapshot", self.vmx_path, label)
 
-    def stopvm(self, powertype="soft"):
+    def stop_vm(self, powertype="hard"):
         """Stop the associated Virtual Machine."""
         self._call(self.vmrun, "stop", self.vmx_path, powertype)
 
@@ -588,13 +672,11 @@ class VMware(Machinery):
         if len(password) < 8:
             log.info("You should provide a password at least 8 characters long.")
         vnc_config = _VMX_VNC.format(**{'password': password, 'port': port})
-        config = dict([item.split(" = ") for item in vnc_config.strip().split("\n")])
-        for key, value in config.items():
-            self.writevar(key, value)
+        self.batchmodify(vnc_config)
 
     # http://wiki.osx86project.org/wiki/index.php/Virtualization
     def enableparavirt(self):
-        self._writevar("vmi.present", "TRUE")
+        self.modifyvm("vmi.present", "TRUE")
 
     # https://www.virtuallyghetto.com/2019/01/quick-tip-import-ovf-ova-as-vm-template-using-ovftool-4-3-update-1.html
     def export(self, filepath):

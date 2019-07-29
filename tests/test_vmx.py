@@ -102,36 +102,81 @@ class VMX(object):
 
         return ret.strip()
 
-    def readvar(self, name, var_type="runtimeConfig"):
-        """ Reads a variable from the virtual machine state or
-        runtime configuration as stored in the .vmx file"""
-        return self._call(self.vmrun, 'readVariable', self.vmx_path, var_type, name)
+    def isrunning(self):
+        """ Check to see if the VM is running or not """
+        vm_list = self._call(self.vmrun, 'list')
+        instances = re.findall(r'Total running VMs:\s(\d+)', vm_list)
+        running = False
+        #import ipdb; ipdb.set_trace()
+        if len(instances):
+            if int(instances[0]) > 0:
+                vm_list = vm_list.splitlines()[1:]
+                for vm in vm_list:
+                    if os.path.basename(vm) == os.path.basename(self.vmx_path):
+                        running = True
+        return running
 
 
-    def modifyvm(self, keyword, value, remove=False):
-        """On success returns True otherwise False"""
-        found = 0
-        if keyword and value:
+    def exists(self, keyword, value=None):
+        """ check the existence of a keyword in VMX config file """
+        found = False
+        line_num = 0
+        pattern = re.compile(r'(?P<keyword>.*)\s=\s"(?P<value>.*)"')
+        if keyword:
             try:
                 with open(self.vmx_path, 'r+') as f:
                     content = f.readlines()
                     for i, line in enumerate(content):
-                        keyword_ = re.findall(r'(.*)\s=', line.rstrip())[0]
-                        if keyword in keyword_:
-                            content[i] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
-                            found = 1
+                        # pass shebang
+                        if line.startswith('#!'):
+                            continue
+                        result = re.match(pattern, line.rstrip())
+                        if result:
+                            keyword_,value_ = result.group('keyword'), result.group('value')
+                        if keyword == keyword_:
+                            found = True
+                            line_num = line
+                            if value is None:
+                                value = value_
                             break
-                    if not found:
-                        attribute = "{0} = {1}".format(keyword, value)
-                        content.append(attribute)
-                    f.seek(0)
-                    f.truncate()
-                    f.write(''.join(content))
-                    return True
             except IOError as e:
                 log.error("I/O error: %s"%e)
+        return found, line_num, value
+
+
+    def readvar(self, name, var_type="runtimeConfig"):
+        """ Reads a variable from the virtual machine state or
+        runtime configuration as stored in the .vmx file"""
+        if self.isrunning():
+            return self._call(self.vmrun, 'readVariable', self.vmx_path, var_type, name)
         else:
+            found, _, value = self.exists(name)
+            if found:
+                return value
+            else:
+                log.error("value not found")
+                return None
+
+
+    def modifyvm(self, keyword, value, remove=False):
+        """On success returns True otherwise False"""
+        try:
+            with open(self.vmx_path, 'r+') as f:
+                content = f.readlines()
+                found, line, _ = self.exists(keyword, value)
+                if found:
+                    content[content.index(line)] = re.sub(r'"(.*)"', '\"%s\"' % value, line)
+                if not found:
+                    attribute = "{0} = \"{1}\"".format(keyword, value)
+                    content.append(attribute)
+                f.seek(0)
+                f.truncate()
+                f.write(''.join(content))
+                return True
+        except IOError as e:
+            log.error("I/O error: %s"%e)
             return False
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="a simple parser for vmware vmx file")
