@@ -17,7 +17,8 @@ class WindowsXP(OperatingSystem):
     name = "winxp"
     service_pack = 3
     mount = "/mnt/winxp"
-    nictype = "Am79C973"
+    #nictype = "Am79C973"
+    nictype = "e1000"
     osdir = os.path.join("$oem$", "$1")
     genisoargs = [
         "-no-emul-boot", "-boot-load-seg", "1984", "-boot-load-size", "4",

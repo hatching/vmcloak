@@ -313,7 +313,8 @@ class WindowsAutounattended(OperatingSystem):
     """Abstract wrapper around Windows-based Operating Systems that use the
     autounattend.xml file for automated installation, i.e., Windows 7+."""
 
-    nictype = "82540EM"
+    # vmware produces internal error while using 82540EM, then I switched to e1000
+    nictype = "e1000"
     osdir = os.path.join("sources", "$oem$", "$1")
     dummy_serial_key = None
     genisoargs = [

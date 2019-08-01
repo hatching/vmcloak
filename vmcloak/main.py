@@ -25,13 +25,13 @@ from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import (
     image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
-    db_migratable
+    db_migratable, vms_path
 )
 from vmcloak.winxp import WindowsXP
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
-from vmcloak.vm import VirtualBox
+from vmcloak.vm import VirtualBox, VMWare
 from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
@@ -132,12 +132,17 @@ def clone(name, outname):
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
 @click.option("--vramsize", default=16, help="Video memory size")
-@click.option("--hddsize", type=int, default=256, help="HDD size *1024")
+@click.option("--hddsize", type=int, default=512, help="HDD size *1024")
+@click.option("--hdd-adapter", type=str, default="lsilogic", help="HDD adapter type")
+@click.option("--cd-adapter", type=str, default="sata", help="CD-ROM adapter type")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--vnc", is_flag=True, help="Enable the VNC Remote Display Protocol.")
+@click.option("--vnc-port", default=5901, help="Specify the VNC port.")
+@click.option("--vnc-pwd", default="password", help="Specify the VNC connection password.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
 @click.option("--paravirtprovider", default="default",
               help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
@@ -145,15 +150,19 @@ def clone(name, outname):
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
-         gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, python_version, paravirtprovider, debug,
+         gateway, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, cd_adapter, tempdir, resolution,
+         vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, debug,
          verbose):
 
     if verbose:
         log.setLevel(logging.INFO)
     if debug:
-        vrde = True
+        if vm == "virtualbox":
+            vrde = True
+        if vm == "vmware":
+            vnc = True
         log.setLevel(logging.DEBUG)
+        vm_visible = True
 
     session = Session()
     image = session.query(Image).filter_by(name=name).first()
@@ -162,13 +171,16 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         exit(1)
 
     if vm not in VMCLOAK_VM_MODES:
-        log.error("Only VirtualBox Machinery or iso is supported at this point.")
+        log.error("Only VirtualBox, VMWare Machinery, or iso is supported at this point.")
         exit(1)
 
     if winxp:
         h = WindowsXP()
         osversion = "winxp"
         ramsize = ramsize or 1024
+        hddsize = "5GB" if vm == "vmware" else hddsize
+        hdd_adapter = "buslogic"
+        cd_adapter = "ide"
     elif win7x86:
         h = Windows7x86()
         ramsize = ramsize or 1024
@@ -177,6 +189,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         h = Windows7x64()
         ramsize = ramsize or 2048
         osversion = "win7x64"
+        hddsize = "20GB" if vm == "vmware" else hddsize
     elif win81x86:
         h = Windows81x86()
         ramsize = ramsize or 2048
@@ -281,36 +294,46 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.compact_hd(hdd_path)
         m.delete_vm()
 
-    elif vm == "vmware":
-        hdd_path = os.path.join(image_path, "%s.vmdk" % name)
+    if vm == "vmware":
         vm_path = os.path.join(vms_path, name)
-        os.mkdir(vm_path)
+        img_path = os.path.join(image_path, name)
+        hdd_path = os.path.join(img_path, "%s.vmdk" % name)
+        ovf_path = os.path.join(img_path, "%s.ovf" % name)
+        # check existence directory
+        if not os.path.isdir(vm_path):
+            os.mkdir(vm_path)
+        if not os.path.isdir(img_path):
+            os.mkdir(img_path)
         vmx_path = os.path.join(vm_path, "%s.vmx" % name)
-        m = VMware(vmx_path, name=name)
+        m = VMWare(vmx_path, name=name)
         m.create_vm()
         m.os_type(osversion)
-        m.enableparavirt()
-        m.cpus(cpus)
+        #m.enableparavirt()
+        #m.cpus(cpus)
         m.ramsize(ramsize)
-        m.vramsize(reso_width, reso_height)
-        m.create_hd(hdd_path, hddsize * 1024)
-        m.attach_iso(iso_path)
-        m.hostonly(nictype=h.nictype, adapter=adapter)
+        #m.vramsize()
+        #m.hwvirt()
+        m.create_hd(hdd_path, fsize=hddsize, adapter_type=hdd_adapter)
+        m.attach_iso(iso_path, adapter_type=cd_adapter)
+        m.hostonly(nictype=h.nictype)
+        m.upgrade_vm()
 
-        if vrde:
-            m.vrde(port=vrde_port)
+        #if vnc:
+        #    m.remotedisplay(port=vnc_port, password=vnc_pwd)
 
         log.info("Starting the Virtual Machine %r to install Windows.", name)
         m.start_vm(visible=vm_visible)
 
+        # wait until system shutdown (after installation finished!)
         m.wait_for_state(shutdown=True)
 
-        m.detach_iso()
+        m.detach_iso(adapter_type=cd_adapter)
         os.unlink(iso_path)
 
-        m.remove_hd()
+        #m.remove_hd()
         m.compact_hd(hdd_path)
-        m.delete_vm()
+        m.export(ovf_path)
+        #m.delete_vm()
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)
 

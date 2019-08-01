@@ -9,6 +9,7 @@ import subprocess
 import time
 import re
 import codecs
+import glob
 
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
@@ -244,7 +245,7 @@ class VirtualBox(Machinery):
         )
 
 
-class VMware(Machinery):
+class VMWare(Machinery):
     """Virtualization layer for VMware Workstation using vmrun utility."""
     FIELDS = {}
 
@@ -294,6 +295,17 @@ class VMware(Machinery):
                 value = match.group('value')
                 vminfo[key] = value
         return vminfo
+
+    def wait_for_state(self, shutdown=False):
+        while True:
+            try:
+                status = self.isrunning()
+                if shutdown and not status:
+                    break
+            except CommandError:
+                pass
+
+            time.sleep(1)
 
     def isrunning(self):
         """ Check to see if the VM is running or not """
@@ -416,6 +428,8 @@ class VMware(Machinery):
 
     def delete_vm(self):
         """Delete an existing Virtual Machine and its associated files."""
+        if self.isrunning():
+            self.stop_vm()
         return self._call(self.vmrun, 'deleteVM', self.vmx_path)
 
     def ramsize(self, ramsize):
@@ -456,7 +470,7 @@ class VMware(Machinery):
         """Set the OS type."""
         # http://sanbarrow.com/vmx/vmx-guestos.html
         operating_systems = {
-            "winxp": "winxppro",
+            "winxp": "winxphome",
             "win7x86": "windows7",
             "win7x64": "windows7-64",
             "win81x86": "windows81",
@@ -467,8 +481,8 @@ class VMware(Machinery):
         return self.modifyvm('guestOS', operating_systems[osversion])
 
     # https://www.vmware.com/pdf/VirtualDiskManager.pdf
-    def create_hd(self, hdd_path, virtual_dev="lsislogic", fsize="1GB",
-                  adapter_type='lsilogic', disk_type='0'):
+    def create_hd(self, hdd_path, virtual_dev="lsisas1068", fsize="10GB",
+                  adapter_type='lsilogic', disk_type='1'):
         """Create a harddisk.
             0- create a growable virtual disk contained in a single file (monolithicsparse)
             1-create a growable virtual disk split in to 2GB files (splitsparse)
@@ -490,22 +504,36 @@ class VMware(Machinery):
             scsi0.virtualDev = "lsislogic"
             ------------------------
         """
+        #import ipdb; ipdb.set_trace()
+        guestOS = self.vminfo("guestOS")
         if not any(s in fsize for s in ('GB', 'MB', 'KB')):
             raise CommandError('hdd_size should contain size specifier: %s' % fsize)
         if not any(a in adapter_type for a in ('ide', 'buslogic', 'lsilogic')):
             raise CommandError('adapter type is not valid: %s' % adapter_type)
         # sparse = 0 / flat = 2 disk_type
-        if not any(dt in disk_type for dt in ('0', '2')):
+        if not any(str(dt) in disk_type for dt in range(6)):
             raise CommandError('disk type is not valid: %s' % disk_type)
-        if self.vminfo("guestOS") == "winxppro" and adapter_type == "buslogic":
-            raise CommandError("""Windows XP doesn't support buslogic by default.
-                               you'd better use this link and mount floppy.
-                               link : https://kb.vmware.com/s/article/2007603""")
-        ret = self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a' , adapter_type, hdd_path)
+        #if self.vminfo("guestOS") == "winxppro":
+        #    # change default value function by messing with *func_defaults*
+        #    defaults_lst = list(self.create_hd.__func__.func_defaults)
+        #    defaults_lst[defaults_lst.index(adapter_type)] = "buslogic"
+        #    self.create_hd.__func__.func_defaults = tuple(defaults_lst)
+        if "64" in guestOS and adapter_type == "buslogic":
+            log.error("BusLogic SCSI controllers are not supported on 64-bit\
+                      virtual machines.")
+            adapter_type = "lsislogic"
+        disk_path = re.findall(r'(.*).vmdk', hdd_path)[0]+"*"
+        files = glob.glob(disk_path)
+        if files:
+            log.debug("disk already exists.. removing")
+            for f in files:
+                os.remove(f)
+        ret = self._call(self.vdiskman, '-c', '-t', disk_type, '-s', fsize, '-a'
+                         , adapter_type, hdd_path)
         if ret:
             # attach created vmdk to vmx file
             data = {
-                'adapter_type': 'scsi',
+                'adapter_type': "scsi" if guestOS != "winxphome" else "ide",
                 'vmdk_path': hdd_path,
                 'virtual_dev': virtual_dev,
                 #'mode': 'independent-persistent' if adapter_type is 'ide' else 'persistent'
@@ -514,6 +542,11 @@ class VMware(Machinery):
             self.batchmodify(content)
         else:
             return ret
+
+    def upgrade_vm(self):
+        if self.isrunning():
+            self.stop_vm()
+        self._call(self.vmrun, "upgradevm", self.vmx_path)
 
     def mount_floppy(self, image, present=True):
         floppy_config = _VMX_FLOPPY.format(**{'file_type': 'file',
@@ -547,9 +580,14 @@ class VMware(Machinery):
         """Clone a harddisk."""
         self._call(self.ovftool, self.vmx_path, hdd_outpath)
 
+    def compact_hd(self, hdd_path):
+        # We first make the HDD "more" compact - this should be basically
+        # defragmenting it.
+        self._call(self.vdiskman, "-d", hdd_path)
+
     def cpus(self, count):
         """Set the number of CPUs to assign to this Virtual Machine."""
-        self.modifyvm('numvcpus', count)
+        self.modifyvm('numvcpus', str(count))
 
     # http://www.sanbarrow.com/vmx/vmx-cd-settings.html
     def attach_iso(self, iso, adapter_type="sata"):
@@ -564,10 +602,12 @@ class VMware(Machinery):
                                           'filename':iso, 'adapter_type': adapter_type})
         return self.batchmodify(iso_config)
 
-    def detach_iso(self):
+    def detach_iso(self, adapter_type="sata"):
         """Detach the ISO file in the DVDRom drive."""
         time.sleep(1)
-        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw', 'filename':'auto detect'})
+        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw',
+                                          'filename':'auto detect',
+                                          'adapter_type': adapter_type})
         return self.batchmodify(iso_config)
 
     # http://sanbarrow.com/vmx/vmx-network-advanced.html
@@ -680,6 +720,9 @@ class VMware(Machinery):
 
     # https://www.virtuallyghetto.com/2019/01/quick-tip-import-ovf-ova-as-vm-template-using-ovftool-4-3-update-1.html
     def export(self, filepath):
+        if self.isrunning():
+            self.stop_vm()
         if filepath.split('.')[-1] != "ovf":
             filepath += ".ovf"
-        return self._call(self.ovftool, self.vmx_path, "--acceptAllEulas", "--allowAllExtraConfig", filepath)
+        return self._call(self.ovftool, "--acceptAllEulas",
+                          "--allowAllExtraConfig", "--compress=9", self.vmx_path, filepath)

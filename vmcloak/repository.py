@@ -94,5 +94,8 @@ if not os.path.isdir(image_path):
 if not os.path.isdir(deps_path):
     os.mkdir(deps_path)
 
+if not os.path.isdir(vms_path):
+    os.mkdir(vms_path)
+
 if not os.path.isdir(iso_dst_path):
     os.mkdir(iso_dst_path)
