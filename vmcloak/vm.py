@@ -473,8 +473,8 @@ class VMWare(Machinery):
             "winxp": "winxphome",
             "win7x86": "windows7",
             "win7x64": "windows7-64",
-            "win81x86": "windows81",
-            "win81x64": "windows81-64",
+            "win81x86": "windows8",
+            "win81x64": "windows8-64",
             "win10x86": "windows10",
             "win10x64": "windows10-64",
         }
@@ -600,6 +600,8 @@ class VMWare(Machinery):
         """
         iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-image',
                                           'filename':iso, 'adapter_type': adapter_type})
+        #if adapter_type == "sata":
+        #    iso_config + 'sata0.present = "TRUE"\n'
         return self.batchmodify(iso_config)
 
     def detach_iso(self, adapter_type="sata"):

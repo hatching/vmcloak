@@ -134,7 +134,7 @@ def clone(name, outname):
 @click.option("--vramsize", default=16, help="Video memory size")
 @click.option("--hddsize", type=int, default=512, help="HDD size *1024")
 @click.option("--hdd-adapter", type=str, default="lsilogic", help="HDD adapter type")
-@click.option("--cd-adapter", type=str, default="sata", help="CD-ROM adapter type")
+@click.option("--cd-adapter", type=str, default="ide", help="CD-ROM adapter type")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
@@ -180,24 +180,30 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         ramsize = ramsize or 1024
         hddsize = "5GB" if vm == "vmware" else hddsize
         hdd_adapter = "buslogic"
-        cd_adapter = "ide"
+        #cd_adapter = "ide"
     elif win7x86:
         h = Windows7x86()
         ramsize = ramsize or 1024
         osversion = "win7x86"
+        hddsize = "20GB" if vm == "vmware" else hddsize
+        #cd_adapter = "ide"
     elif win7x64:
         h = Windows7x64()
         ramsize = ramsize or 2048
         osversion = "win7x64"
         hddsize = "20GB" if vm == "vmware" else hddsize
+        #cd_adapter = "ide"
+        #product = "ULTIMATE"
     elif win81x86:
         h = Windows81x86()
         ramsize = ramsize or 2048
         osversion = "win81x86"
+        hddsize = "20GB" if vm == "vmware" else hddsize
     elif win81x64:
         h = Windows81x64()
         ramsize = ramsize or 2048
         osversion = "win81x64"
+        hddsize = "20GB" if vm == "vmware" else hddsize
     elif win10x86:
         h = Windows10x86()
         ramsize = ramsize or 2048
