@@ -475,8 +475,8 @@ class VMWare(Machinery):
             "win7x64": "windows7-64",
             "win81x86": "windows8",
             "win81x64": "windows8-64",
-            "win10x86": "windows10",
-            "win10x64": "windows10-64",
+            "win10x86": "windows9",
+            "win10x64": "windows9-64",
         }
         return self.modifyvm('guestOS', operating_systems[osversion])
 

@@ -208,10 +208,12 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         h = Windows10x86()
         ramsize = ramsize or 2048
         osversion = "win10x86"
+        hddsize = "20GB" if vm == "vmware" else hddsize
     elif win10x64:
         h = Windows10x64()
         ramsize = ramsize or 2048
         osversion = "win10x64"
+        hddsize = "20GB" if vm == "vmware" else hddsize
     else:
         log.error(
             "Please provide one of --winxp, --win7x86, --win7x64, "
