@@ -500,8 +500,10 @@ class VMWare(Machinery):
             scsi0:0.deviceType = "scsi-passthru"
             scsi0:0.deviceType = "scsi-passThru-rdm"
             ------------------------
-            scsi0.virtualDev = "buslogic"
-            scsi0.virtualDev = "lsislogic"
+            scsi0.virtualDev = "buslogic" -> BusLogic SCSI
+            scsi0.virtualDev = "lsilogic" -> LSI Logic SCSI
+            scsi0.virtualDev = "lsisas1068" -> LSI Logic SAS
+            scsi0.virtualDev = "pvscsi" -> VMware Paravirtual SCSI
             ------------------------
         """
         #import ipdb; ipdb.set_trace()

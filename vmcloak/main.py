@@ -134,6 +134,7 @@ def clone(name, outname):
 @click.option("--vramsize", default=16, help="Video memory size")
 @click.option("--hddsize", type=int, default=512, help="HDD size *1024")
 @click.option("--hdd-adapter", type=str, default="lsilogic", help="HDD adapter type")
+@click.option("--hdd-vdev", type=str, default="lsisas1068", help="HDD virtual adapter type")
 @click.option("--cd-adapter", type=str, default="ide", help="CD-ROM adapter type")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
@@ -150,7 +151,7 @@ def clone(name, outname):
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
-         gateway, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, cd_adapter, tempdir, resolution,
+         gateway, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, hdd_vdev, cd_adapter, tempdir, resolution,
          vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, debug,
          verbose):
 
@@ -321,7 +322,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.ramsize(ramsize)
         #m.vramsize()
         #m.hwvirt()
-        m.create_hd(hdd_path, fsize=hddsize, adapter_type=hdd_adapter)
+        m.create_hd(hdd_path, fsize=hddsize, adapter_type=hdd_adapter, virtual_dev=hdd_vdev)
         m.attach_iso(iso_path, adapter_type=cd_adapter)
         m.hostonly(nictype=h.nictype)
         m.upgrade_vm()
