@@ -27,7 +27,7 @@ from vmcloak.repository import (
     image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
     db_migratable, vms_path
 )
-from vmcloak.winxp import WindowsXP
+from vmcloak.winxp import WindowsXPx86, WindowsXPx64
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
@@ -112,7 +112,8 @@ def clone(name, outname):
 
 @main.command()
 @click.argument("name")
-@click.option("--winxp", is_flag=True, help="This is a Windows XP instance.")
+@click.option("--winxpx86", is_flag=True, help="This is a Windows XP 32-bit instance.")
+@click.option("--winxpx64", is_flag=True, help="This is a Windows XP 64-bit instance.")
 @click.option("--win7x86", is_flag=True, help="This is a Windows 7 32-bit instance.")
 @click.option("--win7x64", is_flag=True, help="This is a Windows 7 64-bit instance.")
 @click.option("--win81x86", is_flag=True, help="This is a Windows 8.1 32-bit instance.")
@@ -145,14 +146,15 @@ def clone(name, outname):
 @click.option("--vnc-port", default=5901, help="Specify the VNC port.")
 @click.option("--vnc-pwd", default="password", help="Specify the VNC connection password.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
+@click.option("--extra-config", type=str, default="", help="Set extra configuration for VM")
 @click.option("--paravirtprovider", default="default",
               help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
-def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
+def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
          gateway, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, hdd_vdev, cd_adapter, tempdir, resolution,
-         vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, debug,
+         vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, extra_config, debug,
          verbose):
 
     if verbose:
@@ -175,13 +177,17 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         log.error("Only VirtualBox, VMWare Machinery, or iso is supported at this point.")
         exit(1)
 
-    if winxp:
-        h = WindowsXP()
-        osversion = "winxp"
+    if winxpx86:
+        h = WindowsXPx86()
+        osversion = "winxpx86"
         ramsize = ramsize or 1024
         hddsize = "5GB" if vm == "vmware" else hddsize
         hdd_adapter = "buslogic"
-        #cd_adapter = "ide"
+    elif winxpx64:
+        h = WindowsXPx64()
+        osversion = "winxpx64"
+        ramsize = ramsize or 1024
+        hddsize = "5GB" if vm == "vmware" else hddsize
     elif win7x86:
         h = Windows7x86()
         ramsize = ramsize or 1024
@@ -217,7 +223,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         hddsize = "20GB" if vm == "vmware" else hddsize
     else:
         log.error(
-            "Please provide one of --winxp, --win7x86, --win7x64, "
+            "Please provide one of --winxpx86, --winxpx64, --win7x86, --win7x64, "
             "--win81x86, --win81x64, --win10x86, --win10x64."
         )
         exit(1)
@@ -325,6 +331,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.create_hd(hdd_path, fsize=hddsize, adapter_type=hdd_adapter, virtual_dev=hdd_vdev)
         m.attach_iso(iso_path, adapter_type=cd_adapter)
         m.hostonly(nictype=h.nictype)
+        if extra_config != "":
+            m.batchmodify(extra_config)
         m.upgrade_vm()
 
         #if vnc:

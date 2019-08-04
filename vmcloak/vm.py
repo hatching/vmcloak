@@ -8,6 +8,7 @@ import os
 import subprocess
 import time
 import re
+import sys
 import codecs
 import glob
 
@@ -28,6 +29,11 @@ class VirtualBox(Machinery):
     def __init__(self, *args, **kwargs):
         Machinery.__init__(self, *args, **kwargs)
         self.vboxmanage = get_path("vboxmanage")
+        if self.vboxmanage is None:
+            log.error("[-] virtaulbox hasn't been installed on this machine. \
+                      Please use the following command to install it: \
+                      sudo apt-get install virtualbox")
+            sys.exit(1)
 
     def _call(self, *args, **kwargs):
         cmd = [self.vboxmanage] + list(args)
@@ -42,7 +48,7 @@ class VirtualBox(Machinery):
             log.debug("Running command: %s", cmd)
             ret = subprocess.check_output(cmd)
         except Exception as e:
-            log.error("[-] Error running command ({0}): {1}".format(e.errno, e.strerror))
+            log.error("[-] Error running command: %s" % str(e))
             raise CommandError
 
         return ret.strip()
@@ -170,6 +176,11 @@ class VirtualBox(Machinery):
             else:
                 adapter = "VirtualBox Host-Only Ethernet Adapter"
 
+        if not any(s in nictype for s in ('Am79C970A', 'Am79C973', '82540EM',
+                                          '82543GC', '82545EM')):
+            log.error("""%s is not supported nic type for virtualbox. by
+                      default set to Am79C973""")
+            nictype = "Am79C973"
         # Ensure our hostonly interface is actually up and running.
         if adapter not in self._call("list", "hostonlyifs"):
             log.error("Have you configured %s?", adapter)
@@ -470,7 +481,8 @@ class VMWare(Machinery):
         """Set the OS type."""
         # http://sanbarrow.com/vmx/vmx-guestos.html
         operating_systems = {
-            "winxp": "winxphome",
+            "winxpx86": "winxphome",
+            "winxpx64": "winxppro",
             "win7x86": "windows7",
             "win7x64": "windows7-64",
             "win81x86": "windows8",
@@ -524,6 +536,8 @@ class VMWare(Machinery):
             log.error("BusLogic SCSI controllers are not supported on 64-bit\
                       virtual machines.")
             adapter_type = "lsislogic"
+        if virtual_dev == "lsisas1068" and "winxp" in guestOS:
+            virtual_dev = "lsilogic"
         disk_path = re.findall(r'(.*).vmdk', hdd_path)[0]+"*"
         files = glob.glob(disk_path)
         if files:

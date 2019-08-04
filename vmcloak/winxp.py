@@ -50,12 +50,15 @@ class WindowsXP(OperatingSystem):
 
     def isofiles(self, outdir, tmp_dir=None):
         dst_winnt = os.path.join(outdir, "i386", "winnt.sif")
+        dst_winnt_x64 = os.path.join(outdir, "amd64", "winnt.sif")
 
         winnt_sif = self._winnt_sif()
 
         # Merge the existing winnt.sif with our changes.
         mode, winnt = ini_read(dst_winnt)
         ini_merge(winnt, winnt_sif, overwrite=True)
+        mode_64, winnt_64 = ini_read(dst_winnt_x64)
+        ini_merge(winnt_64, winnt_sif, overwrite=True)
 
         os.remove(winnt_sif)
 
@@ -63,8 +66,10 @@ class WindowsXP(OperatingSystem):
         # not already been set.
         winnt_opt_sif = os.path.join(self.path, "winnt-opt.sif")
         ini_merge(winnt, winnt_opt_sif, overwrite=False)
+        ini_merge(winnt_64, winnt_opt_sif, overwrite=False)
 
         ini_write(dst_winnt, mode, winnt)
+        ini_write(dst_winnt_x64, mode, winnt)
 
     def set_serial_key(self, serial_key):
         if not serial_key:
@@ -78,3 +83,11 @@ class WindowsXP(OperatingSystem):
 
         self.serial_key = serial_key
         return True
+
+class WindowsXPx64(WindowsXP):
+    arch = "amd64"
+    mount = "/mnt/winxpx64", "/mnt/winxp"
+
+class WindowsXPx86(WindowsXP):
+    arch = "x86"
+    mount = "/mnt/winxpx86", "/mnt/winxp"
