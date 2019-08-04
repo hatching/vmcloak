@@ -57,19 +57,20 @@ class WindowsXP(OperatingSystem):
         # Merge the existing winnt.sif with our changes.
         mode, winnt = ini_read(dst_winnt)
         ini_merge(winnt, winnt_sif, overwrite=True)
-        mode_64, winnt_64 = ini_read(dst_winnt_x64)
-        ini_merge(winnt_64, winnt_sif, overwrite=True)
-
-        os.remove(winnt_sif)
 
         # There are a couple of optional values that should be set if they have
         # not already been set.
         winnt_opt_sif = os.path.join(self.path, "winnt-opt.sif")
         ini_merge(winnt, winnt_opt_sif, overwrite=False)
-        ini_merge(winnt_64, winnt_opt_sif, overwrite=False)
 
         ini_write(dst_winnt, mode, winnt)
-        ini_write(dst_winnt_x64, mode, winnt)
+        if os.path.exists(dst_winnt_x64):
+            mode_64, winnt_64 = ini_read(dst_winnt_x64)
+            ini_merge(winnt_64, winnt_sif, overwrite=True)
+            ini_merge(winnt_64, winnt_opt_sif, overwrite=False)
+            ini_write(dst_winnt_x64, mode, winnt)
+
+        os.remove(winnt_sif)
 
     def set_serial_key(self, serial_key):
         if not serial_key:

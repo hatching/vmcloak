@@ -15,16 +15,20 @@ fi
 
 VM_PATH="/etc/vmware/networking"
 PATTERN="enabled"
+USER="pwnslinger"
+BRANCH=$(sudo -u $USER vmware --version | sed -r 's/.*(Workstation)\s(.*)\s.*/\L\1-\2/')
+#BRANCH="workstation"
 KEY_DIR=$HOME/.vmware/keys/
-PUB_KEY="MOK.der"
-PRV_KEY="MOK.priv"
+PUB_KEY="VMWARE.der"
+PRV_KEY="VMWARE.priv"
 NAT_MASK="255.255.255.0"
 HOSTONLY_MASK="255.255.255.0"
 NAT_SUBNET="192.168.156.0"
-HOSTONLY_SUBNET="192.168.19.0"
+NAT_SUBNET="192.168.19.0"
 DRIVERS=(vmmon vmnet)
 SBOOT=$(mokutil --sb-state | grep -q $PATTERN && echo $?)
 SIGN="/usr/src/linux-headers-$(uname -r)/scripts/sign-file"
+PATCHES="https://github.com/mkubecek/vmware-host-modules.git"
 
 iface() {
     local STAT=1
@@ -73,15 +77,30 @@ usage () {
     exit
 }
 
+function pause () {
+    read -p "$*"
+}
+
 signfile () {
     local DRIVER=$1
-    local MOD_PATH=$(modinfo -n $DRIVER)
-    $($SIGN sha256 "$KEY_DIR/$PRV_KEY" "$KEY_DIR/$PUB_KEY" $MOD_PATH)
+    local MOD_PATH=$(modinfo -n $DRIVER 2>&1)
+    #pause "debugging.."
+    if [[ $MOD_PATH == *"not found"* ]]; then
+        echo "VMWare modules should be compiled for new kernel version..."
+        $(git clone --single-branch --branch=$BRANCH $PATCHES $BRANCH)
+        pushd $BRANCH
+        $(make && make install)
+        popd
+        $(singfile $DRIVER)
+
+    fi
+    $($SIGN sha256 "$KEY_DIR$PRV_KEY" "$KEY_DIR$PUB_KEY" $MOD_PATH)
     $(modprobe -q $DRIVER)
 }
 
 secureboot () {
     local STAT=1
+    #local ERR=""
     if [ $SBOOT ]; then
         echo "Secure Boot is enabled!"
         echo "Generating key-pair using openssl to sign drivers..."
@@ -97,11 +116,13 @@ secureboot () {
             $(openssl req -new -x509 -newkey rsa:2048 -keyout $PRV_KEY \
                 -outform DER -out $PUB_KEY -nodes -days 36500 -subj "/CN=VMware/")
 
-            popd
         else
             echo "public/private keys exist."
         fi
 
+        #ERR=$(mokutil --import $PUB_KEY 2>&1)
+
+        popd
         for drvname in "${DRIVERS[@]}"; do
             echo "Signing/loading the $drvname driver."
             $(signfile $drvname)
