@@ -268,6 +268,8 @@ class VMWare(Machinery):
         self.vmx_path = vmx_path
         self.vmx_template = os.path.join(os.getcwdu(),
                                 "vmcloak/data/template/template.vmx")
+        self.cd_adapter = "ide"
+        self.idx_ide = 0
 
     def _call(self, *args, **kwargs):
         cmd = list(args)
@@ -556,8 +558,29 @@ class VMWare(Machinery):
             }
             content = _VMX_HDD_TEMPLATE % data
             self.batchmodify(content)
+            if guestOS == "winxphome":
+                self.idx_ide +=1;
         else:
             return ret
+
+    def attach_hd(self, hdd_path, virtual_dev="lsisas1068", adapter_type='lsilogic',
+                  disk_type='1'):
+        guestOS = self.vminfo("guestOS")
+        if "64" in guestOS and adapter_type == "buslogic":
+            log.error("BusLogic SCSI controllers are not supported on 64-bit\
+                      virtual machines.")
+            adapter_type = "lsislogic"
+        if virtual_dev == "lsisas1068" and "winxp" in guestOS:
+            virtual_dev = "lsilogic"
+        data = {
+            'adapter_type': "scsi" if guestOS != "winxphome" else "ide",
+            'vmdk_path': hdd_path,
+            'virtual_dev': virtual_dev,
+        }
+        content = _VMX_HDD_TEMPLATE % data
+        self.batchmodify(content)
+        if guestOS == "winxphome":
+            self.idx_ide +=1;
 
     def upgrade_vm(self):
         if self.isrunning():
@@ -601,9 +624,10 @@ class VMWare(Machinery):
         # defragmenting it.
         self._call(self.vdiskman, "-d", hdd_path)
 
-    def cpus(self, count):
+    def cpus(self, count, core=2):
         """Set the number of CPUs to assign to this Virtual Machine."""
-        self.modifyvm('numvcpus', str(count))
+        self.modifyvm('numvcpus', str(count*core))
+        self.modifyvm('cpuid.coresPerSocket', core)
 
     # http://www.sanbarrow.com/vmx/vmx-cd-settings.html
     def attach_iso(self, iso, adapter_type="sata"):
@@ -614,18 +638,20 @@ class VMWare(Machinery):
         scsi0:0.deviceType = "atapi-cdrom"
         scsi0:0.deviceType = "cdrom-raw"
         """
-        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-image',
+        self.cd_adapter = adapter_type
+        iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-image', 'idx':self.idx_ide,
                                           'filename':iso, 'adapter_type': adapter_type})
         #if adapter_type == "sata":
         #    iso_config + 'sata0.present = "TRUE"\n'
         return self.batchmodify(iso_config)
 
-    def detach_iso(self, adapter_type="sata"):
+    def detach_iso(self):
         """Detach the ISO file in the DVDRom drive."""
         time.sleep(1)
         iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw',
                                           'filename':'auto detect',
-                                          'adapter_type': adapter_type})
+                                          'adapter_type': self.cd_adapter,
+                                          'idx': self.idx_ide})
         return self.batchmodify(iso_config)
 
     # http://sanbarrow.com/vmx/vmx-network-advanced.html

@@ -40,7 +40,8 @@ log.setLevel(logging.ERROR)
 
 def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None):
     handlers = {
-        "winxp": WindowsXP,
+        "winxpx86": WindowsXPx86,
+        "winxpx64": WindowsXPx64,
         "win7x86": Windows7x86,
         "win7x64": Windows7x64,
         "win81x86": Windows81x86,
@@ -65,6 +66,26 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         m.detach_iso()
         m.hostonly(nictype=h.nictype, adapter=image.adapter)
         m.paravirtprovider(image.paravirtprovider)
+
+    if image.vm == "vmware":
+        vm_path = os.path.join(vms_path, name or image.name)
+        img_path = os.path.join(image_path, name or image.name)
+        hdd_path = os.path.join(img_path, "%s.vmdk" % name or image.name)
+        ovf_path = os.path.join(img_path, "%s.ovf" % name or image.name)
+        # check existence directory
+        if not os.path.isdir(vm_path):
+            os.mkdir(vm_path)
+        if not os.path.isdir(img_path):
+            os.mkdir(img_path)
+        vmx_path = os.path.join(vm_path, "%s.vmx" % name or image.name)
+        m = VMWare(vmx_path, name=name or image.name)
+        m.create_vm()
+        m.os_type(image.osversion)
+        m.ramsize(ramsize or image.ramsize)
+        m.attach_hd(hdd_path, adapter_type=image.hdd_adapter, virtual_dev=image.hdd_vdev)
+        #m.attach_iso(iso_path, adapter_type=image.cd_adapter)
+        m.hostonly(nictype=h.nictype)
+        m.upgrade_vm()
 
     return m, h
 
@@ -182,7 +203,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         osversion = "winxpx86"
         ramsize = ramsize or 1024
         hddsize = "5GB" if vm == "vmware" else hddsize
-        hdd_adapter = "buslogic"
+        #hdd_adapter = "buslogic"
     elif winxpx64:
         h = WindowsXPx64()
         osversion = "winxpx64"
@@ -324,7 +345,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         m.create_vm()
         m.os_type(osversion)
         #m.enableparavirt()
-        #m.cpus(cpus)
+        m.cpus(cpus)
         m.ramsize(ramsize)
         #m.vramsize()
         #m.hwvirt()
@@ -344,7 +365,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         # wait until system shutdown (after installation finished!)
         m.wait_for_state(shutdown=True)
 
-        m.detach_iso(adapter_type=cd_adapter)
+        m.detach_iso()
         os.unlink(iso_path)
 
         #m.remove_hd()
@@ -360,7 +381,8 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
                       ipaddr=ip, port=port, adapter=adapter,
                       netmask=netmask, gateway=gateway,
                       cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
-                      paravirtprovider=paravirtprovider))
+                      paravirtprovider=paravirtprovider, hdd_adapter=hdd_adapter,
+                      hdd_vdev=hdd_vdev, cd_adapter=cd_adapter))
     session.commit()
 
 @main.command()
@@ -547,14 +569,18 @@ def register(vmname, cuckoo, tags):
     register_cuckoo(snapshot.ipaddr, tags, vmname, cuckoo)
 
 def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
-                hostname, adapter, vm_visible, vrde, vrde_port, interactive):
+                hostname, adapter, vm_visible, vrde, vrde_port, vnc,
+                vnc_port, vnc_pwd, interactive):
     m, h = initvm(image, name=vmname, multi=True, ramsize=ramsize, cpus=cpus)
 
     if vrde:
         m.vrde(port=vrde_port)
 
-    m.start_vm(visible=vm_visible)
+    if vnc:
+        m.remotedisplay(port=vnc_port, password=vnc_pwd)
 
+    m.start_vm(visible=vm_visible)
+    import ipdb; ipdb.set_trace()
     wait_for_host(image.ipaddr, image.port)
     a = Agent(image.ipaddr, image.port)
     a.ping()
@@ -606,10 +632,14 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
 @click.option("--count", type=int, help="The amount of snapshots to make.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--vnc", is_flag=True, help="Enable the VNC Remote Display Protocol.")
+@click.option("--vnc-port", default=5901, help="Specify the VNC port.")
+@click.option("--vnc-pwd", default="password", help="Specify the VNC connection password.")
 @click.option("--interactive", is_flag=True, help="Enable interactive snapshot mode.")
 @click.option("-d", "--debug", is_flag=True, help="Make snapshot in debug mode.")
 def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
-             adapter, vm_visible, count, vrde, vrde_port, interactive, debug):
+             adapter, vm_visible, count, vrde, vrde_port, vnc, vnc_port,
+             vnc_pwd, interactive, debug):
     if debug:
         log.setLevel(logging.DEBUG)
 
@@ -637,7 +667,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
         snapshot = do_snapshot(
             image, vmname, ipaddr, resolution, ramsize, cpus,
             hostname or random_string(8, 16), adapter, vm_visible,
-            vrde, vrde_port, interactive
+            vrde, vrde_port, vnc, vnc_port, vnc_pwd, interactive
         )
         session.add(snapshot)
     else:
