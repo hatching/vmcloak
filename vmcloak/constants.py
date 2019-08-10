@@ -34,7 +34,7 @@ _VMX_CDROM = """
 {adapter_type}0:{idx}.deviceType = "{dev_type}"
 {adapter_type}0:{idx}.fileName = "{filename}"
 {adapter_type}0:{idx}.present = "TRUE"
-{adapter_type}0:{idx}.startConnected = "TRUE"
+{adapter_type}0:{idx}.startConnected = "{flag}"
 """
 
 _VMX_ETHERNET = """

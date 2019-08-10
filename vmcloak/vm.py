@@ -260,14 +260,14 @@ class VMWare(Machinery):
     """Virtualization layer for VMware Workstation using vmrun utility."""
     FIELDS = {}
 
-    def __init__(self, vmx_path, *args, **kwargs):
+    def __init__(self, vmx_path, vmx_template=None, *args, **kwargs):
         Machinery.__init__(self, *args, **kwargs)
         self.vmrun = get_path("vmrun")
         self.vdiskman = get_path("vmware-vdiskmanager")
         self.ovftool = get_path("ovftool")
         self.vmx_path = vmx_path
-        self.vmx_template = os.path.join(os.getcwdu(),
-                                "vmcloak/data/template/template.vmx")
+        self.vmx_template = vmx_template or os.path.join(os.getcwdu(),
+                    "vmcloak/data/template/template.vmx")
         self.cd_adapter = "ide"
         self.idx_ide = 0
 
@@ -627,7 +627,7 @@ class VMWare(Machinery):
     def cpus(self, count, core=2):
         """Set the number of CPUs to assign to this Virtual Machine."""
         self.modifyvm('numvcpus', str(count*core))
-        self.modifyvm('cpuid.coresPerSocket', core)
+        self.modifyvm('cpuid.coresPerSocket', str(core))
 
     # http://www.sanbarrow.com/vmx/vmx-cd-settings.html
     def attach_iso(self, iso, adapter_type="sata"):
@@ -640,7 +640,8 @@ class VMWare(Machinery):
         """
         self.cd_adapter = adapter_type
         iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-image', 'idx':self.idx_ide,
-                                          'filename':iso, 'adapter_type': adapter_type})
+                                          'filename':iso, 'adapter_type': adapter_type,
+                                          'flag': "TRUE"})
         #if adapter_type == "sata":
         #    iso_config + 'sata0.present = "TRUE"\n'
         return self.batchmodify(iso_config)
@@ -651,7 +652,7 @@ class VMWare(Machinery):
         iso_config = _VMX_CDROM.format(**{'dev_type': 'cdrom-raw',
                                           'filename':'auto detect',
                                           'adapter_type': self.cd_adapter,
-                                          'idx': self.idx_ide})
+                                          'idx': self.idx_ide, 'flag':"FALSE"})
         return self.batchmodify(iso_config)
 
     # http://sanbarrow.com/vmx/vmx-network-advanced.html
@@ -766,7 +767,12 @@ class VMWare(Machinery):
     def export(self, filepath):
         if self.isrunning():
             self.stop_vm()
-        if filepath.split('.')[-1] != "ovf":
-            filepath += ".ovf"
+        if filepath.split('.')[-1] != "ova":
+            filepath += ".ova"
         return self._call(self.ovftool, "--acceptAllEulas",
                           "--allowAllExtraConfig", "--compress=9", self.vmx_path, filepath)
+
+    def import_vm(self, ovf_path, vmx_path, ttype="VMX"):
+        return self._call(self.ovftool, "--acceptAllEulas",
+                          "--allowAllExtraConfig", "--targetType=%s"%ttype,
+                          "--skipManifestCheck", ovf_path, vmx_path)

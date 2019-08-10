@@ -5,6 +5,7 @@
 import logging
 import os
 import tempfile
+import shutil
 
 from vmcloak.abstract import OperatingSystem
 from vmcloak.misc import ini_merge, ini_read, ini_write
@@ -64,7 +65,9 @@ class WindowsXP(OperatingSystem):
         ini_merge(winnt, winnt_opt_sif, overwrite=False)
 
         ini_write(dst_winnt, mode, winnt)
-        if os.path.exists(dst_winnt_x64):
+
+        if os.path.exists(os.path.dirname(dst_winnt_x64)):
+            shutil.copy(dst_winnt, dst_winnt_x64)
             mode_64, winnt_64 = ini_read(dst_winnt_x64)
             ini_merge(winnt_64, winnt_sif, overwrite=True)
             ini_merge(winnt_64, winnt_opt_sif, overwrite=False)

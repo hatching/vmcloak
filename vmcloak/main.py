@@ -68,20 +68,19 @@ def initvm(image, name=None, multi=False, ramsize=None, vramsize=None, cpus=None
         m.paravirtprovider(image.paravirtprovider)
 
     if image.vm == "vmware":
-        vm_path = os.path.join(vms_path, name or image.name)
-        img_path = os.path.join(image_path, name or image.name)
-        hdd_path = os.path.join(img_path, "%s.vmdk" % name or image.name)
-        ovf_path = os.path.join(img_path, "%s.ovf" % name or image.name)
+        vm_path = os.path.join(vms_path, name)
+        img_path = os.path.join(image_path, image.name)
+        hdd_path = os.path.join(img_path, "%s.vmdk" % image.name)
         # check existence directory
         if not os.path.isdir(vm_path):
             os.mkdir(vm_path)
-        if not os.path.isdir(img_path):
-            os.mkdir(img_path)
-        vmx_path = os.path.join(vm_path, "%s.vmx" % name or image.name)
-        m = VMWare(vmx_path, name=name or image.name)
+        temp_path = os.path.join(vms_path, image.name, "%s.vmx" % image.name)
+        vmx_path = os.path.join(vm_path, "%s.vmx" % name)
+        m = VMWare(vmx_path, vmx_template=temp_path, name=name or image.name)
         m.create_vm()
         m.os_type(image.osversion)
         m.ramsize(ramsize or image.ramsize)
+        m.cpus(cpus or image.cpus)
         m.attach_hd(hdd_path, adapter_type=image.hdd_adapter, virtual_dev=image.hdd_vdev)
         #m.attach_iso(iso_path, adapter_type=image.cd_adapter)
         m.hostonly(nictype=h.nictype)
@@ -294,6 +293,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
             print>>f, "set %s=%s" % (key, value)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
+    log.debug(iso_path)
 
     if not h.buildiso(mount, iso_path, bootstrap, tempdir):
         shutil.rmtree(bootstrap)
@@ -334,7 +334,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         vm_path = os.path.join(vms_path, name)
         img_path = os.path.join(image_path, name)
         hdd_path = os.path.join(img_path, "%s.vmdk" % name)
-        ovf_path = os.path.join(img_path, "%s.ovf" % name)
+        ovf_path = os.path.join(img_path, "%s.ova" % name)
         # check existence directory
         if not os.path.isdir(vm_path):
             os.mkdir(vm_path)
@@ -371,6 +371,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         #m.remove_hd()
         m.compact_hd(hdd_path)
         m.export(ovf_path)
+        import IPython; IPython.embed()
         #m.delete_vm()
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)
@@ -579,8 +580,8 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
     if vnc:
         m.remotedisplay(port=vnc_port, password=vnc_pwd)
 
-    m.start_vm(visible=vm_visible)
     import ipdb; ipdb.set_trace()
+    m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
     a = Agent(image.ipaddr, image.port)
     a.ping()
@@ -642,6 +643,7 @@ def snapshot(name, vmname, ipaddr, resolution, ramsize, cpus, hostname,
              vnc_pwd, interactive, debug):
     if debug:
         log.setLevel(logging.DEBUG)
+        vm_visible = True
 
     session = Session()
 
