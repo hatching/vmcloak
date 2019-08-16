@@ -371,7 +371,6 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         #m.remove_hd()
         m.compact_hd(hdd_path)
         m.export(ovf_path)
-        import IPython; IPython.embed()
         #m.delete_vm()
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)

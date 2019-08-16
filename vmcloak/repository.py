@@ -61,28 +61,6 @@ class Image(Base):
     hdd_vdev = Column(String(16), default="lsisas1068")
     cd_adapter = Column(String(16), default="ide")
 
-    #def __init__(self, mode, vm, name, path, osversion, servicepack, ipaddr,
-    #             port, adapter, netmask, gateway, cpus, ramsize, vramsize,
-    #             paravirtprovider, hdd_adapter, hdd_vdev, cd_adapter):
-    #    self.mode = mode
-    #    self.name = name
-    #    self.path = path
-    #    self.osversion = osversion
-    #    self.servicepack = servicepack
-    #    self.ipaddr = ipaddr
-    #    self.port = port
-    #    self.adapter = adapter
-    #    self.netmask = netmask
-    #    self.gateway = gateway
-    #    self.cpus = cpus
-    #    self.ramsize = ramsize
-    #    self.vramsize = vramsize
-    #    self.paravirtprovider = paravirtprovider
-    #    self.hdd_adapter = hdd_adapter or "lsilogic"
-    #    self.vdev = hdd_vdev or "lsisas1068"
-    #    self.cd_adapter = cd_adapter or "ide"
-
-
 class Snapshot(Base):
     """Represents each snapshot that has been created."""
     __tablename__ = "snapshot"

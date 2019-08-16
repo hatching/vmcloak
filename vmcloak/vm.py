@@ -15,7 +15,7 @@ import glob
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.constants import _VMX_SVGA_TEMPLATE, _VMX_vramsize_DEFAULT,\
-    _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC, _VMX_FLOPPY
+    _VMX_HDD_TEMPLATE, _VMX_CDROM, _VMX_ETHERNET, _VMX_MAC, _VMX_VNC, _VMX_FLOPPY, VMCLOAK_ROOT
 from vmcloak.exceptions import VMWareError, CommandError, VMWareVMXError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
@@ -266,8 +266,7 @@ class VMWare(Machinery):
         self.vdiskman = get_path("vmware-vdiskmanager")
         self.ovftool = get_path("ovftool")
         self.vmx_path = vmx_path
-        self.vmx_template = vmx_template or os.path.join(os.getcwdu(),
-                    "vmcloak/data/template/template.vmx")
+        self.vmx_template = vmx_template or os.path.join(VMCLOAK_ROOT, "data/template/template.vmx")
         self.cd_adapter = "ide"
         self.idx_ide = 0
 
