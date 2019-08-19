@@ -7,7 +7,7 @@ from vmcloak.abstract import WindowsAutounattended
 class Windows10(WindowsAutounattended):
     name = "win10"
     service_pack = 2
-    interface = "Ethernet"
+    interface = "Ethernet0"
 
     # List of preferences when multiple Windows 10 types are available.
     preference = "pro", "enterprise", "home"

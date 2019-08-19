@@ -6,7 +6,7 @@ from vmcloak.agent import Agent
 import os
 import ntpath
 
-HOST = "192.168.19.2"
+HOST = "192.168.19.8"
 PORT = 1337
 
 class TestAgent(object):
@@ -42,7 +42,7 @@ class TestAgent(object):
 if __name__ == '__main__':
     ta = TestAgent()
     ta.setup()
-    ta.test_download('C:\info.csv','.')
+    #ta.test_download('C:\info.csv','.')
     ta.process_info()
-    ta.hdd_info()
-    ta.memory_info()
+    #ta.hdd_info()
+    #ta.memory_info()

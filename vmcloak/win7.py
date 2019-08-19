@@ -10,8 +10,8 @@ class Windows7(WindowsAutounattended):
     interface = "Local Area Connection"
 
     # List of preferences when multiple Windows 7 types are available.
-    preference = "professional", "homepremium", "ultimate", "homebasic",
-    "enterprise", "enterprise sp1"
+    preference = ["professional", "homepremium", "ultimate", "homebasic",
+                  "enterprise", "enterprise sp1", "ultimate sp1"]
 
     dummy_serial_key = "33PXH-7Y6KF-2VJC9-XBBR8-HVTHH"
 

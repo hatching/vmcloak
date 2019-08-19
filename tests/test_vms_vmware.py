@@ -11,7 +11,7 @@ import pickle
 import IPython
 
 from vmcloak import main, misc, agent, vm
-from vmcloak.repository import Session, Image
+from vmcloak.repository import Session, Image, vms_path
 from vmcloak.constants import VMCLOAK_VM_MODES
 from string import ascii_letters
 
@@ -43,6 +43,8 @@ def test_all():
         name = genname(winver)
         ip = win_conf["network"]["ip"]
         port = win_conf["network"]["port"]
+        gateway = win_conf["network"]["gateway"]
+        mac = win_conf["network"]["mac"]
         iso = win_conf["iso"]
         hdd_vdev = win_conf["config"]["hdd_vdev"]
         cpu = win_conf["config"]["cpus"]
@@ -58,7 +60,8 @@ def test_all():
                 serialkey = win_conf["serialkey"]
                 call(
                     main.init, name,"--vm", machinery,"--%s"%winver,
-                    "--ip",  ip, "--port", port, "--cpus", cpu,
+                    "--ip",  ip, "--port", port, "--gateway", gateway,
+                    "--mac", mac, "--cpus", cpu,
                     "--tempdir", dirpath, "--serial-key", serialkey,
                     "--iso-mount", iso, "--hdd-vdev", hdd_vdev,
                     "--extra-config", extraConfig, "--debug"
@@ -66,31 +69,31 @@ def test_all():
             else:
                 call(
                     main.init, name,"--vm", machinery,"--%s"%winver,
-                    "--ip",  ip, "--port", port, "--cpus", cpu,
+                    "--ip",  ip, "--port", port, "--gateway", gateway,
+                    "--mac", mac, "--cpus", cpu,
                     "--tempdir", dirpath, "--iso-mount", iso,
                     "--hdd-vdev", hdd_vdev, "--extra-config", extraConfig, "--debug"
                 )
 
             image = session.query(Image).filter_by(name=name).first()
-            m = vm.VMWare(name)
+            m = vm.VMWare(image.config, name=image.name)
             m.start_vm(visible=True)
 
-            misc.wait_for_host(image.ip, image.port)
+            misc.wait_for_host(image.ipaddr, image.port)
 
             ## Very basic integrity checking of the VM.
-            a = agent.Agent(image.ip, image.port)
+            a = agent.Agent(image.ipaddr, image.port)
             assert a.environ()["SYSTEMDRIVE"] == "C:"
 
             cpu_usage = a.process_utilization()
-            out = os.path.join(os.path.abspath('~/.vmcloak/vms/'), winver,
+            out = os.path.join(vms_path, name,
                                "cpu_usage.pkl")
             with open(out, 'wb') as f:
-                pickle.dumps(cpu_usage, f)
+                pickle.dump(cpu_usage, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             a.shutdown()
             m.wait_for_state(shutdown=True)
-        print("--- %s seconds to finish %s installation ---" % (time.time() - start_time),
-              winver)
+        print("--- %s seconds to finish %s installation ---" % (time.time() - start_time, winver))
 
 def test_winxpx86():
 
@@ -115,8 +118,14 @@ def test_winxpx86():
                 "--iso-mount", iso, "--hdd-vdev", hdd_vdev,
                 "--extra-config", extraConfig, "--debug"
             )
-            IPython.embed()
-            call(main.snapshot, name, snapshot, ip)
+
+
+            image = session.query(Image).filter_by(name=name).first()
+            m = vm.VMWare(image.config, name=image.name)
+            m.start_vm(visible=True)
+            #m.install_vmwaretools()
+           # IPython.embed()
+            #call(main.snapshot, name, snapshot, ip)
 
             #m = vm.VirtualBox(snapshot)
             #m.restore_snapshot()
@@ -228,34 +237,35 @@ def test_winxpx64_many():
     os.remove(image.path)
 
 def test_win7x64():
-    ip, port = "192.168.56.104", 13338
+    ip, port = "192.168.19.3", 13338
 
     name, snapshot = genname("win7x64"), genname("win7x64-snapshot")
     call(
-        main.init, name, "--win7x64",
-        "--ip", "192.168.56.5", "--port", port,
-        "--tempdir", dirpath,
+        main.init, name, "--vm", "vmware" ,"--win7x64",
+        "--ip", ip, "--port", port,
+        "--tempdir", dirpath, "--debug"
     )
-    call(main.snapshot, name, snapshot, ip)
+    IPython.embed()
+    #call(main.snapshot, name, snapshot, ip)
 
-    m = vm.VirtualBox(snapshot)
-    m.restore_snapshot()
-    m.start_vm()
+    #m = vm.VirtualBox(snapshot)
+    #m.restore_snapshot()
+    #m.start_vm()
 
-    misc.wait_for_host(ip, port)
+    #misc.wait_for_host(ip, port)
 
-    a = agent.Agent(ip, port)
-    assert a.environ()["SYSTEMDRIVE"] == "C:"
+    #a = agent.Agent(ip, port)
+    #assert a.environ()["SYSTEMDRIVE"] == "C:"
 
-    a.shutdown()
-    m.wait_for_state(shutdown=True)
+    #a.shutdown()
+    #m.wait_for_state(shutdown=True)
 
-    m.delete_snapshot("vmcloak")
-    m.remove_hd()
-    m.delete_vm()
+    #m.delete_snapshot("vmcloak")
+    #m.remove_hd()
+    #m.delete_vm()
 
-    image = session.query(Image).filter_by(name=name).first()
-    os.remove(image.path)
+    #image = session.query(Image).filter_by(name=name).first()
+    #os.remove(image.path)
 
 def test_win81x64():
     ip, port = "192.168.56.105", 13339
@@ -321,3 +331,4 @@ if __name__ == "__main__":
     test_all()
     #test_winxpx64()
     #test_winxpx86()
+    #test_win7x64()

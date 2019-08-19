@@ -46,6 +46,7 @@ class Image(Base):
     vm = Column(String(16))
     name = Column(String(64))
     path = Column(Text)
+    config = Column(Text, nullable=True)
     osversion = Column(String(32))
     servicepack = Column(String(32))
     ipaddr = Column(String(32))

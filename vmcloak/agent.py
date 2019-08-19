@@ -155,17 +155,15 @@ class Agent(object):
         process_count = len(process_list)
         process_PID = data_list[0].split(',')[:process_count]
         cpu_usage = {p:[] for p in process_list}
+        cpu_list = []
 
-        for sample in range(samples):
-            for process, t in zip(process_list,
-                                     data_list[sample].split('\",\"')[process_count:]):
-                # monkey patch
-                re.sub(r'(\d+)\"', r'\1', t)
-                if t == " ":
-                    t = 0
+        for sample in range(1, samples-1):
+            cpu_list = [ d.replace('\"', '') for d in
+                        data_list[sample].split(',')[process_count:] ]
+            for process, t in zip(process_list, cpu_list):
                 cpu_usage[process].append(t)
 
-        cpu_usage['x'] = range(1,samples+1)
+        cpu_usage['x'] = range(1,samples-1)
         df = pd.DataFrame(cpu_usage)
         plt.ylabel("Processor time")
         plt.xlabel("Samples per second")

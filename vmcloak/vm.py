@@ -752,6 +752,10 @@ class VMWare(Machinery):
         """Stop the associated Virtual Machine."""
         self._call(self.vmrun, "stop", self.vmx_path, powertype)
 
+    def install_vmwaretools(self):
+        """Install VMWare tools on Virtual Machine."""
+        self._call(self.vmrun, "installTools", self.vmx_path)
+
     def remotedisplay(self, port=5901, password=""):
         if len(password) < 8:
             log.info("You should provide a password at least 8 characters long.")

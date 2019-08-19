@@ -30,9 +30,10 @@ for mount in "${!MOUNT_POINTS[@]}"; do
         echo "Mounting the $mount in /mnt/$mount"
         MPoint="$(getabs "${MOUNT_POINTS[$mount]}")"
 
-        findmnt $MOUNT_DIR 2> /dev/null
-        if [ $? -ne 0  ]; then
-            /bin/mount -o loop,ro $MPoint $MOUNT_DIR 2>/dev/null
-        fi
+        #findmnt $MOUNT_DIR 2> /dev/null
+        #if [ $? -ne 0  ]; then
+        #    /bin/mount -o loop,ro $MPoint $MOUNT_DIR 2>/dev/null
+        #fi 
+        /bin/mount -o loop,ro $MPoint $MOUNT_DIR
     fi
 done

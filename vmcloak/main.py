@@ -144,11 +144,12 @@ def clone(name, outname):
 @click.option("--vm", default="virtualbox", help="Virtual Machinery.")
 @click.option("--iso-mount", help="Mounted ISO Windows installer image.")
 @click.option("--serial-key", help="Windows Serial Key.")
-@click.option("--ip", default="192.168.56.2", help="Guest IP address.")
+@click.option("--ip", default="192.168.19.2", help="Guest IP address.")
 @click.option("--port", default=8000, help="Port to run the Agent on.")
 @click.option("--adapter", default="vboxnet0", help="Network adapter.")
 @click.option("--netmask", default="255.255.255.0", help="Guest IP address.")
-@click.option("--gateway", default="192.168.56.1", help="Guest IP address.")
+@click.option("--gateway", default="192.168.19.1", help="Guest IP address.")
+@click.option("--mac", default=None, help="Interface MAC address.")
 @click.option("--dns", default="8.8.8.8", help="DNS Server.")
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
@@ -173,7 +174,7 @@ def clone(name, outname):
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
 def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
-         gateway, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, hdd_vdev, cd_adapter, tempdir, resolution,
+         gateway, mac, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, hdd_vdev, cd_adapter, tempdir, resolution,
          vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, extra_config, debug,
          verbose):
 
@@ -220,7 +221,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         osversion = "win7x64"
         hddsize = "20GB" if vm == "vmware" else hddsize
         #cd_adapter = "ide"
-        #product = "ULTIMATE"
+        product = "ULTIMATE SP1"
     elif win81x86:
         h = Windows81x86()
         ramsize = ramsize or 2048
@@ -300,6 +301,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         exit(1)
 
     shutil.rmtree(bootstrap)
+    config_path = None
 
     if vm == "virtualbox":
         hdd_path = os.path.join(image_path, "%s.vdi" % name)
@@ -351,7 +353,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         #m.hwvirt()
         m.create_hd(hdd_path, fsize=hddsize, adapter_type=hdd_adapter, virtual_dev=hdd_vdev)
         m.attach_iso(iso_path, adapter_type=cd_adapter)
-        m.hostonly(nictype=h.nictype)
+        m.hostonly(nictype=h.nictype, macaddr=mac)
         if extra_config != "":
             m.batchmodify(extra_config)
         m.upgrade_vm()
@@ -364,13 +366,13 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
 
         # wait until system shutdown (after installation finished!)
         m.wait_for_state(shutdown=True)
-
         m.detach_iso()
         os.unlink(iso_path)
 
         #m.remove_hd()
         m.compact_hd(hdd_path)
         m.export(ovf_path)
+        config_path=vmx_path
         #m.delete_vm()
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)
@@ -379,7 +381,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
     session.add(Image(name=name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
-                      netmask=netmask, gateway=gateway,
+                      netmask=netmask, gateway=gateway, config=config_path,
                       cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
                       paravirtprovider=paravirtprovider, hdd_adapter=hdd_adapter,
                       hdd_vdev=hdd_vdev, cd_adapter=cd_adapter))
