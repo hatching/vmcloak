@@ -39,7 +39,6 @@ def config_writer():
             vmx_path = image.config
             if not os.path.exists(vmx_path):
                 continue
-            vmware_machines[name] = []
             vm = VMWare(vmx_path, name=name)
             snapshots = vm.list_snapshots()
             if not snapshots:
@@ -47,15 +46,14 @@ def config_writer():
                 vm.snapshot(snapshot)
                 snapshots = vm.list_snapshots()
                 #TODO: change ipaddr of each snapshot from default one
-            vmware_machines[name].append({'ipaddr': ipaddr,
+            vmware_machines[name] = {'ipaddr': ipaddr,
                                           'snapshot': snapshots[0],
-                                        'vmx_path': vmx_path})
+                                        'vmx_path': vmx_path}
         if machinery == "virtualbox":
-            vbox_machines[name] = []
             if not snapshots:
                 snapshot = do_snapshot(image, name)
-                vbox_machines[name].append({snapshot: {'snapshot': snapshot,
-                                                    'ipaddr': ipaddr}})
+                vbox_machines[name] = {'snapshot': snapshot,
+                                        'ipaddr': ipaddr}
 
     if vmware_machines:
         template_parser("vmware", "nogui", vmware_machines)
