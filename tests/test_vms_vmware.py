@@ -123,29 +123,28 @@ def test_winxpx86():
             image = session.query(Image).filter_by(name=name).first()
             m = vm.VMWare(image.config, name=image.name)
             m.start_vm(visible=True)
-            #m.install_vmwaretools()
-           # IPython.embed()
-            #call(main.snapshot, name, snapshot, ip)
+            m.install_vmwaretools()
+            call(main.snapshot, name, snapshot, ip)
 
-            #m = vm.VirtualBox(snapshot)
-            #m.restore_snapshot()
-            #m.start_vm()
+            m = vm.VMWare(snapshot)
+            m.restore_snapshot()
+            m.start_vm()
 
-            #misc.wait_for_host(ip, port)
+            misc.wait_for_host(ip, port)
 
             ## Very basic integrity checking of the VM.
-            #a = agent.Agent(ip, port)
-            #assert a.environ()["SYSTEMDRIVE"] == "C:"
+            a = agent.Agent(ip, port)
+            assert a.environ()["SYSTEMDRIVE"] == "C:"
 
-            #a.shutdown()
-            #m.wait_for_state(shutdown=True)
+            a.shutdown()
+            m.wait_for_state(shutdown=True)
 
-            #m.delete_snapshot("vmcloak")
-            #m.remove_hd()
-            #m.delete_vm()
+            m.delete_snapshot("vmcloak")
+            m.remove_hd()
+            m.delete_vm()
 
-            #image = session.query(Image).filter_by(name=name).first()
-            #os.remove(image.path)
+            image = session.query(Image).filter_by(name=name).first()
+            os.remove(image.path)
 
 def test_winxpx64():
 
@@ -171,28 +170,11 @@ def test_winxpx64():
                 "--iso-mount", iso, "--hdd-vdev", hdd_vdev,
                 "--extra-config", extraConfig, "--debug"
             )
-            IPython.embed()
-            #call(main.snapshot, name, snapshot, ip)
-
-            #m = vm.VirtualBox(snapshot)
-            #m.restore_snapshot()
-            #m.start_vm()
-
             misc.wait_for_host(ip, port)
 
             ## Very basic integrity checking of the VM.
             a = agent.Agent(ip, port)
             assert a.environ()["SYSTEMDRIVE"] == "C:"
-
-            #a.shutdown()
-            #m.wait_for_state(shutdown=True)
-
-            #m.delete_snapshot("vmcloak")
-            #m.remove_hd()
-            #m.delete_vm()
-
-            #image = session.query(Image).filter_by(name=name).first()
-            #os.remove(image.path)
 
 def test_winxpx64_many():
     ip, port, count = "192.168.56.201", 13400, 10
@@ -245,27 +227,26 @@ def test_win7x64():
         "--ip", ip, "--port", port,
         "--tempdir", dirpath, "--debug"
     )
-    IPython.embed()
-    #call(main.snapshot, name, snapshot, ip)
+    call(main.snapshot, name, snapshot, ip)
 
-    #m = vm.VirtualBox(snapshot)
-    #m.restore_snapshot()
-    #m.start_vm()
+    m = vm.VMWare(snapshot)
+    m.restore_snapshot()
+    m.start_vm()
 
-    #misc.wait_for_host(ip, port)
+    misc.wait_for_host(ip, port)
 
-    #a = agent.Agent(ip, port)
-    #assert a.environ()["SYSTEMDRIVE"] == "C:"
+    a = agent.Agent(ip, port)
+    assert a.environ()["SYSTEMDRIVE"] == "C:"
 
-    #a.shutdown()
-    #m.wait_for_state(shutdown=True)
+    a.shutdown()
+    m.wait_for_state(shutdown=True)
 
-    #m.delete_snapshot("vmcloak")
-    #m.remove_hd()
-    #m.delete_vm()
+    m.delete_snapshot("vmcloak")
+    m.remove_hd()
+    m.delete_vm()
 
-    #image = session.query(Image).filter_by(name=name).first()
-    #os.remove(image.path)
+    image = session.query(Image).filter_by(name=name).first()
+    os.remove(image.path)
 
 def test_win81x64():
     ip, port = "192.168.56.105", 13339
@@ -329,6 +310,3 @@ def test_win10x64():
 
 if __name__ == "__main__":
     test_all()
-    #test_winxpx64()
-    #test_winxpx86()
-    #test_win7x64()

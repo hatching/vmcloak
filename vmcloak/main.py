@@ -581,7 +581,7 @@ def do_snapshot(image, vmname, ipaddr, resolution, ramsize, cpus,
     if vnc:
         m.remotedisplay(port=vnc_port, password=vnc_pwd)
 
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
     m.start_vm(visible=vm_visible)
     wait_for_host(image.ipaddr, image.port)
     a = Agent(image.ipaddr, image.port)

@@ -723,7 +723,12 @@ class VMWare(Machinery):
 
     def list_snapshots(self):
         """ Returns a list of snapshots for the specific VMX file """
-        return self._call(self.vmrun, "listSnapshots", self.vmx_path)
+        snapshots = self._call(self.vmrun, "listSnapshots", self.vmx_path)
+        result = re.findall(r'Total snapshots: (\d+)\n',snapshots)
+        if result:
+            return snapshots.split('\n')[1:]
+        else:
+            log.debug('There\'s not snapshot available for this VM.')
 
     def snapshot(self, label):
         """Take a snapshot of the associated Virtual Machine.
