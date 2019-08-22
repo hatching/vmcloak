@@ -9,8 +9,8 @@ import time
 import re
 import logging
 import requests
-import matplotlib.pyplot as plt
-import pandas as pd
+#import matplotlib.pyplot as plt
+#import pandas as pd
 
 
 log = logging.getLogger(__name__)
@@ -163,15 +163,15 @@ class Agent(object):
             for process, t in zip(process_list, cpu_list):
                 cpu_usage[process].append(t)
 
-        cpu_usage['x'] = range(1,samples-1)
-        df = pd.DataFrame(cpu_usage)
-        plt.ylabel("Processor time")
-        plt.xlabel("Samples per second")
-        for p in process_list:
-            plt.plot('x', p, data=df, marker='o', markerfacecolor='blue',
-                     markersize=12, color='skyblue', linewidth=4)
-        plt.legend()
-        plt.savefig("cpu_usage.png", dpi=100)
+        #cpu_usage['x'] = range(1,samples-1)
+        #df = pd.DataFrame(cpu_usage)
+        #plt.ylabel("Processor time")
+        #plt.xlabel("Samples per second")
+        #for p in process_list:
+        #    plt.plot('x', p, data=df, marker='o', markerfacecolor='blue',
+        #             markersize=12, color='skyblue', linewidth=4)
+        #plt.legend()
+        #plt.savefig("cpu_usage.png", dpi=100)
         #plt.show()
         return cpu_usage
 

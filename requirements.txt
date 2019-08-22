@@ -1,3 +1,5 @@
 lockfile
 sphinx
 setuptools
+matplotlib
+pandas
