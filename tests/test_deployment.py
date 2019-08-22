@@ -40,6 +40,8 @@ def config_writer():
         if machinery == "vmware":
             vmware_machines[name] = []
             vmx_path = image.config
+            if not os.path.exists(vmx_path):
+                continue
             vm = VMWare(vmx_path, name=name)
             snapshots = vm.list_snapshots()
             if not snapshots:
