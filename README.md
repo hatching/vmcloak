@@ -107,6 +107,14 @@ Finally run the unit tests:
 py.test -n 8
 ```
 
+TODO List
+-------
+- [x] Installing PIL inside guest
+- [x] set static ip for vmnet1 vmnet8 vmware ifaces
+  (/etc/vmware/vmnet1/dhcpd/dhcpd.conf)
+- [x] finding some test programs that works fine and test them using agent.py
+
+
 Credits
 -------
 

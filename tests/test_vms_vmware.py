@@ -8,7 +8,6 @@ import os.path
 import tempfile
 import time
 import pickle
-import IPython
 
 from vmcloak import main, misc, agent, vm
 from vmcloak.repository import Session, Image, vms_path
@@ -44,6 +43,7 @@ def test_all():
         ip = win_conf["network"]["ip"]
         port = win_conf["network"]["port"]
         gateway = win_conf["network"]["gateway"]
+        dns = win_conf["network"]["dns"]
         mac = win_conf["network"]["mac"]
         iso = win_conf["iso"]
         hdd_vdev = win_conf["config"]["hdd_vdev"]
@@ -61,7 +61,7 @@ def test_all():
                 call(
                     main.init, name,"--vm", machinery,"--%s"%winver,
                     "--ip",  ip, "--port", port, "--gateway", gateway,
-                    "--mac", mac, "--cpus", cpu,
+                    "--mac", mac, "--cpus", cpu, "--dns", dns,
                     "--tempdir", dirpath, "--serial-key", serialkey,
                     "--iso-mount", iso, "--hdd-vdev", hdd_vdev,
                     "--extra-config", extraConfig, "--debug"
@@ -148,7 +148,7 @@ def test_winxpx86():
 
 def test_winxpx64():
 
-    name, snapshot = genname("winxpx64"), genname("winxpx64-snapshot")
+    name, _ = genname("winxpx64"), genname("winxpx64-snapshot")
     ip = config["winxpx64"]["network"]["ip"]
     port = config["winxpx64"]["network"]["port"]
     serialkey = config["winxpx64"]["serialkey"]

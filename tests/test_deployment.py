@@ -2,12 +2,24 @@
 import random
 import jinja2
 import os
+import logging
 
 from string import ascii_letters
 from vmcloak.repository import Image, Session, Snapshot
 from vmcloak.vm import VMWare
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.main import do_snapshot
+from vmcloak.misc import wait_for_host
+from vmcloak.agent import Agent
+from vmcloak.dependencies.pillow import Pillow
+from vmcloak.winxp import WindowsXPx86, WindowsXPx64
+from vmcloak.win7 import Windows7x86, Windows7x64
+from vmcloak.win81 import Windows81x86, Windows81x64
+from vmcloak.win10 import Windows10x86, Windows10x64
+
+logging.basicConfig()
+log = logging.getLogger("vmcloak")
+log.setLevel(logging.DEBUG)
 
 session = Session()
 vmware_machines = dict()
@@ -27,12 +39,24 @@ def template_parser(tpl_name, mode, config):
         f.write(content)
 
 def config_writer():
+    handlers = {
+        "winxpx86": WindowsXPx86,
+        "winxpx64": WindowsXPx64,
+        "win7x86": Windows7x86,
+        "win7x64": Windows7x64,
+        "win81x86": Windows81x86,
+        "win81x64": Windows81x64,
+        "win10x86": Windows10x86,
+        "win10x64": Windows10x64,
+    }
+
     images = session.query(Image).all()
 
     for image in images:
         ipaddr = image.ipaddr
         machinery = image.vm
         name = image.name
+        h = handlers[image.osversion]
         snapshots = session.query(Snapshot).filter_by(image_id=image.id)
 
         if machinery == "vmware":
@@ -43,12 +67,26 @@ def config_writer():
             snapshots = vm.list_snapshots()
             if not snapshots:
                 snapshot = genname(name)
+
+                vm.start_vm(visible=True)
+
+                wait_for_host(image.ipaddr, image.port)
+
+                a = Agent(image.ipaddr, image.port)
+                a.ping()
+
+                Pillow(a=a, h=h).run()
+
                 vm.snapshot(snapshot)
+
+                vm.stop_vm()
+                vm.wait_for_state(shutdown=True)
+
                 snapshots = vm.list_snapshots()
                 #TODO: change ipaddr of each snapshot from default one
             vmware_machines[name] = {'ipaddr': ipaddr,
-                                          'snapshot': snapshots[0],
-                                        'vmx_path': vmx_path}
+                                    'snapshot': snapshots[0],
+                                    'vmx_path': vmx_path}
         if machinery == "virtualbox":
             if not snapshots:
                 snapshot = do_snapshot(image, name)
