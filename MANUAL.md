@@ -91,6 +91,9 @@ file is as the following:
     },
 ``` 
 
+**NOTE**: a sample config file has been provided under
+`vmcloak/data/template/config.json`. 
+
 Then after you set necessary parameters for CPU, RAM, network info, and so on,
 then you are ready to boot up the OS through VMCloak. All the necessary test
 cases are located under `tests/test_vms_vmware.py` for `vmware` as an example. 
