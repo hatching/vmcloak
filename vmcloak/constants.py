@@ -5,4 +5,4 @@
 import os.path
 
 VMCLOAK_ROOT = os.path.abspath(os.path.dirname(__file__))
-VMCLOAK_VM_MODES = ["virtualbox", "iso"]
+VMCLOAK_VM_MODES = ["virtualbox", "kvm","iso"]

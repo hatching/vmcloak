@@ -77,3 +77,13 @@ class WindowsXP(OperatingSystem):
 
         self.serial_key = serial_key
         return True
+
+
+class WindowsXPx64(WindowsXP):
+    arch = "amd64"
+    mount = "/mnt/winxpx64", "/mnt/winxp"
+
+class WindowsXPx86(WindowsXP):
+    arch = "x86"
+    mount = "/mnt/winxpx86", "/mnt/winxp"
+    nictype = "virtio"

@@ -19,6 +19,18 @@ PATHS = {
         "/usr/bin/VBoxManage",
         "/usr/local/bin/VBoxManage",
     ],
+    "qemu-img": [
+        "/usr/bin/qemu-img",
+        "/usr/local/bin/qemu-img",
+    ],
+    "virsh": [
+        "/usr/bin/virsh",
+        "/usr/local/bin/virsh",
+    ],
+    "virt-install": [
+        "/usr/bin/virt-install",
+        "/usr/local/bin/virt-install",
+    ],
 }
 
 INSTALL = {

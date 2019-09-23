@@ -25,13 +25,13 @@ from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import (
     image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
-    db_migratable
+    db_migratable, vms_path
 )
-from vmcloak.winxp import WindowsXP
+from vmcloak.winxp import WindowsXPx86, WindowsXPx64
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
 from vmcloak.win10 import Windows10x86, Windows10x64
-from vmcloak.vm import VirtualBox
+from vmcloak.vm import VirtualBox, KVM
 from vmcloak.constants import VMCLOAK_VM_MODES
 
 logging.basicConfig()
@@ -112,7 +112,8 @@ def clone(name, outname):
 
 @main.command()
 @click.argument("name")
-@click.option("--winxp", is_flag=True, help="This is a Windows XP instance.")
+@click.option("--winxpx86", is_flag=True, help="This is a Windows XP 32-bit instance.")
+@click.option("--winxpx64", is_flag=True, help="This is a Windows XP 64-bit instance.")
 @click.option("--win7x86", is_flag=True, help="This is a Windows 7 32-bit instance.")
 @click.option("--win7x64", is_flag=True, help="This is a Windows 7 64-bit instance.")
 @click.option("--win81x86", is_flag=True, help="This is a Windows 8.1 32-bit instance.")
@@ -128,26 +129,35 @@ def clone(name, outname):
 @click.option("--adapter", default="vboxnet0", help="Network adapter.")
 @click.option("--netmask", default="255.255.255.0", help="Guest IP address.")
 @click.option("--gateway", default="192.168.56.1", help="Guest IP address.")
+@click.option("--mac", default=None, help="Interface MAC address.")
 @click.option("--dns", default="8.8.8.8", help="DNS Server.")
 @click.option("--cpus", default=1, help="CPU count.")
 @click.option("--ramsize", type=int, help="Memory size")
 @click.option("--vramsize", default=16, help="Video memory size")
 @click.option("--hddsize", type=int, default=256, help="HDD size *1024")
+@click.option("--hdd-adapter", type=str, default="lsilogic", help="HDD adapter type")
+@click.option("--hdd-vdev", type=str, default="lsisas1068", help="HDD virtual adapter type")
+@click.option("--cd-adapter", type=str, default="ide", help="CD-ROM adapter type")
 @click.option("--tempdir", default=iso_dst_path, help="Temporary directory to build the ISO file.")
 @click.option("--resolution", default="1024x768", help="Screen resolution.")
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
+@click.option("--vnc", is_flag=True, help="Enable the VNC Remote Display Protocol.")
+@click.option("--vnc-port", default=5901, help="Specify the VNC port.")
+@click.option("--vnc-pwd", default="password", help="Specify the VNC connection password.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
+@click.option("--extra-config", type=str, default="", help="Set extra configuration for VM")
 @click.option("--paravirtprovider", default="default",
               help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
 @click.option("-v", "--verbose", is_flag=True, help="Verbose logging.")
-def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
+def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
          product, vm, iso_mount, serial_key, ip, port, adapter, netmask,
-         gateway, dns, cpus, ramsize, vramsize, hddsize, tempdir, resolution,
-         vm_visible, vrde, vrde_port, python_version, paravirtprovider, debug,
-         verbose):
+         gateway, mac, dns, cpus, ramsize, vramsize, hddsize, hdd_adapter, hdd_vdev, cd_adapter, tempdir, resolution,
+         vm_visible, vrde, vrde_port, vnc, vnc_port, vnc_pwd, python_version, paravirtprovider, extra_config, debug,
+         verbose
+):
 
     if verbose:
         log.setLevel(logging.INFO)
@@ -165,10 +175,17 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         log.error("Only VirtualBox Machinery or iso is supported at this point.")
         exit(1)
 
-    if winxp:
-        h = WindowsXP()
-        osversion = "winxp"
+    if winxpx86:
+        h = WindowsXPx86()
+        osversion = "winxpx86"
         ramsize = ramsize or 1024
+        hddsize = "5GB" if vm == "vmware" else hddsize
+        #hdd_adapter = "buslogic"
+    elif winxpx64:
+        h = WindowsXPx64()
+        osversion = "winxpx64"
+        ramsize = ramsize or 1024
+        hddsize = "5GB" if vm == "vmware" else hddsize
     elif win7x86:
         h = Windows7x86()
         ramsize = ramsize or 1024
@@ -245,8 +262,6 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
             print>>f, "set %s=%s" % (key, value)
 
     iso_path = os.path.join(tempdir, "%s.iso" % name)
-    hdd_path = os.path.join(image_path, "%s.vdi" % name)
-    m = VirtualBox(name=name)
 
     if not h.buildiso(mount, iso_path, bootstrap, tempdir):
         shutil.rmtree(bootstrap)
@@ -255,6 +270,8 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
     shutil.rmtree(bootstrap)
 
     if vm == "virtualbox":
+        hdd_path = os.path.join(image_path, "%s.vdi" % name)
+        m = VirtualBox(name=name)
         m.create_vm()
         m.os_type(osversion)
         m.paravirtprovider(paravirtprovider)
@@ -280,6 +297,38 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
         m.remove_hd()
         m.compact_hd(hdd_path)
         m.delete_vm()
+
+    if vm == "kvm":
+        vm_path = os.path.join(vms_path, name)
+        img_path = os.path.join(image_path, name)
+        hdd_path = os.path.join(img_path, "%s.qcow2" % name)
+        domain_path = os.path.join(vm_path, "%s.xml" % name)
+
+        if not os.path.isdir(vm_path):
+            os.mkdir(vm_path)
+        if not os.path.isdir(img_path):
+            os.mkdir(img_path)
+
+        m = KVM(domain_path, name=name)
+        m.os_type(osversion)
+        m.create_hd(hdd_path)
+        m.create_vm()
+        m.cpus(cpus)
+        m.ramsize(ramsize)
+        m.vramsize(vramsize)
+        m.attach_iso(iso_path)
+        m.hostonly(nictype=h.nictype, macaddr=mac)
+
+        log.info("Starting the Virtual Machine %r to install Windows.", name)
+        import ipdb; ipdb.set_trace()
+        m.start_vm(visible=vm_visible)
+
+        m.wait_for_state(shutdown=True)
+
+        m.detach_iso()
+        os.unlink(iso_path)
+
+        m.compact_hd(hdd_path)
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)
 
@@ -291,6 +340,7 @@ def init(name, winxp, win7x86, win7x64, win81x86, win81x64, win10x86, win10x64,
                       cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
                       paravirtprovider=paravirtprovider))
     session.commit()
+
 
 @main.command()
 @click.argument("name")
