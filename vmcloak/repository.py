@@ -46,6 +46,7 @@ class Image(Base):
     vm = Column(String(16))
     name = Column(String(64))
     path = Column(Text)
+    config = Column(Text, nullable=True)
     osversion = Column(String(32))
     servicepack = Column(String(32))
     ipaddr = Column(String(32))
@@ -57,6 +58,9 @@ class Image(Base):
     ramsize = Column(Integer)
     vramsize = Column(Integer)
     paravirtprovider = Column(String(32))
+    hdd_adapter = Column(String(16), default="lsilogic")
+    hdd_vdev = Column(String(16), default="lsisas1068")
+    cd_adapter = Column(String(16), default="ide")
 
 class Snapshot(Base):
     """Represents each snapshot that has been created."""

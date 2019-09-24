@@ -10,13 +10,14 @@ import time
 import libvirt
 import xml.etree.ElementTree as ET
 
+from string import ascii_letters
+
 from vmcloak.abstract import Machinery
 from vmcloak.data.config import VBOX_CONFIG
 from vmcloak.exceptions import CommandError
 from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
 from vmcloak.repository import vms_path
-from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.vmxml import Element
 
 log = logging.getLogger(__name__)
@@ -253,6 +254,7 @@ class KVM(Machinery):
         self.virsh = get_path("virsh")
         self.qemu_img = get_path("qemu-img")
         self.virt_install = get_path("virt-install")
+        self.domain_path = domain_path
 
         if os.getenv("LIBVIRT_DEFAULT_URI"):
             self.QEMU_URI = os.getenv("LIBVIRT_DEFAULT_URI")
@@ -291,10 +293,13 @@ class KVM(Machinery):
 
     def create_vm(self):
         """Create a new Virtual Machine."""
-        xml = self._call(self.virt_install, '--virt-type', self.virt_type,
-                   '--name', self.name, '--os-type', self.os_type,
-                   '--os-variant', self.os_variant, '--disk', self.disk_path,
-                    '--print-xml', '--memory', '1024')
+        if os.path.exists(self.domain_path):
+            xml = open(self.domain_path).read()
+        else:
+            xml = self._call(self.virt_install, '--virt-type', self.virt_type,
+                    '--name', self.name, '--os-type', self.os_type,
+                    '--os-variant', self.os_variant, '--disk', self.disk_path,
+                        '--print-xml', '--memory', '1024')
         self.domain = ET.fromstring(xml)
 
     def delete_vm(self):
@@ -408,15 +413,26 @@ class KVM(Machinery):
         if vcpu is not None:
             vcpu.text = str(count)
 
-    def attach_iso(self, iso):
+    def attach_iso(self, iso, override=False):
         """Attach a ISO file as DVDRom drive."""
-        cdrom = self.domain.find(".//devices/disk[@device='cdrom']")
+        cdrom = self.domain.findall(".//devices/disk[@device='cdrom']")
+        boot_order = self.domain.findall(".//os/boot")
+        if len(boot_order) > 1:
+            if boot_order[0].attrib['dev'] == 'cdrom':
+                log.info("load from CDROM.")
+        else:
+            cdrom = Element('boot', dev='cdrom')
+            self.domain.find('.//os').insert(1, cdrom)
+        dev_name = 'hdb'
+        if cdrom is not None:
+            idx = len(cdrom)
+            dev_name = 'hd'+ascii_letters[idx+1]
         devices = self.domain.find('.//devices')
-        if cdrom is None:
+        if cdrom is None or not override:
             cdrom = Element('disk', type='file', device='cdrom')
             cdrom.appendChildWithArgs('driver', name='qemu', type='raw')
             cdrom.appendChildWithArgs('source', file=iso)
-            cdrom.appendChildWithArgs('target', dev='hda', bus='ide')
+            cdrom.appendChildWithArgs('target', dev=dev_name, bus='ide')
             devices.insert(0, cdrom)
         else:
             try:
@@ -431,18 +447,12 @@ class KVM(Machinery):
 
     def detach_iso(self):
         """Detach the ISO file in the DVDRom drive."""
-        disks = self.domain.find('.//devices/disk')
-        for disk in disks:
-            if not disk.attrib.has_key('type'):
-                continue
-            if disk.attrib['type'] == 'cdrom':
-                break
-        for child in disk.getchildren():
-            if child.tag == 'source':
-                child.attrib['file'] = ""
-        #device_xml = ET.dump(device)
-        #self.domain.updateDeviceFlags(device_xml)
-
+        boot_cdrom = self.domain.find(".//os/boot[@dev='cdrom']")
+        if boot_cdrom is not None:
+            self.domain.find(".//os").remove(boot_cdrom)
+        cdrom = self.domain.find(".//devices/disk[@device='cdrom']")
+        source = cdrom.iter('source').next()
+        source.attrib['file'] = ""
 
     def set_field(self, key, value):
         """Set a specific field of a Virtual Machine."""
@@ -511,12 +521,20 @@ class KVM(Machinery):
 
     def start_vm(self, visible=False):
         """Start the associated Virtual Machine."""
-        dom = self.virt_conn.lookupByName(self.name)
-        state, reason = dom.state()
-        if state == libvirt.VIR_DOMAIN_RUNNING:
-            log.error('VM %s is already running!'%self.name)
-        else:
-            dom.create()
+        # save finalized domain before start
+        try:
+            dom = self.virt_conn.lookupByName(self.name)
+            state, reason = dom.state()
+            if state == libvirt.VIR_DOMAIN_RUNNING:
+                log.error('VM %s is already running!'%self.name)
+            else:
+                dom.create()
+        except libvirt.libvirtError:
+            self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
+            self.dom.create()
+
+    def save_domain(self):
+        open(self.domain_path, 'w').write(ET.tostring(self.domain))
 
     def list_snapshots(self):
         """ Returns a list of snapshots for the specific VMX file """
@@ -539,8 +557,15 @@ class KVM(Machinery):
 
     def remotedisplay(self, port=5901, password=""):
         """ Provides a VNC/RDP interface for GUI communication over the network """
-        self.vnc_password = password
-        self.vnc_port = port
+        devices = self.domain.find('.//devices')
+        graphics = self.domain.find('.//devices/graphics')
+        if graphics is None:
+            graphics = Element('graphics', type='vnc', port=port,
+                                passwd=password)
+            devices.insert(0, graphics)
+        else:
+            graphics.attrib['port'] = port
+            graphics.attrib['passwd'] = password
 
     def enableparavirt(self):
         raise

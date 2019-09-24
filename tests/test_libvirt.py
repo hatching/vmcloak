@@ -33,6 +33,8 @@ def test_winxpx86():
     win_conf = config["winxpx86"]
     ip = win_conf["network"]["ip"]
     port = win_conf["network"]["port"]
+    dns = win_conf["network"]["dns"]
+    mac = win_conf["network"]["mac"]
     serialkey = win_conf["serialkey"]
     iso = win_conf["iso"]
     ramsize = win_conf["config"]["ram_size"]
@@ -44,11 +46,13 @@ def test_winxpx86():
         main.init, name,"--vm", machinery,"--winxpx86",
         "--ip",  ip, "--port", port, "--ramsize", ramsize,
         "--tempdir", dirpath, "--serial-key", serialkey,
-        "--iso-mount", iso, "--vramsize", vramsize ,"--debug"
+        "--iso-mount", iso, "--vramsize", vramsize ,
+        "--dns", dns, "--mac", mac, "--debug"
     )
 
     image = session.query(Image).filter_by(name=name).first()
-    m = vm.VMWare(image.config, name=image.name)
+    m = vm.KVM(image.config, name=image.name)
+    m.create_vm()
     m.start_vm(visible=True)
 
     misc.wait_for_host(ip, port)

@@ -13,19 +13,20 @@ import tempfile
 import time
 
 from sqlalchemy.orm.session import make_transient
+from sys import exit
 
 import vmcloak.dependencies
 
 from vmcloak.agent import Agent
 from vmcloak.constants import VMCLOAK_ROOT
-from vmcloak.dependencies import Python
+from vmcloak.dependencies import Python, Virtio
 from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_host, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import (
     image_path, Session, Image, Snapshot, iso_dst_path, SCHEMA_VERSION,
-    db_migratable, vms_path
+    db_migratable, vms_path, iso_dst_path
 )
 from vmcloak.winxp import WindowsXPx86, WindowsXPx64
 from vmcloak.win7 import Windows7x86, Windows7x64
@@ -302,30 +303,36 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         vm_path = os.path.join(vms_path, name)
         img_path = os.path.join(image_path, name)
         hdd_path = os.path.join(img_path, "%s.qcow2" % name)
-        domain_path = os.path.join(vm_path, "%s.xml" % name)
+        config_path = os.path.join(vm_path, "%s.xml" % name)
+
+
+        # Download the virtio-win.iso and attach it as a cdrom device for driver compatilibity
+        d = Virtio(i=Image(osversion=osversion), h=h, version="0.1.96-1")
+        d.download()
 
         if not os.path.isdir(vm_path):
             os.mkdir(vm_path)
         if not os.path.isdir(img_path):
             os.mkdir(img_path)
 
-        m = KVM(domain_path, name=name)
+        m = KVM(config_path, name=name)
         m.os_type(osversion)
         m.create_hd(hdd_path)
         m.create_vm()
         m.cpus(cpus)
         m.ramsize(ramsize)
         m.vramsize(vramsize)
+        #m.attach_iso(d.filepath) --> virtio.iso
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, macaddr=mac)
 
         log.info("Starting the Virtual Machine %r to install Windows.", name)
-        import ipdb; ipdb.set_trace()
         m.start_vm(visible=vm_visible)
 
         m.wait_for_state(shutdown=True)
 
         m.detach_iso()
+        m.save_domain()
         os.unlink(iso_path)
 
         m.compact_hd(hdd_path)
@@ -336,7 +343,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
     session.add(Image(name=name, path=hdd_path, osversion=osversion,
                       servicepack="%s" % h.service_pack, mode="normal",
                       ipaddr=ip, port=port, adapter=adapter,
-                      netmask=netmask, gateway=gateway,
+                      netmask=netmask, gateway=gateway, config=config_path,
                       cpus=cpus, ramsize=ramsize, vramsize=vramsize, vm="%s" % vm,
                       paravirtprovider=paravirtprovider))
     session.commit()
