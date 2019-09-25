@@ -19,8 +19,10 @@ from vmcloak.paths import get_path
 from vmcloak.rand import random_mac
 from vmcloak.repository import vms_path
 from vmcloak.vmxml import Element
+from vmcloak.constants import SNAPSHOT_XML_TEMPLATE
 
 log = logging.getLogger(__name__)
+logging.getLogger('libvirt').setLevel(logging.WARNING)
 
 class VirtualBox(Machinery):
     FIELDS = VBOX_CONFIG
@@ -355,6 +357,8 @@ class KVM(Machinery):
                 if shutdown and state == libvirt.VIR_DOMAIN_SHUTOFF or \
                                     state == libvirt.VIR_DOMAIN_SHUTDOWN:
                     break
+                if state == libvirt.VIR_DOMAIN_REBOOT_DEFAULT:
+                    self.detach_iso()
             except CommandError:
                 pass
 
@@ -441,9 +445,6 @@ class KVM(Machinery):
             except StopIteration:
                 source = Element('source', file=iso)
                 cdrom.insert(0, source)
-        # TODO: check if domain is running then use this method
-        #device_xml = ET.dump(disk)
-        #self.domain.updateDeviceFlags(device_xml)
 
     def detach_iso(self):
         """Detach the ISO file in the DVDRom drive."""
@@ -478,7 +479,7 @@ class KVM(Machinery):
     def dumpXML(self):
         return ET.dump(self.domain)
 
-    def hostonly(self, nictype="virtio", macaddr=None, adapter='virbr'):
+    def hostonly(self, nictype="rtl8139", macaddr=None, adapter='virbr'):
         """Configure hostonly for the Virtual Machine.
         <interface type="bridge">
             <source bridge="virbr0"/>
@@ -489,7 +490,7 @@ class KVM(Machinery):
         interface = self.domain.find('.//devices/interface')
         index = self.network_index()
         if interface is None:
-            interface = Element('interface', type='bridge')
+            interface = Element('interface', type='network')
             interface.appendChildWithArgs('model', type=nictype)
             interface.appendChildWithArgs('source', bridge=adapter+str(index))
             interface = self.modify_mac(interface, macaddr)
@@ -506,8 +507,10 @@ class KVM(Machinery):
             try:
                 source = interface.iter('source').next()
                 source.attrib['bridge'] = adapter+str(index)
+                #source.attrib['network'] = 'default'
             except StopIteration:
                 source = Element('source', bridge=adapter+str(index))
+                #source = Element('source', network='default')
                 interface.insert(0, source)
 
 
@@ -523,37 +526,64 @@ class KVM(Machinery):
         """Start the associated Virtual Machine."""
         # save finalized domain before start
         try:
-            dom = self.virt_conn.lookupByName(self.name)
-            state, reason = dom.state()
+            self.dom = self.virt_conn.lookupByName(self.name)
+            state, reason = self.dom.state()
             if state == libvirt.VIR_DOMAIN_RUNNING:
                 log.error('VM %s is already running!'%self.name)
             else:
-                dom.create()
+                self.dom.create()
         except libvirt.libvirtError:
             self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
             self.dom.create()
+
+    def sysinfo(self, element_dict):
+        if isinstance(element_dict, dict):
+            sysinfo = Element('sysinfo', type='smbios')
+            for k, v in element_dict.items():
+                elements = k.split('.')
+                child = sysinfo.find('.//%s'%elements[0])
+                if child is None:
+                    child = Element(elements[0])
+                # maximum recursion depth exceeded while calling a Python
+                # object!!
+                #if not isinstance(child, Element):
+                #    child.__class__ = Element
+                if not isinstance(child, Element):
+                    e = Element(elements[1], name=v)
+                    child.append(e)
+                else:
+                    child.appendChildWithArgs(elements[1], name=v)
+                sysinfo.append(child)
+            self.domain.append(sysinfo)
+        else:
+            log.error("Wrong format for sysinfo element!")
 
     def save_domain(self):
         open(self.domain_path, 'w').write(ET.tostring(self.domain))
 
     def list_snapshots(self):
         """ Returns a list of snapshots for the specific VMX file """
-        raise
+        return self.dom.snapshotListNames()
 
     def snapshot(self, label):
         """Take a snapshot of the associated Virtual Machine."""
-        raise
+        snap_xml = SNAPSHOT_XML_TEMPLATE.format(**{'snapshot_name': label})
+        self.dom.snapshotCreateXML(snap_xml, libvirt.VIR_DOMAIN_SNAPSHOT_CREATE_ATOMIC)
 
     def restore_snapshot(self, label=None):
         """ Revert to the latest snapshot available """
-        raise
+        if label in self.list_snapshots():
+            flag = libvirt.VIR_DOMAIN_SNAPSHOT_REVERT_RUNNING
+            self.dom.revertToSnapshot(label, flag)
+        else:
+            log.error("Snapshot %s doesn't exist."%label)
 
     def delete_snapshot(self, label, recursive=False):
         raise
 
     def stopvm(self, powertype="soft"):
         """Stop the associated Virtual Machine."""
-        raise
+        self.dom.shutdownFlags(0)
 
     def remotedisplay(self, port=5901, password=""):
         """ Provides a VNC/RDP interface for GUI communication over the network """

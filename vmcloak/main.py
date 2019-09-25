@@ -148,7 +148,7 @@ def clone(name, outname):
 @click.option("--vnc-port", default=5901, help="Specify the VNC port.")
 @click.option("--vnc-pwd", default="password", help="Specify the VNC connection password.")
 @click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
-@click.option("--extra-config", type=str, default="", help="Set extra configuration for VM")
+@click.option("--extra-config", default=None, help="Set extra configuration for VM")
 @click.option("--paravirtprovider", default="default",
               help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
@@ -325,6 +325,8 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         #m.attach_iso(d.filepath) --> virtio.iso
         m.attach_iso(iso_path)
         m.hostonly(nictype=h.nictype, macaddr=mac)
+        if extra_config is not None:
+            m.sysinfo(extra_config)
 
         log.info("Starting the Virtual Machine %r to install Windows.", name)
         m.start_vm(visible=vm_visible)
@@ -335,7 +337,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
         m.save_domain()
         os.unlink(iso_path)
 
-        m.compact_hd(hdd_path)
+        #m.compact_hd(hdd_path)
     else:
         log.info("You can find your deployment ISO image from : %s" % iso_path)
 

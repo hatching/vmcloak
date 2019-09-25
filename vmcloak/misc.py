@@ -230,7 +230,7 @@ def wait_for_host(ipaddr, port):
             socket.create_connection((ipaddr, port), 1).close()
             break
         except socket.error:
-            log.debug("Waiting for host %s", ipaddr)
+            log.debug("Waiting for host %s:%s"% (ipaddr, str(port)))
             pass
         time.sleep(1)
 

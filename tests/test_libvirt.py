@@ -30,6 +30,7 @@ def genname(osversion):
 def test_winxpx86():
     """ Test windows XP X86 """
     name, _ = genname("winxpx86"), genname("winxpx86-snapshot")
+    machinery = 'kvm'
     win_conf = config["winxpx86"]
     ip = win_conf["network"]["ip"]
     port = win_conf["network"]["port"]
@@ -39,15 +40,17 @@ def test_winxpx86():
     iso = win_conf["iso"]
     ramsize = win_conf["config"]["ram_size"]
     vramsize = win_conf["config"]["vram_size"]
+    gateway = win_conf["network"]["gateway"]
+    extra_config = win_conf["extraConfig"][machinery]
     #hdd_vdev = config["winxpx86"]["config"]["hdd_vdev"]
-    machinery = 'kvm'
 
     call(
         main.init, name,"--vm", machinery,"--winxpx86",
         "--ip",  ip, "--port", port, "--ramsize", ramsize,
         "--tempdir", dirpath, "--serial-key", serialkey,
         "--iso-mount", iso, "--vramsize", vramsize ,
-        "--dns", dns, "--mac", mac, "--debug"
+        "--dns", dns, "--mac", mac, "--gateway", gateway, "--debug",
+        "--extra-config", extra_config
     )
 
     image = session.query(Image).filter_by(name=name).first()
@@ -55,10 +58,9 @@ def test_winxpx86():
     m.create_vm()
     m.start_vm(visible=True)
 
-    misc.wait_for_host(ip, port)
-
     ## Very basic integrity checking of the VM.
     a = agent.Agent(ip, port)
+    misc.wait_for_host(ip, port)
     assert a.environ()["SYSTEMDRIVE"] == "C:"
 
     a.shutdown()

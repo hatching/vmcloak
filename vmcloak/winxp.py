@@ -86,4 +86,4 @@ class WindowsXPx64(WindowsXP):
 class WindowsXPx86(WindowsXP):
     arch = "x86"
     mount = "/mnt/winxpx86", "/mnt/winxp"
-    nictype = "virtio"
+    nictype = "rtl8139"
