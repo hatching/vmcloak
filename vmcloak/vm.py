@@ -549,10 +549,14 @@ class KVM(Machinery):
                 #if not isinstance(child, Element):
                 #    child.__class__ = Element
                 if not isinstance(child, Element):
-                    e = Element(elements[1], name=v)
+                    e = Element('entry', name=elements[1], text=v)
                     child.append(e)
                 else:
-                    child.appendChildWithArgs(elements[1], name=v)
+                    if isinstance(v, list):
+                        for value in v:
+                            child.appendChildWithArgs('entry', text=value)
+                    else:
+                        child.appendChildWithArgs('entry', name=elements[1] , text=v)
                 sysinfo.append(child)
             self.domain.append(sysinfo)
         else:
@@ -580,6 +584,17 @@ class KVM(Machinery):
 
     def delete_snapshot(self, label, recursive=False):
         raise
+
+    def disk_stats(self):
+        disk_stats = dict()
+        disk_path = self.domain.find(".//devices/disk[@device='disk']/source").get('file')
+        if disk_path is not None:
+            rd_req, rd_bytes, wr_req, wr_bytes, err = self.dom.blockStats(disk_path)
+            disk_stats['rd_req'] = rd_req
+            disk_stats['rd_bytes'] = rd_bytes
+            disk_stats['wr_req'] = wr_req
+            disk_stats['wr_bytes'] = wr_bytes
+            return disk_stats
 
     def stopvm(self, powertype="soft"):
         """Stop the associated Virtual Machine."""

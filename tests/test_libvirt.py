@@ -58,9 +58,13 @@ def test_winxpx86():
     m.create_vm()
     m.start_vm(visible=True)
 
+    # sleep
+    time.sleep(7)
+
+    misc.wait_for_host(ip, port)
+
     ## Very basic integrity checking of the VM.
     a = agent.Agent(ip, port)
-    misc.wait_for_host(ip, port)
     assert a.environ()["SYSTEMDRIVE"] == "C:"
 
     a.shutdown()
