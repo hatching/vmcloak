@@ -544,6 +544,7 @@ class KVM(Machinery):
                 child = sysinfo.find('.//%s'%elements[0])
                 if child is None:
                     child = Element(elements[0])
+                    sysinfo.append(child)
                 # maximum recursion depth exceeded while calling a Python
                 # object!!
                 #if not isinstance(child, Element):
@@ -557,7 +558,11 @@ class KVM(Machinery):
                             child.appendChildWithArgs('entry', text=value)
                     else:
                         child.appendChildWithArgs('entry', name=elements[1] , text=v)
-                sysinfo.append(child)
+            # check if there's a UUID mismatch between <uuid> and <sysinfo>
+            uuid = sysinfo.find(".//system/entry/[@name='uuid']")
+            domain_uuid = self.domain.find(".//uuid")
+            if uuid.text != domain_uuid.text:
+                uuid.text = domain_uuid.text
             self.domain.append(sysinfo)
         else:
             log.error("Wrong format for sysinfo element!")
