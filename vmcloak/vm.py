@@ -537,7 +537,10 @@ class KVM(Machinery):
             self.dom.create()
 
     def sysinfo(self, element_dict):
-        if isinstance(element_dict, dict):
+        if isinstance(element_dict, dict) and element_dict:
+            # introduce smbios in OS element
+            os = self.domain.find('.//os')
+            os.append(Element('smbios', mode='sysinfo'))
             sysinfo = Element('sysinfo', type='smbios')
             for k, v in element_dict.items():
                 elements = k.split('.')
