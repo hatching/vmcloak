@@ -21,3 +21,4 @@ class Windows7x64(Windows7):
 class Windows7x86(Windows7):
     arch = "x86"
     mount = "/mnt/win7x86", "/mnt/win7"
+    nictype = "rtl8139"

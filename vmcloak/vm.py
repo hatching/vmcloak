@@ -462,13 +462,25 @@ class KVM(Machinery):
 
     def modify_mac(self, interface, macaddr=None):
         """Modify the MAC address of a Virtual Machine."""
-        if macaddr is None:
-            macaddr = random_mac()
+        mac_addr = macaddr
+        if mac_addr is None:
+            return
+            #macaddr = random_mac()
+        # check if macaddr is unicast or multicast
+        # most significant bit of the most significant byte
+        # 1 -> multicast, 0 -> unicast
+        while True:
+            msb = int(bin(int("0x"+mac_addr.split(':')[0],0))[2:].zfill(8)[-1])
+            if msb == 1:
+                mac_addr = random_mac()
+            else:
+                log.debug("mac address changed from %s to %s"%(macaddr, mac_addr))
+                break
         if isinstance(interface, Element):
-            return interface.appendChildWithArgs('mac', address=macaddr)
+            return interface.appendChildWithArgs('mac', address=mac_addr)
         else:
             mac = interface.iter('mac').next()
-            mac.attrib['address'] = macaddr
+            mac.attrib['address'] = mac_addr
             return
 
     def network_index(self):
