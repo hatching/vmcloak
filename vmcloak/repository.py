@@ -95,6 +95,9 @@ elif db_exists:
 if not os.path.isdir(image_path):
     os.mkdir(image_path)
 
+if not os.path.isdir(vms_path):
+    os.mkdir(vms_path)
+
 if not os.path.isdir(deps_path):
     os.mkdir(deps_path)
 

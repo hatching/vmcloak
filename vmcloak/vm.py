@@ -155,7 +155,8 @@ class VirtualBox(Machinery):
 
     def modify_mac(self, macaddr=None, index=1):
         if macaddr is None:
-            macaddr = random_mac()
+            return
+            #macaddr = random_mac()
 
         # VBoxManage prefers MAC addresses without colons.
         vbox_mac = macaddr.replace(":", "")
