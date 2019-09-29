@@ -581,7 +581,7 @@ class KVM(Machinery):
                 uuid.text = domain_uuid.text
             self.domain.append(sysinfo)
         else:
-            log.error("Wrong format for sysinfo element!")
+            log.info("sysinfo field is not populated!")
 
     def save_domain(self):
         open(self.domain_path, 'w').write(ET.tostring(self.domain))

@@ -41,6 +41,7 @@ def test_winx786():
         dns = win_conf["network"]["dns"]
         mac = win_conf["network"]["mac"] if 'mac' in win_conf["network"].keys() else None
         iso = win_conf["iso"]
+        cpus = win_conf["config"]["cpus"]
         ramsize = win_conf["config"]["ram_size"]
         vramsize = win_conf["config"]["vram_size"]
         gateway = win_conf["network"]["gateway"]
@@ -50,7 +51,7 @@ def test_winx786():
 
         call(
             main.init, name,"--vm", machinery,"--win7x86",
-            "--ip",  ip, "--port", port, "--ramsize", ramsize,
+            "--ip",  ip, "--port", port, "--ramsize", ramsize, "--cpus", cpus,
             "--tempdir", dirpath, "--iso-mount", iso, "--vramsize", vramsize ,
             "--dns", dns, "--mac", mac, "--gateway", gateway, "--debug",
             "--extra-config", extra_config
