@@ -321,9 +321,10 @@ class KVM(Machinery):
             xml = open(self.domain_path).read()
             self.dom = self.virt_conn.defineXML(xml)
         else:
-            self.dom = self.virt_conn.lookupByName(self.name)
-            if self.dom:
-                self.dom.undefine()
+            if self.name in self.virt_conn.listDefinedDomains():
+                self.dom = self.virt_conn.lookupByName(self.name)
+                if self.dom:
+                    self.dom.undefine()
             xml = self._call(self.virt_install, '--virt-type', self.virt_type,
                     '--name', self.name, '--os-type', self.os_type,
                     '--os-variant', self.os_variant, '--disk', self.disk_path,
@@ -564,15 +565,18 @@ class KVM(Machinery):
         """Start the associated Virtual Machine."""
         # save finalized domain before start
         try:
-            self.dom = self.virt_conn.lookupByName(self.name)
-            state, reason = self.dom.state()
-            if state == libvirt.VIR_DOMAIN_RUNNING:
-                log.error('VM %s is already running!'%self.name)
+            if self.name in self.virt_conn.listDefinedDomains():
+                self.dom = self.virt_conn.lookupByName(self.name)
+                state, reason = self.dom.state()
+                if state == libvirt.VIR_DOMAIN_RUNNING:
+                    log.error('VM %s is already running!'%self.name)
+                else:
+                    self.dom.create()
             else:
+                self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
                 self.dom.create()
         except libvirt.libvirtError:
-            self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
-            self.dom.create()
+            log.debug("This shouldn't happen.. Please check the source-code.")
 
     def sysinfo(self, element_dict):
         if isinstance(element_dict, dict) and element_dict:
