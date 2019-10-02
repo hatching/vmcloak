@@ -251,6 +251,16 @@ class VirtualBox(Machinery):
 class KVM(Machinery):
     """Virtualization layer for KVM using libvirt utility."""
     FIELDS = {}
+    VM_STATES = {
+        libvirt.VIR_DOMAIN_NOSTATE: 'VIR_DOMAIN_NOSTATE',
+        libvirt.VIR_DOMAIN_RUNNING: 'VIR_DOMAIN_RUNNING',
+        libvirt.VIR_DOMAIN_BLOCKED: 'VIR_DOMAIN_BLOCKED',
+        libvirt.VIR_DOMAIN_PAUSED: 'VIR_DOMAIN_PAUSED',
+        libvirt.VIR_DOMAIN_SHUTDOWN: 'VIR_DOMAIN_SHUTDOWN',
+        libvirt.VIR_DOMAIN_SHUTOFF: 'VIR_DOMAIN_SHUTOFF',
+        libvirt.VIR_DOMAIN_CRASHED: 'VIR_DOMAIN_CRASHED',
+        libvirt.VIR_DOMAIN_PMSUSPENDED: 'VIR_DOMAIN_PMSUSPENDED'
+    }
 
     def __init__(self, domain_path, *args, **kwargs):
         Machinery.__init__(self, *args, **kwargs)
@@ -292,12 +302,24 @@ class KVM(Machinery):
     def vminfo(self, element=None):
         """Returns a dictionary with all available information for the
         Virtual Machine."""
-        raise
+        vminfo = dict()
+        if self.dom:
+            state, maxmem, mem, cpus, cput = self.dom.info()
+            vminfo['state'] = KVM.VM_STATES[state]
+            vminfo['maxmem'] = maxmem
+            vminfo['memory'] = mem
+            vminfo['cpu_count'] = cpus
+            vminfo['cpu_time'] = cput
+        try:
+            return vminfo if element is None else vminfo.get(element)
+        except KeyError:
+            log.error('%s is not a valid key in vminfo.'%element)
 
     def create_vm(self):
         """Create a new Virtual Machine."""
         if os.path.exists(self.domain_path):
             xml = open(self.domain_path).read()
+            self.dom = self.virt_conn.defineXML(xml)
         else:
             xml = self._call(self.virt_install, '--virt-type', self.virt_type,
                     '--name', self.name, '--os-type', self.os_type,
