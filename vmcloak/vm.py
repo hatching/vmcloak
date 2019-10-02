@@ -321,6 +321,9 @@ class KVM(Machinery):
             xml = open(self.domain_path).read()
             self.dom = self.virt_conn.defineXML(xml)
         else:
+            self.dom = self.virt_conn.lookupByName(self.name)
+            if self.dom:
+                self.dom.undefine()
             xml = self._call(self.virt_install, '--virt-type', self.virt_type,
                     '--name', self.name, '--os-type', self.os_type,
                     '--os-variant', self.os_variant, '--disk', self.disk_path,
