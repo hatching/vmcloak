@@ -573,6 +573,8 @@ class KVM(Machinery):
                 else:
                     self.dom.create()
             else:
+                if not os.path.exists(self.domain):
+                    exit(1)
                 self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
                 self.dom.create()
         except libvirt.libvirtError:
