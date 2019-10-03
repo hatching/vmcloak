@@ -65,6 +65,7 @@ def config_writer():
             if not os.path.exists(domain_path):
                 continue
             vm =KVM(domain_path, name=name)
+            vm.create_vm()
             snapshots = vm.list_snapshots()
             if not snapshots:
                 snapshot = genname(name)

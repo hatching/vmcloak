@@ -646,7 +646,7 @@ class KVM(Machinery):
             disk_stats['wr_bytes'] = wr_bytes
             return disk_stats
 
-    def stopvm(self, powertype="soft"):
+    def stop_vm(self, powertype="soft"):
         """Stop the associated Virtual Machine."""
         self.dom.shutdownFlags(0)
 
