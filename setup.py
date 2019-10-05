@@ -42,7 +42,7 @@ setup(
     install_requires=[
         "click==6.6",
         "jinja2==2.9.6",
-        "pefile2==1.2.11",
+        "pefile==2019.4.18",
         "pyyaml==3.12",
         "sqlalchemy==1.3.3",
         "alembic>=1.0.7, <1.1",
