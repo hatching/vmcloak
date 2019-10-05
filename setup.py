@@ -40,7 +40,7 @@ setup(
         "vmcloak.data.win7": ["*.*"],
     },
     install_requires=[
-        "click==6.6",
+        "click==7.0",
         "jinja2==2.9.6",
         "pefile2==1.2.11",
         "pyyaml==3.12",
