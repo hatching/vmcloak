@@ -316,10 +316,11 @@ class KVM(Machinery):
             log.error('%s is not a valid key in vminfo.'%element)
 
     def create_vm(self):
-        """Create a new Virtual Machine."""
+        """Defines the domain if domain_path exists, otherwise if it can find
+        already defined domain, undefine it."""
         if os.path.exists(self.domain_path):
             xml = open(self.domain_path).read()
-            self.dom = self.virt_conn.defineXML(xml)
+            #self.dom = self.virt_conn.defineXML(xml)
         else:
             if self.name in self.virt_conn.listDefinedDomains():
                 self.dom = self.virt_conn.lookupByName(self.name)
@@ -573,8 +574,8 @@ class KVM(Machinery):
                 else:
                     self.dom.create()
             else:
-                if not os.path.exists(self.domain):
-                    exit(1)
+                if not os.path.exists(self.domain_path):
+                    open(self.domain_path, 'w').write(ET.tostring(self.domain))
                 self.dom = self.virt_conn.defineXML(ET.tostring(self.domain))
                 self.dom.create()
         except libvirt.libvirtError:
