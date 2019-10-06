@@ -36,6 +36,7 @@ def test_ipaddr_increase():
     assert misc.ipaddr_increase("192.168.56.101") == "192.168.56.102"
 
 def test_all():
+    config = json.load(open(os.path.expanduser("~/.vmcloak/config/win7x86_vmware_conf2.json"), "rb"))
     for winver in config.keys():
         start_time = time.time()
         win_conf = config[winver]
@@ -44,22 +45,26 @@ def test_all():
         port = win_conf["network"]["port"]
         gateway = win_conf["network"]["gateway"]
         dns = win_conf["network"]["dns"]
-        mac = win_conf["network"]["mac"]
+        mac = win_conf["network"]["mac"] if win_conf["network"].has_key('mac') else None
         iso = win_conf["iso"]
         hdd_vdev = win_conf["config"]["hdd_vdev"]
         cpu = win_conf["config"]["cpus"]
         virts = win_conf["extraConfig"].keys()
         virts.remove('virtualbox')
+        virts.remove('kvm')
         extraConfig = ""
 
         for machinery in virts:
             if machinery in VMCLOAK_VM_MODES:
-                for k,v in win_conf["extraConfig"][machinery].items():
-                    extraConfig += "{0} = {1}\n".format(k,v)
+                if win_conf["extraConfig"]:
+                    for k,v in win_conf["extraConfig"][machinery].items():
+                        extraConfig += "{0} = {1}\n".format(k,v)
+                else:
+                    extraConfig = ""
             if "serialkey" in win_conf.keys():
                 serialkey = win_conf["serialkey"]
                 call(
-                    main.init, name,"--vm", machinery,"--%s"%winver,
+                    main.init, name,"--vm", machinery,"--win7x86",
                     "--ip",  ip, "--port", port, "--gateway", gateway,
                     "--mac", mac, "--cpus", cpu, "--dns", dns,
                     "--tempdir", dirpath, "--serial-key", serialkey,
@@ -68,7 +73,7 @@ def test_all():
                 )
             else:
                 call(
-                    main.init, name,"--vm", machinery,"--%s"%winver,
+                    main.init, name,"--vm", machinery,"--win7x86",
                     "--ip",  ip, "--port", port, "--gateway", gateway,
                     "--mac", mac, "--cpus", cpu,
                     "--tempdir", dirpath, "--iso-mount", iso,

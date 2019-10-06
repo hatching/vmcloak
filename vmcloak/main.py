@@ -371,7 +371,7 @@ def init(name, winxpx86, winxpx64, win7x86, win7x64, win81x86, win81x64, win10x8
 
         #m.remove_hd()
         m.compact_hd(hdd_path)
-        m.export(ovf_path)
+        #m.export(ovf_path)
         config_path=vmx_path
         #m.delete_vm()
     else:

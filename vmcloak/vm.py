@@ -655,12 +655,15 @@ class VMWare(Machinery):
         return self.batchmodify(iso_config)
 
     # http://sanbarrow.com/vmx/vmx-network-advanced.html
-    def modify_mac(self, macaddr=None, index=0):
+    def modify_mac(self, macaddr=None, index=0, addr_type='static'):
         """Modify the MAC address of a Virtual Machine."""
         if macaddr is None:
-            macaddr = random_mac()
-        # VMRun accepts MAC addressed to be out-of-range
-        mac_config = _VMX_MAC.format(**{'index': index, 'addr_type': 'static', 'mac_addr':macaddr})
+            # set generated ip addr by vmware
+            mac_config = "ethernet{index}.addressType = \
+            \"{addr_type}\"".format(**{'index': index, 'addr_type': addr_type})
+        else:
+            # VMRun accepts MAC addressed to be out-of-range
+            mac_config = _VMX_MAC.format(**{'index': index, 'addr_type': addr_type, 'mac_addr':macaddr})
         return self.batchmodify(mac_config)
 
     def network_index(self):
@@ -688,7 +691,10 @@ class VMWare(Machinery):
 
         hostonly_config = _VMX_ETHERNET.format(**{'index': index, 'vdev': nictype, 'conn_type': 'hostonly'})
         self.batchmodify(hostonly_config)
-        return self.modify_mac(macaddr, index)
+        if macaddr is None:
+            return self.modify_mac(index, addr_type='generated')
+        else:
+            return self.modify_mac(macaddr, index)
 
     # TODO: check existence of vboxnet1 iface on windows OS
     # http://www.sanbarrow.com/vmx/vmx-network.html
