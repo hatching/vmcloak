@@ -268,6 +268,7 @@ class KVM(Machinery):
         self.qemu_img = get_path("qemu-img")
         self.virt_install = get_path("virt-install")
         self.domain_path = domain_path
+        self.virt_type = 'kvm'
 
         if os.getenv("LIBVIRT_DEFAULT_URI"):
             self.QEMU_URI = os.getenv("LIBVIRT_DEFAULT_URI")
