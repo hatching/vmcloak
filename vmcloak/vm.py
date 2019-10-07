@@ -319,11 +319,11 @@ class KVM(Machinery):
     def create_vm(self):
         """Defines the domain if domain_path exists, otherwise if it can find
         already defined domain, undefine it."""
-        if self.name in self.virt_conn.listDefinedDomains():
-            self.dom = self.virt_conn.lookupByName(self.name)
-            if self.dom:
-                self.dom.undefine()
         if os.path.exists(self.domain_path):
+            if self.name in self.virt_conn.listDefinedDomains():
+                self.dom = self.virt_conn.lookupByName(self.name)
+                if self.dom:
+                    self.dom.undefine()
             xml = open(self.domain_path).read()
             self.dom = self.virt_conn.defineXML(xml)
         else:
