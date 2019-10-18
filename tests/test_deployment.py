@@ -12,6 +12,7 @@ from vmcloak.main import do_snapshot
 from vmcloak.misc import wait_for_host
 from vmcloak.agent import Agent
 from vmcloak.dependencies.pillow import Pillow
+from vmcloak.dependencies.vcredist import VcRedist
 from vmcloak.winxp import WindowsXPx86, WindowsXPx64
 from vmcloak.win7 import Windows7x86, Windows7x64
 from vmcloak.win81 import Windows81x86, Windows81x64
@@ -76,6 +77,7 @@ def config_writer():
                 a.ping()
 
                 Pillow(a=a, h=h).run()
+                VcRedist(a=a, h=h, version="2015sp1").run()
 
                 vm.snapshot(snapshot)
 
