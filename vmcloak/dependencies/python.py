@@ -6,7 +6,7 @@ from vmcloak.abstract import Dependency
 
 class Python(Dependency):
     name = "python"
-    default = "2.7.6"
+    default = "2.7.13"
     exes = [{
         "version": "2.7.6",
         "urls": [

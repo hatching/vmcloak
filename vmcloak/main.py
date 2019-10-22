@@ -138,7 +138,7 @@ def clone(name, outname):
 @click.option("--vm-visible", is_flag=True, help="Start the Virtual Machine in GUI mode.")
 @click.option("--vrde", is_flag=True, help="Enable the VirtualBox Remote Display Protocol.")
 @click.option("--vrde-port", default=3389, help="Specify the VRDE port.")
-@click.option("--python-version", default="2.7.6", help="Which Python version do we install on the guest?")
+@click.option("--python-version", default="2.7.13", help="Which Python version do we install on the guest?")
 @click.option("--paravirtprovider", default="default",
               help="Select paravirtprovider for Virtualbox none|default|legacy|minimal|hyperv|kvm")
 @click.option("-d", "--debug", is_flag=True, help="Install Virtual Machine in debug mode.")
