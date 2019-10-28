@@ -280,6 +280,7 @@ class KVM(Machinery):
         if self.virt_conn == None:
             log.error('Failed to open connection to qemu:///system')
             exit(1)
+        self.dom = self.virt_conn.lookupByName(self.name)
 
     def _call(self, *args, **kwargs):
         cmd = list(args)
@@ -632,7 +633,8 @@ class KVM(Machinery):
         """ Revert to the latest snapshot available """
         if label in self.list_snapshots():
             flag = libvirt.VIR_DOMAIN_SNAPSHOT_REVERT_RUNNING
-            self.dom.revertToSnapshot(label, flag)
+            snapshot_ptr = self.dom.snapshotLookupByName(label)
+            self.dom.revertToSnapshot(snapshot_ptr, flag)
         else:
             log.error("Snapshot %s doesn't exist."%label)
 
