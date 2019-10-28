@@ -3,6 +3,7 @@ import random
 import jinja2
 import os
 import logging
+import time
 
 from string import ascii_letters
 from vmcloak.repository import Image, Session, Snapshot
@@ -61,6 +62,7 @@ def config_writer():
         snapshots = session.query(Snapshot).filter_by(image_id=image.id)
 
         if machinery == "vmware":
+            start_time = time.time()
             vmx_path = image.config
             if not os.path.exists(vmx_path):
                 continue
@@ -89,6 +91,7 @@ def config_writer():
             vmware_machines[name] = {'ipaddr': ipaddr,
                                     'snapshot': snapshots[0],
                                     'vmx_path': vmx_path}
+            print("--- %s seconds to finish %s config deployement ---" % (time.time() - start_time, name))
         if machinery == "virtualbox":
             if not snapshots:
                 snapshot = do_snapshot(image, name)
