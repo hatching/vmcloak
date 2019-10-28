@@ -1,17 +1,12 @@
 # Copyright (C) 2014-2018 Jurriaan Bremer.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
-from __future__ import print_function
-from vmcloak.misc import wait_for_host
 
 import io
-import time
-import re
 import logging
 import requests
-#import matplotlib.pyplot as plt
-#import pandas as pd
 
+from vmcloak.misc import wait_for_host
 
 log = logging.getLogger(__name__)
 
@@ -53,13 +48,13 @@ class Agent(object):
         environ = self.get("/environ").json()["environ"]
         return environ if value is None else environ.get(value, default)
 
-    def execute(self, command, async=False):
+    def execute(self, command, shell=False, async=False):
         """Execute a command."""
         log.debug("Executing command in VM: %s", command)
         if async:
-            return self.post("/execute", command=command, async="true")
+            return self.post("/execute", command=command, shell=shell, async="true")
         else:
-            return self.post("/execute", command=command)
+            return self.post("/execute", command=command, shell=shell)
 
     def execpy(self, filepath, async=False):
         """Execute a Python file."""
@@ -135,86 +130,6 @@ class Agent(object):
         if isinstance(contents, basestring):
             contents = io.BytesIO(str(contents))
         self.postfile("/store", {"file": contents}, filepath=filepath)
-
-    def process_utilization(self, process="*", interval=2, samples=10,
-                            output="C:\process.csv"):
-        """Read performance counter for process object."""
-        RE_PROC = r'\"\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}\.\d{3}\",(.*)\r\n'
-        config = ["\Process({process})\ID Process",
-                "\Process({process})\% Processor Time"]
-        counters_string = ' '.join("\"%s\""%c.format(**{"process": process}) for c in config)
-        command = "typeperf -si {si} -sc {sc} -f CSV -y -o {o} {counters}".format(**{"si": interval,
-                                                                "sc":samples,
-                                                                "o":output,
-                                                                "counters": counters_string})
-        self.execute(command, async=True)
-        time.sleep(interval*samples)
-        content = self.retrieve(output)
-        data_list = re.findall(RE_PROC, content)
-        process_list = re.findall(r'Process\(([\w#]+)\)\\ID Process', content)
-        process_count = len(process_list)
-        process_PID = data_list[0].split(',')[:process_count]
-        cpu_usage = {p:[] for p in process_list}
-        cpu_list = []
-
-        for sample in range(1, samples-1):
-            cpu_list = [ d.replace('\"', '') for d in
-                        data_list[sample].split(',')[process_count:] ]
-            for process, t in zip(process_list, cpu_list):
-                cpu_usage[process].append(t)
-
-        #cpu_usage['x'] = range(1,samples-1)
-        #df = pd.DataFrame(cpu_usage)
-        #plt.ylabel("Processor time")
-        #plt.xlabel("Samples per second")
-        #for p in process_list:
-        #    plt.plot('x', p, data=df, marker='o', markerfacecolor='blue',
-        #             markersize=12, color='skyblue', linewidth=4)
-        #plt.legend()
-        #plt.savefig("cpu_usage.png", dpi=100)
-        #plt.show()
-        return cpu_usage
-
-    def disk_utilization(self, interval=2, samples=10,
-                            output="C:\hdd.csv"):
-        """Read performance counter for physical disk object."""
-        ret = dict()
-        r = re.compile(r'\"\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}\.\d{3}\",\"(?P<read>\d+\.\d+|\d+)\",\"(?P<write>\d+\.\d+|\d+)\"\r\n')
-        config = ["\PhysicalDisk(0 C:)\Disk Read Bytes/sec",
-                  "\PhysicalDisk(0 C:)\Disk Write Bytes/sec"]
-        counters_string = ' '.join("\"%s\""%c for c in config)
-        command = "typeperf -si {si} -sc {sc} -f CSV -y -o {o} {counters}".format(**{"si": interval,
-                                                                "sc":samples,
-                                                                "o":output,
-                                                                "counters": counters_string})
-        self.execute(command, async=True)
-        time.sleep(interval*samples)
-        content = self.retrieve(output)
-        ret['read'] = [m.group('read') for m in r.finditer(content)]
-        ret['write'] = [m.group('write') for m in r.finditer(content)]
-        return ret
-
-    def memory_utilization(self, interval=2, samples=10,
-                            output="C:\memory.csv"):
-        """Read performance counter for memory object."""
-        ret = dict()
-        r = re.compile(r'\"\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}\.\d{3}\",\"(?P<commit>\d+)\",\"(?P<avail>\d+)\"\,\"(?P<cache>\d+)\"\r\n')
-        config = ["\Memory\Committed Bytes",
-                  "\Memory\Available Bytes",
-                  "\Memory\Cache Bytes"]
-        counters_string = ' '.join("\"%s\""%c for c in config)
-        command = "typeperf -si {si} -sc {sc} -f CSV -y -o {o} {counters}".format(**{"si": interval,
-                                                                "sc":samples,
-                                                                "o":output,
-                                                                "counters": counters_string})
-        self.execute(command, async=True)
-        time.sleep(interval*samples)
-        content = self.retrieve(output)
-        ret['commit'] = [m.group('commit') for m in r.finditer(content)]
-        ret['available'] = [m.group('avail') for m in r.finditer(content)]
-        ret['cache'] = [m.group('cache') for m in r.finditer(content)]
-        return ret
-
 
     def retrieve(self, filepath):
         """Retrieve a file from the Agent."""

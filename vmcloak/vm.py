@@ -229,7 +229,7 @@ class VirtualBox(Machinery):
     def delete_snapshot(self, label):
         return self._call("snapshot", self.name, "delete", label)
 
-    def stopvm(self):
+    def stop_vm(self):
         return self._call("controlvm", self.name, "poweroff")
 
     def list_settings(self):
