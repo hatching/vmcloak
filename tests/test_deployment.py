@@ -77,7 +77,7 @@ def config_writer():
                 a.ping()
 
                 Pillow(a=a, h=h).run()
-                VcRedist(a=a, h=h, version="2015sp1").run()
+                VcRedist(a=a, h=h, version="2015u2").run()
 
                 vm.snapshot(snapshot)
 
