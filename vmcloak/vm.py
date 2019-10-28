@@ -282,10 +282,9 @@ class KVM(Machinery):
             exit(1)
         if self.name in self.virt_conn.listDefinedDomains():
             self.dom = self.virt_conn.lookupByName(self.name)
-            if not self.dom:
-                if os.path.exists(self.domain_path):
-                    xml = open(self.domain_path).read()
-                    self.dom = self.virt_conn.defineXML(xml)
+        elif os.path.exists(self.domain_path):
+            xml = open(self.domain_path).read()
+            self.dom = self.virt_conn.defineXML(xml)
 
 
     def _call(self, *args, **kwargs):
