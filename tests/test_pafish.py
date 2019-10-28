@@ -14,7 +14,10 @@ import json
 from vmcloak.repository import Image, Session, Snapshot, deps_path
 from vmcloak.agent import Agent
 from vmcloak.misc import wait_for_host
-from vmcloak.vm import VMWare, VirtualBox
+try:
+    from vmcloak.vm import VMWare, VirtualBox
+except ImportError:
+    from vmcloak.vm import KVM, VirtualBox
 
 logging.basicConfig()
 log = logging.getLogger("vmcloak")
@@ -57,6 +60,7 @@ def test_pafish():
     pfish_gpath = "C:\\pafish.exe"
 
     for image in images:
+        start_time = time.time()
         ipaddr = image.ipaddr
         port = image.port
         backend = image.vm
@@ -67,30 +71,33 @@ def test_pafish():
 
         if backend == "vmware":
             vmx_path = image.config
-            log.debug(vmx_path)
             if vmx_path is None:
                 continue
             if not os.path.exists(vmx_path):
                 continue
             vm = VMWare(vmx_path, name=name)
-
-            snapshot_list = vm.list_snapshots()
-            if snapshot_list:
-                vm.restore_snapshot(label=snapshot_list[0])
-            else:
-                vm.start_vm(visible=False)
+            snapshots = vm.list_snapshots()
 
         elif backend == "virtualbox":
             vm = VirtualBox(name=name)
-
             snapshots = session.query(Snapshot).filter_by(image_id=image.id).all()
-            if snapshots:
-                vm.restore_snapshot(label=snapshot_list[0])
-            else:
-                vm.start_vm(visible=False)
 
         elif backend == "kvm":
-            pass
+            domain_path = image.config
+            if not os.path.exists(domain_path):
+                continue
+            vm =KVM(domain_path, name=name)
+            vm.create_vm()
+            snapshots = vm.list_snapshots()
+
+        else:
+            log.error("This backend is not supported so far...")
+            exit(1)
+
+        if snapshots:
+            vm.restore_snapshot(label=snapshots[0])
+        else:
+            vm.start_vm(visible=False)
 
         wait_for_host(ipaddr, port)
 
@@ -111,6 +118,9 @@ def test_pafish():
 
         vm.stop_vm()
         vm.wait_for_state(shutdown=True)
+
+        log.debug("--- %s seconds to collect anti-vm artifacts under %s config ---" %
+              (time.time() - start_time, name))
 
 
 if __name__ == "__main__":
