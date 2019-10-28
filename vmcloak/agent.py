@@ -48,13 +48,14 @@ class Agent(object):
         environ = self.get("/environ").json()["environ"]
         return environ if value is None else environ.get(value, default)
 
-    def execute(self, command, async=False):
+    def execute(self, command, shell=False, async=False):
         """Execute a command."""
         log.debug("Executing command in VM: %s", command)
         if async:
-            return self.post("/execute", command=command, async="true")
+            return self.post("/execute", command=command, shell=shell, async="true")
         else:
-            return self.post("/execute", command=command)
+            return self.post("/execute", command=command, shell=shell)
+
 
     def execpy(self, filepath, async=False):
         """Execute a Python file."""
