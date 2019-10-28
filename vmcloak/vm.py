@@ -280,7 +280,13 @@ class KVM(Machinery):
         if self.virt_conn == None:
             log.error('Failed to open connection to qemu:///system')
             exit(1)
-        self.dom = self.virt_conn.lookupByName(self.name)
+        if self.name in self.virt_conn.listDefinedDomains():
+            self.dom = self.virt_conn.lookupByName(self.name)
+            if not self.dom:
+                if os.path.exists(self.domain_path):
+                    xml = open(self.domain_path).read()
+                    self.dom = self.virt_conn.defineXML(xml)
+
 
     def _call(self, *args, **kwargs):
         cmd = list(args)
@@ -320,18 +326,10 @@ class KVM(Machinery):
     def create_vm(self):
         """Defines the domain if domain_path exists, otherwise if it can find
         already defined domain, undefine it."""
-        if os.path.exists(self.domain_path):
-            if self.name in self.virt_conn.listDefinedDomains():
-                self.dom = self.virt_conn.lookupByName(self.name)
-                if self.dom:
-                    self.dom.undefine()
-            xml = open(self.domain_path).read()
-            self.dom = self.virt_conn.defineXML(xml)
-        else:
-            xml = self._call(self.virt_install, '--virt-type', self.virt_type,
-                    '--name', self.name, '--os-type', self.os_type,
-                    '--os-variant', self.os_variant, '--disk', self.disk_path,
-                        '--print-xml', '--memory', '1024')
+        xml = self._call(self.virt_install, '--virt-type', self.virt_type,
+                '--name', self.name, '--os-type', self.os_type,
+                '--os-variant', self.os_variant, '--disk', self.disk_path,
+                    '--print-xml', '--memory', '1024')
         self.domain = ET.fromstring(xml)
 
     def delete_vm(self):
