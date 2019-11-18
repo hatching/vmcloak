@@ -27,6 +27,7 @@ log.setLevel(logging.DEBUG)
 session = Session()
 kvm_machines = dict()
 vbox_machines = dict()
+qemu_machines = dict()
 
 def genname(osversion):
     rand_str = ''.join(random.choice(ascii_letters) for _ in range(5))
@@ -74,7 +75,7 @@ def config_writer():
             if not snapshots:
                 snapshot = genname(name)
 
-                vm.start_vm(visible=True)
+                vm.start_vm(visible=False)
 
                 wait_for_host(ipaddr, port)
 
@@ -94,6 +95,39 @@ def config_writer():
             kvm_machines[name] = {'ipaddr': ipaddr,
                                     'snapshot': snapshots[0]}
             print("--- %s seconds to finish %s config deployement ---" % (time.time() - start_time, name))
+        if machinery == "qemu":
+            start_time = time.time()
+            domain_path = image.config
+            image_path = image.path
+            if not os.path.exists(domain_path):
+                continue
+            vm =KVM(domain_path, name=name)
+            #vm.create_vm()
+            snapshots = vm.list_snapshots()
+            if not snapshots:
+                snapshot = genname(name)
+
+                vm.start_vm(visible=False)
+
+                wait_for_host(ipaddr, port)
+
+                a = Agent(ipaddr, port)
+                a.ping()
+
+                Pillow(a=a, h=h).run()
+                VcRedist(a=a, h=h, version="2015u2").run()
+
+                vm.snapshot(snapshot)
+
+                vm.stop_vm()
+                vm.wait_for_state(shutdown=True)
+
+                snapshots = vm.list_snapshots()
+                #TODO: change ipaddr of each snapshot from default one
+            qemu_machines[name] = {'ipaddr': ipaddr,
+                                   'image': image_path,
+                                    'snapshot': snapshots[0]}
+            print("--- %s seconds to finish %s config deployement ---" % (time.time() - start_time, name))
         if machinery == "virtualbox":
             if not snapshots:
                 snapshot = do_snapshot(image, name)
@@ -102,6 +136,8 @@ def config_writer():
 
     if kvm_machines:
         template_parser("kvm", "qemu:///system", kvm_machines)
+    if qemu_machines:
+        template_parser("qemu", "qemu:///system", qemu_machines)
     if vbox_machines:
         template_parser("virtualbox", "headless", vbox_machines)
 
