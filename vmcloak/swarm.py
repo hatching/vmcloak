@@ -136,16 +136,16 @@ class Swarm(object):
         ret.extend(inherited or [])
 
         deps = deps or []
-        if isinstance(deps, basestring):
+        if isinstance(deps, str):
             deps = deps.split()
 
         for dep in deps:
-            if isinstance(dep, basestring):
+            if isinstance(dep, str):
                 ret.append(self.parse_dependency(dep))
             elif isinstance(dep, dict):
                 ret.append(self.apply_dict(
-                    self.parse_dependency(dep.keys()[0]),
-                    dep.values()[0][0]
+                    self.parse_dependency(list(dep.keys())[0]),
+                    list(dep.values())[0][0]
                 ))
             else:
                 raise SwarmError()
@@ -174,7 +174,7 @@ class Swarm(object):
             else:
                 target_os = None
 
-            if isinstance(info, basestring):
+            if isinstance(info, str):
                 ret.append({
                     "os": target_os,
                     "dependency": dependency,
@@ -191,7 +191,7 @@ class Swarm(object):
                         }, entry))
                         continue
 
-                    if isinstance(entry, (int, float, basestring)):
+                    if isinstance(entry, (int, float, str)):
                         ret.append({
                             "os": target_os,
                             "dependency": dependency,

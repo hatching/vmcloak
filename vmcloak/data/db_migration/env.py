@@ -2,7 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from __future__ import with_statement
 from alembic import context
 from sqlalchemy import create_engine, pool
 from logging.config import fileConfig

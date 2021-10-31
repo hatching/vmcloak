@@ -10,11 +10,11 @@ def random_string(minimum, maximum=None):
         maximum = minimum
 
     count = random.randint(minimum, maximum)
-    return "".join(random.choice(string.ascii_letters) for x in xrange(count))
+    return "".join(random.choice(string.ascii_letters) for x in range(count))
 
 def random_mac():
     """Generates a random MAC address."""
-    values = [random.randint(0, 15) for _ in xrange(12)]
+    values = [random.randint(0, 15) for _ in range(12)]
 
     # At least for VirtualBox there's a limitation for the second character,
     # as outlined in the following thread. Thus we handle this.
@@ -28,7 +28,7 @@ def random_serial(length=None):
         length = random.randint(8, 20)
 
     return "".join(random.choice(string.uppercase + string.digits)
-                   for _ in xrange(length))
+                   for _ in range(length))
 
 def random_uuid():
     value = random_serial(32)

@@ -11,6 +11,7 @@ setup(
     author="Hatching B.V.",
     author_email="info@hatching.io",
     url="https://github.com/hatching/vmcloak",
+    python_requires=">=3.6",
     packages=[
         "vmcloak",
         "vmcloak.data",
@@ -40,12 +41,13 @@ setup(
         "vmcloak.data.win7": ["*.*"],
     },
     install_requires=[
-        "click==6.6",
-        "jinja2==2.9.6",
-        "pefile2==1.2.11",
-        "pyyaml==3.12",
-        "sqlalchemy==1.3.3",
-        "alembic>=1.0.7, <1.1",
+        "click",
+        "jinja2",
+        "pefile>=2019.4.18, <2019.5.0"
+        "pyyaml>=5.1",
+        "sqlalchemy>=1.4.26, <1.5",
+        "alembic>=1.7.4, <1.8",
+        "requests>=2.22.0, <3"
     ],
     extras_require={
         ":sys_platform == 'win32'": [

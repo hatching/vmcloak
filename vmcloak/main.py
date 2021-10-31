@@ -22,13 +22,13 @@ import vmcloak.dependencies
 from vmcloak.agent import Agent
 from vmcloak.constants import VMCLOAK_ROOT
 from vmcloak.dependencies import Python
-from vmcloak.exceptions import DependencyError, CommandError
+from vmcloak.exceptions import DependencyError
 from vmcloak.misc import wait_for_agent, register_cuckoo, drop_privileges
 from vmcloak.misc import ipaddr_increase
 from vmcloak.rand import random_string
 from vmcloak.repository import (
-    vms_path, image_path, Session, Image, Snapshot, iso_dst_path,
-    db_migratable, SCHEMA_VERSION
+    image_path, Session, Image, Snapshot, iso_dst_path, db_migratable,
+    SCHEMA_VERSION
 )
 from vmcloak.ostype import get_os
 

@@ -5,9 +5,10 @@
 import logging
 import os
 import os.path
+import random
 import subprocess
 import time
-from os.path import basename, exists, join
+from os.path import basename
 
 from vmcloak.conf import load_hwconf
 from vmcloak.data.config import VBOX_CONFIG
@@ -15,7 +16,7 @@ from vmcloak.exceptions import CommandError
 from vmcloak.ostype import network_interface
 from vmcloak.platforms import Machinery
 from vmcloak.rand import random_mac, random_serial, random_uuid
-from vmcloak.repository import vms_path, image_path
+from vmcloak.repository import vms_path
 
 log = logging.getLogger(__name__)
 name = "VirtualBox"

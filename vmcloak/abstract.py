@@ -85,7 +85,7 @@ class OperatingSystem(object):
         """Picks the first available mounted directory."""
         mounts = [isomount]
 
-        if isinstance(self.mount, basestring):
+        if isinstance(self.mount, str):
             mounts.append(self.mount)
         else:
             mounts.extend(self.mount)

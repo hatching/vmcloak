@@ -36,13 +36,13 @@ DISP_CHANGE_SUCCESSFUL = 0
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print "Usage: %s <width> <height>" % sys.argv[0]
+        print("Usage: %s <width> <height>" % sys.argv[0])
         exit(1)
 
     dm = _DevMode()
     dm.dmSize = sizeof(dm)
     if not EnumDisplaySettings(None, ENUM_CURRENT_SETTINGS, dm):
-        print "Error enumerating display settings.."
+        print("Error enumerating display settings..")
         exit(1)
 
     dm.dmPelsWidth = int(sys.argv[1])
@@ -50,5 +50,5 @@ if __name__ == "__main__":
 
     ret = ChangeDisplaySettings(dm, CDS_UPDATEREGISTRY)
     if ret != DISP_CHANGE_SUCCESSFUL:
-        print "Error changing display settings.."
+        print("Error changing display settings..")
         exit(1)

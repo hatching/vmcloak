@@ -2,7 +2,6 @@
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
-from __future__ import print_function
 from vmcloak.abstract import Dependency
 
 WMIC = "C:\\Windows\\sysnative\\wbem\\wmic.exe"

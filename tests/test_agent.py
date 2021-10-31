@@ -14,4 +14,4 @@ class TestAgent(object):
 
         self.a.postfile = none
         self.a.upload("/tmp/hello", "contents")
-        self.a.upload("/tmp/hello", u"contents")
+        self.a.upload("/tmp/hello", "contents")

@@ -14,9 +14,9 @@ import struct
 import subprocess
 import sys
 import time
-import urllib2
+import urllib.parse
 
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 try:
     import pwd
@@ -278,7 +278,7 @@ def ipaddr_increase(ipaddr):
 
 def filename_from_url(url):
     """Return the filename from a given url."""
-    return os.path.basename(urllib2.urlparse.urlparse(url).path)
+    return os.path.basename(urllib.urlparse.urlparse(url).path)
 
 def download_file(url, filepath):
     """Download the file from url and store it in the given filepath."""

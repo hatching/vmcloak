@@ -48,7 +48,7 @@ class Onemon(Dependency):
         buf = pe2.write()
 
         count = 0
-        for idx in xrange(len(blob)):
+        for idx in range(len(blob)):
             if blob[idx] != buf[idx]:
                 count += 1
 
@@ -80,7 +80,7 @@ class Onemon(Dependency):
         buf = pe2.write()
 
         count = 0
-        for idx in xrange(len(blob)):
+        for idx in range(len(blob)):
             if blob[idx] != buf[idx]:
                 count += 1
 
