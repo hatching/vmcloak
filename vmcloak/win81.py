@@ -9,6 +9,8 @@ class Windows81(WindowsAutounattended):
     service_pack = 2
     interface = "Ethernet"
 
+    os_version = "8.1"
+
     # List of preferences when multiple Windows 8.1 types are available.
     preference = "pro", "enterprise", "home"
 

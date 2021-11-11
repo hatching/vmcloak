@@ -3,12 +3,16 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from vmcloak.abstract import Dependency
+from vmcloak.exceptions import DependencyError
 
 class DotNet(Dependency):
     name = "dotnet"
-    depends = "wic"
-    default = "4.0"
+    depends = ["wic", "carootcert"]
+    default = "4.7.2"
+    tags = ["dotnet"]
     recommended = True
+    multiversion = True
+
     exes = [{
         "version": "4.0",
         "urls": [
@@ -61,16 +65,36 @@ class DotNet(Dependency):
     }, {
         "version": "4.7",
         "urls": [
-            "https://download.microsoft.com/download/D/D/3/DD35CC25-6E9C-484B-A746-C5BE0C923290/NDP47-KB3186497-x86-x64-AllOS-ENU.exe",
             "https://cuckoo.sh/vmcloak/NDP47-KB3186497-x86-x64-AllOS-ENU.exe",
         ],
         "sha1": "76054141a492ba307595250bda05ad4e0694cdc3",
-    }]
+    },
+        {
+            "version": "4.7.2",
+            "urls": [
+                "https://hatching.io/hatchvm/NDP472-KB4054530-x86-x64-AllOS-ENU.exe",
+            ],
+            "sha1": "31fc0d305a6f651c9e892c98eb10997ae885eb1e",
+        }
+    ]
 
     def run(self):
         self.upload_dependency("C:\\setup.exe")
-        self.a.execute("C:\\setup.exe /passive /norestart")
-        self.a.remove("C:\\setup.exe")
+        try:
+            res = self.a.execute("C:\\setup.exe /passive /norestart")
+            exit_code = res.get("exit_code")
+            if exit_code not in (0, 3010, 40008):
+                msg = ""
+                if exit_code == 2148204810:
+                    msg = "Missing Microsoft root CA certificate. " \
+                          "Install 'carootcert'."
+                raise DependencyError(
+                    f"Failed to install dotnet {self.version}. Installer "
+                    f"returned unexpected non-zero exit code: {exit_code}. "
+                    f"{msg}"
+                )
+        finally:
+            self.a.remove("C:\\setup.exe")
 
 class DotNet40(DotNet, Dependency):
     """Backwards compatibility."""

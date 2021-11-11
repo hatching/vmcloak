@@ -1,0 +1,78 @@
+#!/bin/bash
+# Copyright (C) 2021 Hatching B.V.
+# This file is part of VMCloak - http://www.vmcloak.org/.
+# See the file 'docs/LICENSE.txt' for copying permission.
+
+DEFAULT_BRIDGENAME="qemubr0"
+DEFAULT_BRIDGE_CIDRIP="192.168.30.1/24"
+
+printhelp () {
+  printf "Creates bridge 'bridge_interface' with IPv4 'bridge_ip' in network '/cidr'\n"
+  printf "'qemu-bridge-helper' binary must have SUID and bridge name must \nbe in ACL file before it can be used by qemu.\n"
+  printf "See https://wiki.qemu.org/Features/HelperNetworking\n"
+  printf "\nUsage: $0 [bridge_interface] [bridge_ip/cidr]\n"
+  printf "  $0 $DEFAULT_BRIDGENAME $DEFAULT_BRIDGE_CIDRIP\n"
+
+  printf "Defaults to:\n"
+  printf "  $0 $DEFAULT_BRIDGENAME $DEFAULT_BRIDGE_CIDRIP\n\n"
+  printf "This script needs root permissions.\n"
+  exit $1
+}
+if [ "$#" -eq 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
+  printhelp 0
+fi
+
+if [ $EUID -ne 0 ]; then
+  printf "\nRoot permissions required to run script\n\n"
+  printhelp 1
+fi
+
+if [ "$#" -eq 2 ]; then
+  BRIDGE_NAME="$1"
+  BRIDGE_IP="$2"
+else
+  BRIDGE_NAME="$DEFAULT_BRIDGENAME"
+  BRIDGE_IP="$DEFAULT_BRIDGE_CIDRIP"
+fi
+
+# Only try to create if this interface already exists as a bridge.
+if [ ! -d "/sys/class/net/$BRIDGE_NAME/bridge" ]; then
+  if ! /sbin/ip link add name "$BRIDGE_NAME" type bridge stp_state 0; then
+    echo "Failed to create bridge: $BRIDGE_NAME" >&2
+    exit 1
+  fi
+else
+  echo "Assigning $BRIDGE_IP to already existing bridge $BRIDGE_NAME"
+fi
+
+existing_net=$(/sbin/ip -4 address show "$BRIDGE_NAME" | awk '/inet/{print $2}')
+# Do not attempt to add the IP if the bridge already has an IP that is not
+# the same as the provided IP.
+if [ -n "$existing_net" ]; then
+  if [ "$existing_net" != "$BRIDGE_IP" ]; then
+    echo "Bridge $BRIDGE_NAME already has an IPv4 address: $existing_net" >&2
+    exit 1
+  fi
+
+else
+  if ! /sbin/ip addr add "$BRIDGE_IP" dev "$BRIDGE_NAME"; then
+    echo "Failed to assign $BRIDGE_IP to $BRIDGE_NAME" >&2
+    exit 1
+  fi
+fi
+
+if ! /sbin/ip link set "$BRIDGE_NAME" up; then
+  echo "Failed to set state of $BRIDGE_NAME to up." >&2
+  exit 1
+fi
+
+echo "Bridge created and configured!"
+echo ""
+echo "Ensure an 'allow $BRIDGE_NAME' entry exists in the 'qemu-bridge-helper' ACL file."
+echo ""
+echo "ACL file should usually be at /etc/qemu/bridge.conf or /usr/local/etc/qemu/bridge.conf. This depends on the bridge helper binary."
+echo ""
+echo "Ensure 'qemu-bridge-helper' has setuid bit so it can create interfaces for this bridge."
+echo "Binary is usually located at: /usr/lib/qemu/qemu-bridge-helper or /usr/local/libexec/qemu-bridge-helper"
+
+echo "See https://wiki.qemu.org/Features/HelperNetworking"

@@ -33,7 +33,7 @@ class Modified(Dependency):
         # Use same Python instance as main agent.
         r = self.a.execute("%s query %s /v Agent" % (REG, RUN))
         python = None
-        lines = r.json()["stdout"].split("\r\n")
+        lines = r["stdout"].split("\r\n")
         for line in lines:
             parts = line.split()
             if parts[:2] == ["Agent", "REG_SZ"]:

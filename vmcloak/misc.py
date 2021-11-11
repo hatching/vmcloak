@@ -6,17 +6,16 @@ import hashlib
 import importlib
 import logging
 import os
-import requests
 import shutil
 import socket
 import stat
 import struct
-import subprocess
 import sys
 import time
 import urllib.parse
-
 from configparser import ConfigParser
+
+import requests
 
 try:
     import pwd
@@ -73,7 +72,6 @@ def copytreeinto(srcdir, dstdir):
     for fname in os.listdir(srcdir):
         path_in = os.path.join(srcdir, fname)
         path_out = os.path.join(dstdir, fname)
-
         if os.path.isfile(path_in):
             shutil.copy(path_in, path_out)
         else:
@@ -85,7 +83,7 @@ def ini_read(path):
     if os.path.exists(path):
         buf = open(path, "rb").read()
     else:
-        buf = ""
+        buf = b""
 
     # UTF-16 Byte Order Mark ("BOM")
     mode = "utf16" if buf[:2] == "\xff\xfe" else "latin1"
@@ -166,72 +164,27 @@ def ini_read_dict(path):
 def sha1_file(path):
     """Calculate the sha1 hash of a file."""
     h = hashlib.sha1()
-    f = open(path, "rb")
 
-    while True:
-        buf = f.read(1024*1024)
-        if not buf:
-            break
+    with open(path, "rb") as fp:
+        while True:
+            buf = fp.read(8*1024*1024)
+            if not buf:
+                break
 
-        h.update(buf)
+            h.update(buf)
 
     return h.hexdigest()
 
-def register_cuckoo(hostonly_ip, tags, vmname, cuckoo_dirpath, rdp_port=None):
-    log.debug("Registering the Virtual Machine with Cuckoo.")
-
-    # Legacy Cuckoo setup.
-    machine_py = os.path.join(cuckoo_dirpath, "utils", "machine.py")
-    if os.path.exists(machine_py):
-        try:
-            args = [
-                machine_py, "--add",
-                "--ip", hostonly_ip,
-                "--platform", "windows",
-                "--tags", tags or "",
-                "--snapshot", "vmcloak",
-                vmname,
-            ]
-
-            if rdp_port:
-                args += ["--rdp_port", "%s" % rdp_port]
-
-            subprocess.check_call(args, cwd=cuckoo_dirpath)
-            return True
-        except OSError as e:
-            log.error("Is $CUCKOO/utils/machine.py executable? -> %s", e)
-            return False
-        except subprocess.CalledProcessError as e:
-            log.error("Error registering the VM: %s.", e)
-            return False
-        return
-
-    # Cuckoo Package setup.
-    try:
-        args = [
-            "cuckoo",
-            "--cwd", cuckoo_dirpath,
-            "machine",
-            "--add", vmname, hostonly_ip,
-            "--platform", "windows",
-            "--tags", tags or "",
-            "--snapshot", "vmcloak",
-            "--options", "",
-        ]
-        subprocess.check_call(args)
-    except subprocess.CalledProcessError as e:
-        log.error("Error registering VM: %s", e)
-        return False
-
-
-def wait_for_agent(a, timeout=90):
+def wait_for_agent(a, timeout=180):
     """Wait for the Agent to come up."""
     now = time.time()
     while (time.time() - now) < timeout:
         try:
+            log.debug(f"Sending ping to agent on: {a.ipaddr}:{a.port}")
             a.ping()
             return
         except:
+            log.debug("No response")
             time.sleep(1)
     raise IOError("Agent not online within %s second(s)" % timeout)
 
@@ -278,29 +231,37 @@ def ipaddr_increase(ipaddr):
 
 def filename_from_url(url):
     """Return the filename from a given url."""
-    return os.path.basename(urllib.urlparse.urlparse(url).path)
+    return os.path.basename(urllib.parse.urlparse(url).path)
 
 def download_file(url, filepath):
     """Download the file from url and store it in the given filepath."""
-    user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:94.0) " \
+                 "Gecko/20100101 Firefox/94.0"
     headers = {
         "User-Agent": user_agent,
     }
 
     start = time.time()
-
+    sha1_hash = hashlib.sha1()
+    written = 0
     try:
-        r = requests.get(url, headers=headers).content
+        with requests.get(url, headers=headers, stream=True) as resp:
+            resp.raise_for_status()
+            with open(filepath, "wb") as fp:
+                for chunk in resp.iter_content(chunk_size=2*1024*1024):
+                    written += fp.write(chunk)
+                    sha1_hash.update(chunk)
     except requests.RequestException as e:
-        log.warn("Failed to download file from '%s', got error: %s", url, e)
-        return
+        log.warning("Failed to download file from '%s', got error: %s", url, e)
+        return False, None
 
     log.debug(
-        "Successfully downloaded file '{}' ({:.2f}MB) from '{}' in "
+        "Successfully downloaded file '{}' ({:.2f}MB)' in "
         "'{:.2f}' second(s) ({:.2f}MB/s)".format(
-            filename_from_url(url), len(r) / 1024.**2.,
-            url, time.time() - start, len(r) / (time.time() - start)
+            filename_from_url(url), written / 1024.**2.,
+            time.time() - start, written / (time.time() - start)
         )
     )
+    return True, sha1_hash.hexdigest()
 
-    open(filepath, "wb").write(r)
+

@@ -9,6 +9,8 @@ class Windows7(WindowsAutounattended):
     service_pack = 2
     interface = "Local Area Connection"
 
+    os_version = "7"
+
     # List of preferences when multiple Windows 7 types are available.
     preference = "professional", "homepremium", "ultimate", "homebasic"
 

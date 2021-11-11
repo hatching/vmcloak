@@ -9,6 +9,8 @@ class Windows10(WindowsAutounattended):
     service_pack = 2
     interface = "Ethernet"
 
+    os_version = "10"
+
     # List of preferences when multiple Windows 10 types are available.
     preference = "pro", "enterprise", "home"
 

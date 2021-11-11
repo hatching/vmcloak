@@ -14,6 +14,7 @@ config = """
     <Display Level="basic" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
     <PIDKEY Value="%(serial_key)s" />
     <Setting Id="AUTO_ACTIVATE" Value="%(activate)s" />
+    <Updates Enabled="FALSE" />
 </Configuration>
 """
 
@@ -28,6 +29,7 @@ officever = {
 class Office(Dependency):
     name = "office"
     default = "2010"
+    tags = ["office"]
 
     def init(self):
         self.isopath = None

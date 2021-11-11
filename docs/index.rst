@@ -13,11 +13,6 @@ Machines directly usable from within `Cuckoo Sandbox
 <http://cuckoosandbox.org/>`_, but it can also be used for other purposes
 as *Cuckoo*'s components can be omitted through the configuration.
 
-**Please refer to the following blogposts for up-to-date installation methods
-and further information:**
-
-* `VMCloak 0.3 usage <http://jbremer.org/vmcloak3/>`_
-* `VMCloak 0.4.1 release <https://cuckoo.sh/blog/vmcloak41.html>`_
 
 Contents:
 
@@ -26,17 +21,16 @@ Contents:
 
    requirements
    setup
-   vbox
+   qemu
+   vmcreation
    config
    network
-   hwconfig
    license
    credits
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+**Please refer to the following blogposts for installation methods for VMCloak versions older than 0.5.**
+
+* `VMCloak 0.3 usage <http://jbremer.org/vmcloak3/>`_
+* `VMCloak 0.4.1 release <https://cuckoo.sh/blog/vmcloak41.html>`_

@@ -3,16 +3,33 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 import logging
+import time
 
 from vmcloak.abstract import Dependency
 from vmcloak.exceptions import DependencyError
 
 log = logging.getLogger(__name__)
 
+_adobedefaulthandler_ps1 = """
+# Make adobe the default PDF handler https://eddiejackson.net/wp/?p=15400
+control /name Microsoft.DefaultPrograms /page pageDefaultProgram\pageAdvancedSettings?pszAppName=Adobe%20Reader%20XI%20`(%VERSION%`)
+$wshell = New-Object -ComObject wscript.shell
+For ($a=0; $a -le 10; $a++) {
+  Start-Sleep -s 1
+  If ($proc.MainWindowHandle -ne 0) {
+    Start-Sleep -s 1
+    $wshell.SendKeys("{TAB} {Enter}")
+    Break
+  }
+}
+
+"""
+
 class AdobePdf(Dependency):
     name = "adobepdf"
-    default = "9.0.0"
+    default = "11.0.8"
     recommended = True
+    tags = ["adobepdf", "pdfreader"]
     exes = [{
         "version": "9.0.0",
         "url": "https://cuckoo.sh/vmcloak/AdbeRdr90_en_US.exe",
@@ -80,7 +97,7 @@ class AdobePdf(Dependency):
         "sha1": "3e08c3f6daad59f463227590cc438b3906648f5e",
     }, {
         "version": "11.0.8",
-        "url": "https://cuckoo.sh/vmcloak/AdbeRdr11008_en_US.exe",
+        "url": "https://hatching.io/hatchvm/AdbeRdr11008_en_US.exe",
         "sha1": "3e889258ea2000337bbe180d81317d44f617a292",
     }, {
         "version": "11.0.9",
@@ -169,6 +186,27 @@ class AdobePdf(Dependency):
         "filename": "AdbeRdrUpd11019.msp",
     }]
 
+    def _run_once(self):
+        v = self.version.split(".")[0]
+        self.a.execute(
+            f'"c:\\Program Files (x86)\\Adobe\\Reader {v}.0\\Reader'
+            f'\\AcroRd32.exe"', async=True
+        )
+        # Wait until process exists and then leave it to run for a few seconds.
+        self.wait_process_appear("AcroRd32.exe")
+        time.sleep(5)
+        self.a.killprocess("AcroRd32.exe", force=False)
+        try:
+            self.wait_process_exit("AcroRd32.exe", timeout=30)
+        except TimeoutError as e:
+            log.debug(e)
+            self.a.killprocess("AcroRd32.exe", force=True)
+            self.wait_process_exit("AcroRd32.exe", timeout=30)
+
+    def _make_adobe_default(self):
+        ps1 = _adobedefaulthandler_ps1.replace("%VERSION%", self.version)
+        self.run_powershell_strings(ps1)
+
     def run(self):
         if self.version.startswith("11") and self.filename.endswith(".msp"):
             log.debug(
@@ -208,23 +246,43 @@ class AdobePdf(Dependency):
             self.a.remove("C:\\AdobeFiles")
         else:
             self.upload_dependency("C:\\%s" % self.filename)
-            self.a.execute(
-                "C:\\%s /sAll /msi /norestart /passive "
-                "ALLUSERS=1 EULA_ACCEPT=YES" % self.filename
-            )
+            try:
+                exit_code = self.a.execute(
+                    "C:\\%s /sPb /rs /rps /norestart OWNERSHIP_STATE=0 "
+                    "ALLUSERS=1 EULA_ACCEPT=YES SUPPRESS_APP_LAUNCH=YES" %
+                    self.filename
+                ).get("exit_code")
+                if exit_code not in (0, 3010):
+                    raise DependencyError(
+                        f"Failed to install Adobepdf {self.version}. "
+                        f"Installer returned unexpected non-zero "
+                        f"exit code: {exit_code}"
+                    )
+            finally:
+                self.a.remove("C:\\%s" % self.filename)
 
-            self.a.remove("C:\\%s" % self.filename)
-
+        key_version = self.version.split('.')[0]
         # add needed registry keys to skip Licence Agreement
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
             "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" "
-            "/v EULA /t REG_DWORD /d 1 /f" % self.version.split(".")[0]
+            "/v EULA /t REG_DWORD /d 1 /f" % key_version
         )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\"
             "Adobe\\Acrobat Reader\\%s.0\\AdobeViewer\" "
-            "/v Launched /t REG_DWORD /d 1 /f" % self.version.split(".")[0]
+            "/v Launched /t REG_DWORD /d 1 /f" % key_version
+        )
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader"
+            "\\%s.0\\AdobeViewer\" "
+            "/v EULA /t REG_DWORD /d 1 /f " % key_version
+        )
+
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader"
+            "\\%s.0\\AdobeViewer\" "
+            "/v Launched /t REG_DWORD /d 1 /f " % key_version
         )
 
         # man : https://www.adobe.com/devnet-docs/acrobatetk/tools/PrefRef/Windows/
@@ -233,7 +291,7 @@ class AdobePdf(Dependency):
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\AVGeneral\" "
             "/v bCheckForUpdatesAtStartup /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            key_version
         )
 
         # disable the updater completely
@@ -241,7 +299,7 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
-            "/v bUpdater /t REG_DWORD /d 0 /f" % self.version.split(".")[0]
+            "/v bUpdater /t REG_DWORD /d 0 /f" % key_version
         )
 
         # disable the sandboxing (protected mode)
@@ -249,15 +307,22 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
-            "/v bProtectedMode /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            "/v bProtectedMode /t REG_DWORD /d 0 /f" % key_version
+        )
+        self.a.execute(
+            "reg add \"HKCU\\SOFTWARE\\Adobe\\Acrobat Reader\\%s.0\\"
+            "Privileged\" /v bProtectedMode /t REG_DWORD /d 0 /f" % key_version
         )
         # https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/protectedview.html
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
-            "/v iProtectedView /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            "/v iProtectedView /t REG_DWORD /d 0 /f" % key_version
+        )
+
+        self.a.execute(
+            "reg add \"HKCU\\SOFTWARE\\Adobe\\Acrobat Reader\\%s.0\\"
+            "TrustManager\" /v iProtectedView /t REG_DWORD /d 0 /f"
         )
 
         # disable enchanced security
@@ -266,13 +331,24 @@ class AdobePdf(Dependency):
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
             "/v bEnhancedSecurityStandalone /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            key_version
         )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
             "/v bEnhancedSecurityInBrowser /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            key_version
+        )
+
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader\\%s.0\\"
+            "TrustManager\" /v bEnhancedSecurityStandalone "
+            "/t REG_DWORD /d 0 /f" % key_version
+        )
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader\\%s.0\\"
+            "TrustManager\" /v bEnhancedSecurityInBrowser "
+            "/t REG_DWORD /d 0 /f" % key_version
         )
 
         # allow URL access
@@ -280,14 +356,24 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
             "Acrobat Reader\\%s.0\\TrustManager\\cDefaultLaunchURLPerms\" "
-            "/v iURLPerms /t REG_DWORD /d 2 /f" % self.version.split(".")[0]
+            "/v iURLPerms /t REG_DWORD /d 2 /f" % key_version
         )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
             "FeatureLockDown\\cDefaultLaunchURLPerms\" "
-            "/v iUnknownURLPerms /t REG_DWORD /d 2 /f" %
-            self.version.split(".")[0]
+            "/v iUnknownURLPerms /t REG_DWORD /d 2 /f" % key_version
+        )
+
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader\\%s.0\\"
+            "TrustManager\\cDefaultLaunchURLPerms\" /v iURLPerms "
+            "/t REG_DWORD /d 2 /f" % key_version
+        )
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader\\%s.0\\"
+            "TrustManager\\cDefaultLaunchURLPerms\" /v iUnknownURLPerms "
+            "/t REG_DWORD /d 2 /f" % key_version
         )
 
         # allow opening of all embedded files
@@ -296,14 +382,20 @@ class AdobePdf(Dependency):
             "reg delete \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
             "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
-            "/v tBuiltInPermList /f" % self.version.split(".")[0]
+            "/v tBuiltInPermList /f" % key_version
         )
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\"
             "FeatureLockDown\\cDefaultLaunchAttachmentPerms\" "
             "/v iUnlistedAttachmentTypePerm /t REG_DWORD /d 2 /f" %
-            self.version.split(".")[0]
+            key_version
+        )
+
+        self.a.execute(
+            "reg add \"HKCU\\Software\\Adobe\\Acrobat Reader\\%s.0\\"
+            "Attachments\\cDefaultLaunchURLPerms\" "
+            "/v iUnlistedAttachmentTypePerm /t REG_DWORD /d 2 /f" % key_version
         )
 
         # enable flash content
@@ -311,17 +403,17 @@ class AdobePdf(Dependency):
         self.a.execute(
             "reg add \"HKEY_LOCAL_MACHINE\\SOFTWARE\\"
             "Policies\\Adobe\\Acrobat Reader\\%s.0\\FeatureLockDown\" "
-            "/v bEnableFlash /t REG_DWORD /d 1 /f" %
-            self.version.split(".")[0]
+            "/v bEnableFlash /t REG_DWORD /d 1 /f" % key_version
         )
 
-        # FIXME: really needed ?
+        # Disable periodic trust anchor downloading from Adobe.
         self.a.execute(
             "reg add \"HKEY_CURRENT_USER\\Software\\Adobe\\"
-            "Acrobat Reader\\%s.0\\Security\\cDigSig\\cCustomDownload\" "
-            "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f" %
-            self.version.split(".")[0]
+            "Acrobat Reader\\%s.0\\Security\\cDigSig\\cAdobeDownload\" "
+            "/v bLoadSettingsFromURL /t REG_DWORD /d 0 /f" % key_version
         )
+        self._make_adobe_default()
+        self._run_once()
 
 class Adobe9(AdobePdf, Dependency):
     """Backwards compatibility."""

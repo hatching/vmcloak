@@ -55,7 +55,7 @@
                 </RunSynchronousCommand>
                 <RunSynchronousCommand wcm:action="add">
                     <Order>2</Order>
-                    <Path>reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Run /v Agent /t REG_SZ /d C:\vmcloak\bootstrap.bat</Path>
+                    <Path>reg add HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce /v !Bootstrap /t REG_SZ /d C:\vmcloak\bootstrap.bat</Path>
                     <WillReboot>Never</WillReboot>
                 </RunSynchronousCommand>
             </RunSynchronous>
@@ -172,17 +172,23 @@
                         <RouterDiscoveryEnabled>true</RouterDiscoveryEnabled>
                     </Ipv6Settings>
                     <UnicastIpAddresses>
-                        <IpAddress wcm:action="add" wcm:keyValue="1">192.168.56.254/24</IpAddress>
+                        <IpAddress wcm:action="add" wcm:keyValue="1">@IPADDRESS@</IpAddress>
                     </UnicastIpAddresses>
                     <Routes>
                         <Route wcm:action="add">
                             <Identifier>0</Identifier>
                             <Prefix>0.0.0.0/0</Prefix>
-                            <NextHopAddress>192.168.56.1</NextHopAddress>
+                            <NextHopAddress>@DEFAULTGATEWAY@</NextHopAddress>
                         </Route>
                     </Routes>
                 </Interface>
             </Interfaces>
         </component>
     </settings>
+    <settings pass="offlineServicing">
+        <component name="Microsoft-Windows-LUA-Settings" processorArchitecture="@ARCH@" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <EnableLUA>false</EnableLUA>
+        </component>
+    </settings>
+
 </unattend>

@@ -1,5 +1,5 @@
 # Copyright (C) 2014-2018 Jurriaan Bremer.
-# Copyright (C) 2018-2019 Hatching B.V.
+# Copyright (C) 2018-2021 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name="VMCloak",
-    version="0.4.8",
+    version="0.5.0",
     author="Hatching B.V.",
     author_email="info@hatching.io",
     url="https://github.com/hatching/vmcloak",
@@ -19,11 +19,12 @@ setup(
         "vmcloak.data.hwconf",
     ],
     scripts=[
-        "bin/vmcloak-gethwconf",
+        # "bin/vmcloak-gethwconf",
         "bin/vmcloak-iptables",
-        "bin/vmcloak-killvbox",
-        "bin/vmcloak-removevms",
-        "bin/vmcloak-vboxnet0",
+        # "bin/vmcloak-killvbox",
+        # "bin/vmcloak-removevms",
+        # "bin/vmcloak-vboxnet0",
+        "bin/vmcloak-qemubridge"
     ],
     entry_points={
         "console_scripts": [
@@ -45,9 +46,10 @@ setup(
         "jinja2",
         "pefile>=2019.4.18, <2019.5.0"
         "pyyaml>=5.1",
-        "sqlalchemy>=1.4.26, <1.5",
+        "sqlalchemy>=1.4, <1.5",
         "alembic>=1.7.4, <1.8",
-        "requests>=2.22.0, <3"
+        "requests>=2.22.0, <3",
+        "psutil>=5.4.8, <6"
     ],
     extras_require={
         ":sys_platform == 'win32'": [
@@ -59,5 +61,9 @@ setup(
         ":sys_platform == 'linux2'": [
             "requests[security]>=2.13.0",
         ],
+        "docs": [
+            "sphinx",
+            "sphinx-rtd-theme"
+        ]
     },
 )

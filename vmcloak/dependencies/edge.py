@@ -6,6 +6,7 @@ from vmcloak.abstract import Dependency
 
 class Edge(Dependency):
     name = "edge"
+    tags = ["browser_edge"]
 
     def run(self):
         self.a.execute(

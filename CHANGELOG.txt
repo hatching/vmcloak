@@ -1,3 +1,26 @@
+0.5.0, TBD
+
+    New: QEMU support.
+    New: Cuckoo 3 VM import format support.
+    New: New Go Cuckoo 3 agent (exe) replaces Python 2 agent.
+    New: bin/vmcloak-qemubridge tool to create required bridges for QEMU.
+    New: Available image, snapshot, and dependency listing tool.
+    New: Installed dependencies/changes are stored for each image.
+    New: --network replaces --netmask. VMCloak now tracks used IPs of subnet.
+    New: OS optimization scripts for Windows 7 and 10. 'osoptimize' and
+        'disableservices'.
+    Tweak: VMCloak now requires Python 3.6 or higher.
+    Tweak: --recommended now chooses a specific dependency/changes list per
+        OS type (win10x64 and win7x64 at the moment).
+    Tweak: Rewrite bin/vmcloak-iptables to give a single VM internet
+        access during image creation.
+    Tweak: Failed installs are more clearly logged. Missing dependencies
+        (such as failed KB install) can cause an install to stop.
+    Temporary: Broken VirtualBox support disabled until we fully support
+        new versions.
+    Temporary: All features tied to VirtualBox disabled until VirtualBox
+        support enabled again.
+
 0.4.7, TBD
 
     Tweak: Set a default version for Firefox (thanks samwakel).

@@ -22,8 +22,9 @@ class WIC(Dependency):
         "arch": "amd64",
         "urls": [
             "https://download.microsoft.com/download/6/4/5/645FED5F-A6E7-44D9-9D10-FE83348796B0/wic_x64_enu.exe",
+            "https://hatching.dev/hatchvm/wic_x64_enu.exe"
         ],
-        "sha1": "4bdbf76a7bc96453306c893b4a7b2b8ae6127f67",
+        "sha1": "da12927da6eb931a39e479d55c8b0321e8367f5e",
     }]
 
     def run(self):

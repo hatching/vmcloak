@@ -8,6 +8,7 @@ from vmcloak.abstract import Dependency
 class Firefox(Dependency):
     name = "firefox"
     default = "41.0.2"
+    tags = ["browser_firefox"]
     exes = [{
         "version": "41.0.2",
         "url": "https://cuckoo.sh/vmcloak/Firefox_Setup_41.0.2.exe",

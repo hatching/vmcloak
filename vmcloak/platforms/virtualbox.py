@@ -16,13 +16,15 @@ from vmcloak.exceptions import CommandError
 from vmcloak.ostype import network_interface
 from vmcloak.platforms import Machinery
 from vmcloak.rand import random_mac, random_serial, random_uuid
-from vmcloak.repository import vms_path
+from vmcloak.repository import vms_path, IPNet
 
 log = logging.getLogger(__name__)
 name = "VirtualBox"
 disk_format = "vdi"
 
 vboxmanage = "vboxmanage"
+
+default_net = IPNet("192.168.56.0/24")
 
 def _call(*args, **kwargs):
     cmd = [vboxmanage] + list(args)
@@ -54,7 +56,7 @@ def _set_common_attr(vm, attr):
     vm.mouse("usbtablet")
     vm.ramsize(attr["ramsize"])
     vm.vramsize(attr["vramsize"])
-    vm.hostonly(nictype=nictype, adapter=attr["adapter"])
+    vm.hostonly(nictype=nictype, adapter=attr["adapter"], macaddr=attr["mac"])
     port = attr.get("vrde")
     if port:
         if port is True:
@@ -62,6 +64,9 @@ def _set_common_attr(vm, attr):
         vm.vrde(port=port)
 
 def _create_vm(name, attr, iso_path=None, is_snapshot=True):
+    if not attr.get("mac"):
+        attr["mac"] = random_mac()
+
     vm = VM(name)
     vm.create_vm()
     _set_common_attr(vm, attr)
@@ -186,6 +191,9 @@ def restore_snapshot(name, snap_name):
 
 def remove_hd(path):
     _call("closemedium", "disk", path, delete=True)
+
+def create_machineinfo_dump(name, image):
+    pass
 
 # --
 

@@ -8,7 +8,7 @@ import subprocess
 import time
 
 from vmcloak.platforms import Machinery
-from vmcloak.repository import vms_path
+from vmcloak.repository import vms_path, IPNet
 
 log = logging.getLogger(__name__)
 name = "LibVirt"
@@ -16,6 +16,8 @@ disk_format = "qcow2"
 
 VIRSH = ["virsh", "-c", "qemu:///system"]
 VIRT_INSTALL = ["virt-install", "--connect", "qemu:///system"]
+
+default_net = IPNet("192.168.122.0/24")
 
 # virt-install doesn't seem to have anything newer than win7
 libvirt_os_variants = {
@@ -166,6 +168,9 @@ def restore_snapshot(name, snap_name):
 
 def remove_hd(path):
     os.remove(path)
+
+def create_machineinfo_dump(name, image):
+    pass
 
 #
 # Helper class for dependencies

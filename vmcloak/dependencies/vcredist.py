@@ -3,6 +3,7 @@
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 from vmcloak.abstract import Dependency
+from vmcloak.exceptions import DependencyError
 
 class VcRedist(Dependency):
     # all latest versions can be found on:
@@ -10,6 +11,9 @@ class VcRedist(Dependency):
     name = "vcredist"
     description = "Visual studio redistributable packages"
     default = "2005sp1"
+    must_reboot = True
+    multiversion = True
+    tags = ["vcredist"]
 
     install_params = {
         "2005": "/q:a",
@@ -18,6 +22,7 @@ class VcRedist(Dependency):
         "2012": "/passive /norestart",
         "2013": "/passive /norestart",
         "2015": "/passive /norestart",
+        "2019": "/qb /quiet /norestart"
     }
 
     exes = [{
@@ -284,13 +289,31 @@ class VcRedist(Dependency):
             "https://download.microsoft.com/download/6/A/A/6AA4EDFF-645B-48C5-81CC-ED5963AEAD48/vc_redist.x64.exe",
         ],
         "sha1": "10b1683ea3ff5f36f225769244bf7e7813d54ad0"
+    },{
+        "version": "2019",
+        "arch": "amd64",
+        "urls": [
+            "https://hatching.dev/hatchvm/vcredist2019_x64.exe",
+        ],
+        "sha1": "de385d69864413400250f2f3fe9f4aec78eb997b"
     }]
 
+    #
     def run(self):
         # Get the installation parameters required to start
         # an unattended install
         param = self.install_params[self.version.split("u")[0].split("sp")[0]]
 
         self.upload_dependency("C:\\vcredist.exe")
-        self.a.execute("C:\\vcredist.exe %s" % param)
-        self.a.remove("C:\\vcredist.exe")
+        try:
+            exit_code = self.a.execute(
+                "C:\\vcredist.exe %s" % param
+            ).get("exit_code")
+            if exit_code not in (0, 3010):
+                raise DependencyError(
+                    f"Failed to install vcredist {self.version}. Installer "
+                    f"returned unexpected non-zero exit code: {exit_code}"
+                )
+
+        finally:
+            self.a.remove("C:\\vcredist.exe")

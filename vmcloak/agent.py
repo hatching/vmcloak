@@ -54,7 +54,11 @@ class Agent(object):
         if async:
             return self.post("/execute", command=command, async="true")
         else:
-            return self.post("/execute", command=command)
+            resp = self.post("/execute", command=command).json()
+            return {
+                "exit_code": resp.get("exit_code"), "error": resp.get("error"),
+                "stdout": resp.get("stdout"), "stderr": resp.get("stderr")
+            }
 
     def execpy(self, filepath, async=False):
         """Execute a Python file."""
@@ -74,19 +78,26 @@ class Agent(object):
 
     def shutdown(self):
         """Power off the machine."""
-        self.execute("shutdown -s -t 0", async=True)
+        # Use 1 second timer with async to prevent the machine from shutting
+        # down while a response is being sent or before it is sent.
+        self.execute("shutdown -s -t 1", async=True)
 
     def reboot(self):
         """Reboot the machine."""
-        self.execute("shutdown -r -t 0", async=True)
+        # Use 1 second timer with async to prevent the machine from shutting
+        # down while a response is being sent or before it is sent.
+        self.execute("shutdown -r -t 1", async=True)
 
     def kill(self):
         """Kill the Agent."""
         self.get("/kill")
 
-    def killprocess(self, process_name):
+    def killprocess(self, process_name, force=True):
         """Terminate a process."""
-        self.execute("taskkill /F /IM %s" % process_name)
+        cmd = f"taskkill /IM {process_name}"
+        if force:
+            cmd += " /F"
+        self.execute(cmd)
 
     def hostname(self, hostname):
         """Assign a new hostname."""
@@ -102,7 +113,7 @@ class Agent(object):
         command = (
             "netsh interface ip set address name=\"%s\" static %s %s %s 1"
         ) % (interface, ipaddr, netmask, gateway)
-
+        log.debug("Executing command in VM: %s", command)
         try:
             session = requests.Session()
             session.trust_env = False
@@ -111,11 +122,14 @@ class Agent(object):
                 "http://%s:%s/execute" % (self.ipaddr, self.port),
                 data={"command": command}, timeout=5
             )
-        except requests.exceptions.ReadTimeout:
+        except requests.exceptions.ConnectionError:
             pass
 
         # Now wait until the Agent is reachable on the new IP address.
         self.ipaddr = ipaddr
+        log.debug(
+            f"Waiting for agent to be reachable on: {self.ipaddr}:{self.port}"
+        )
         wait_for_agent(self)
 
     def dns_server(self, ipaddr):
@@ -161,6 +175,6 @@ class Agent(object):
     def resolution(self, width, height):
         """Set the screen resolution of this Virtual Machine."""
         self.execute(
-            "C:\\Python27\\python.exe C:\\vmcloak\\resolution.py %s %s" %
+            "C:\\Python3\\python.exe C:\\vmcloak\\resolution.py %s %s" %
             (width, height)
         )

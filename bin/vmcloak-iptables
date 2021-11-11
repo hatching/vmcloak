@@ -1,55 +1,97 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (C) 2014-2015 Jurriaan Bremer.
+# Copyright (C) 2021 Hatching B.V.
 # This file is part of VMCloak - http://www.vmcloak.org/.
 # See the file 'docs/LICENSE.txt' for copying permission.
 
 # Credits to Mark Schloesser, https://github.com/rep/cuckoo-contrib
 
-if [ "$1" = "-h" ]; then
-    echo "Usage: $0 [ip_range/cidr] [interfaces..]"
-    echo "  $0 192.168.57.0/24 eth0 eth1"
+VMCLOAK_COMMENT="VMCLOAK_IPTABLES"
+
+printhelp() {
+    echo "Usage: $0 [do/undo] [vm_ip] [outgoing interfaces..]"
+    echo "Examples:"
+    echo "  $0 do 192.168.30.2 eth0"
+    echo "  $0 undo 192.168.30.2 eth0"
     echo
-    echo "Defaults to:"
-    echo "  $0 192.168.56.0/24 eth0 wlan0"
-    exit
+    echo "'do' applies forwarding and masquerading for the specified IP "
+    echo "from and to the 'outgoing interface(s)'"
+    echo "'undo' tries to remove rules that were applied earlier"
+    exit $1
+}
+
+if [ "$#" -lt 3 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
+  printhelp 0
 fi
 
-# Fetch the IP range and CIDR.
-if [ "$#" -ne 0 ]; then
-    VBOXNET="$1"
-    shift
-else
-    VBOXNET="192.168.56.0/24"
+if [ ! -f "/sbin/iptables-save" ]; then
+  echo "iptables-save is needed to for this tool to function."
+  exit 1
 fi
 
-# Fetch the interfaces.
-if [ "$#" -ne 0 ]; then
-    INTERFACES="$*"
-else
-    INTERFACES="eth0 wlan0"
+if [ $EUID -ne 0 ]; then
+  printf "\nRoot permissions required to run script\n\n"
+  printhelp 1
 fi
 
-iptables -F
-iptables -t nat -F
+find_vmcloakrules() {
+  while read -r entry
+  do
+    if [[ "$entry" == *"--comment $VMCLOAK_COMMENT"* ]]; then
+      echo "Existing VMCloak rule: $entry"
+      echo
+      return 0
+    fi
+  done <<< "$(iptables-save)"
 
-for i in $INTERFACES; do
-    iptables -t nat -A POSTROUTING -o $i -s "$VBOXNET" -j MASQUERADE
-done
+  return 1
+}
 
-# Default drop.
-iptables -P FORWARD DROP
+ACTION="$1"
+IPNET="$2"
+shift 2
+INTERFACES="$*"
 
-# Existing connections.
-iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+do_iptables() {
+  IPTABLES_ACTION="$1"
+  VMIP="$2"
+  NETIFS="$3"
+  for i in $NETIFS; do
+    iptables -t nat -$IPTABLES_ACTION POSTROUTING -o $i -s "$VMIP" -j MASQUERADE -m comment --comment $VMCLOAK_COMMENT
+  done
 
-# Accept connections from vboxnet to the whole internet.
-iptables -A FORWARD -s "$VBOXNET" -j ACCEPT
+  # Existing connections.
+  iptables -$IPTABLES_ACTION FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT -m comment --comment $VMCLOAK_COMMENT
 
-# Internal traffic.
-iptables -A FORWARD -s $VBOXNET -d $VBOXNET -j ACCEPT
+  # Accept connections from vm net to the whole internet.
+  iptables -$IPTABLES_ACTION FORWARD -s "$VMIP" -j ACCEPT -m comment --comment $VMCLOAK_COMMENT
 
-# Log stuff that reaches this point, could be noisy though.
-iptables -A FORWARD -j LOG
+  # Internal traffic.
+  iptables -$IPTABLES_ACTION FORWARD -s "$VMIP" -d "$VMIP" -j ACCEPT -m comment --comment $VMCLOAK_COMMENT
+}
 
-# Actually enable forwarding of packets. This is Debian/Ubuntu specific.
-echo 1 > /proc/sys/net/ipv4/ip_forward
+case $ACTION in
+ "do")
+   if find_vmcloakrules; then
+     echo "One or more VMCloak iptables rules still exist. First undo these. Run '$0 undo $IPNET $INTERFACES'"
+     echo "If the undo command does not work, remove all rules with the comment '$VMCLOAK_COMMENT' manually."
+     exit 1
+  fi
+  echo 1 > /proc/sys/net/ipv4/ip_forward
+  do_iptables "A" "$IPNET" "$INTERFACES"
+  echo "Rules applied"
+ ;;
+ "undo")
+  echo "Removing VMCloak iptables rules for specified IP and interfaces"
+  do_iptables "D" "$IPNET" "$INTERFACES"
+  if find_vmcloakrules; then
+    echo "One or more VMCloak rules still exist after undo. Remove rules with the comment '$VMCLOAK_COMMENT' manually."
+    exit 1
+  fi
+  echo "Rules removed"
+  exit 0
+  ;;
+ *)
+   echo "Unknown option: $ACTION. First argument can be 'do' or 'undo'. See -h"
+   printhelp 1
+esac

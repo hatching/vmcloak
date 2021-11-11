@@ -18,7 +18,7 @@ Unsupported features:
 
 
 Managing KVM as regular user
----------------------------
+----------------------------
 
 .. TODO: all URL to official document
 

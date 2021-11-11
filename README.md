@@ -13,34 +13,61 @@ prepare a few configuration values that will be used later on by the tool.
 Dependencies
 ------------
 
-VMCloak relies on a couple of tools and libraries that are required during
-the process of generating a new VM.
+In order to run VMCloak you'll at the very least require the following:
 
-* Python 2.6+
-* mkisofs/genisoimage
-* VirtualBox
+* Python 3.6 or higher.
+* mkisofs *or* genisoimage.
+* QEMU 2.11 or higher (tested with 4.2.1).
+* **root** access to mount images and perform actions such as creating network bridges.
+
 
 Installation
 ------------
 
-On Ubuntu a few packages are required due to the indirect inclusion of the
-``cryptography`` Python package. Installation of all packages *excluding*
-``VirtualBox`` may be done by running as follows.
+It is recommended that VMCloak is installed in a Virtualenv and on the user
+that should own the created virtual machines.
+
+VMCloak is available as a [Python Package](<https://pypi.python.org/pypi/vmcloak>)
+It can be installed with ``pip`` using ``pip install -U vmcloak``.
+
+Install the requirements. See the docs/ for a full list of requirements.
 
 ```bash
-$ sudo apt-get install build-essential libssl-dev libffi-dev
-$ sudo apt-get install python-dev genisoimage
-$ sudo pip install vmcloak
+$ sudo apt update
+$ sudo apt install python3 genisoimage qemu-system-x86 qemu-utils qemu-system-common
 ```
 
-Or one may also install it in a virtualenv.
+
+It is recommended to install VMCloak in a virtualenv.
 
 ```bash
-$ virtualenv .
-$ source ./bin/activate
-$ pip install -U vmcloak
+$ virtualenv venv
+$ source venv/bin/activate
+$ (venv) pip install -U vmcloak
 ```
 
+Fetching the [Git repository](<https://github.com/hatching/vmcloak>)  through allows one access to the latest
+development version of VMCloak with features that may not have been pushed to
+the Python Package yet. A full example of installing VMCloak manually can be
+as follows:
+
+```bash
+$ (venv) git clone git@github.com:hatching/vmcloak.git
+$ (venv) cd vmcloak
+$ (venv) pip install .
+```
+
+Docs
+----
+
+```bash
+$ (venv) pip install -e .[docs]
+$ (venv) cd docs
+$ (venv) make html
+$ (venv) <your browser>/_build/html/index.html
+```
+
+<!--
 Usage
 -----
 
@@ -49,6 +76,8 @@ following blogpost: [http://jbremer.org/vmcloak3][blogpost].
 
 [blogpost]: http://jbremer.org/vmcloak3
 
+--->
+<!---
 Testing
 -------
 
@@ -106,7 +135,7 @@ Finally run the unit tests:
 ```bash
 py.test -n 8
 ```
-
+--->
 Credits
 -------
 
@@ -114,4 +143,7 @@ The development of the VMCloak project initially started out as part of the
 ITES Project at Avira, thanks to **Thorsten Sick**. Many thanks to
 **Rasmus Männa** for lots of great contributions lately.
 
+
+<!---
 [![Coverage Status](https://coveralls.io/repos/github/jbremer/vmcloak/badge.svg)](https://coveralls.io/github/jbremer/vmcloak)
+--->

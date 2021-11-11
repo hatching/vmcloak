@@ -4,12 +4,17 @@
 
 from vmcloak.abstract import Dependency
 
+
+_win7depends = ["win7sp:sp1", "dotnet:4.6.1", "kb:2819745", "kb:3109118"]
+
 class PS1Logging(Dependency):
     name = "ps1logging"
     default = "3109118"
-    depends = [
-        "win7sp", "dotnet:4.6.1", "kb:2819745", "kb:3109118"
-    ]
+
+    os_depends = {
+        "win7x64": _win7depends,
+        "win7x86": _win7depends
+    }
 
     def run(self):
         # Set registry keys to enable PowerShell enchanced logging
