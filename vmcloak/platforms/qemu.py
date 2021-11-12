@@ -55,7 +55,6 @@ def _make_pre_v41_args(attr):
 
         "-device", "ich9-ahci,id=ahci",
         "-device", "ide-drive,bus=ahci.0,unit=0,drive=disk,bootindex=2",
-        "-drive", "if=none,id=cdrom,readonly=on",
         "-device", "ide-cd,bus=ahci.1,unit=0,drive=cdrom,bootindex=1",
         "-device", "usb-ehci,id=ehci",
         "-device", "usb-tablet,bus=ehci.0",
@@ -205,7 +204,7 @@ _DECOMPRESS_BINARIES = {
 
 _DECOMPRESS_COMMANDS = {
     "lz4": "-z > %SNAPSHOT_PATH%",
-    "gzip": "-c 3 > %SNAPSHOT_PATH%"
+    "gzip": "-c -3 > %SNAPSHOT_PATH%"
 }
 
 def _get_exec_args(memsnapshot_path):
