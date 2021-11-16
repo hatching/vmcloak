@@ -193,8 +193,9 @@ class AdobePdf(Dependency):
             f'\\AcroRd32.exe"', async=True
         )
         # Wait until process exists and then leave it to run for a few seconds.
+        # The 'preparing for first use' dialog can take some time.
         self.wait_process_appear("AcroRd32.exe")
-        time.sleep(5)
+        time.sleep(120)
         self.a.killprocess("AcroRd32.exe", force=False)
         try:
             self.wait_process_exit("AcroRd32.exe", timeout=30)
