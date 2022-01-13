@@ -190,7 +190,7 @@ class AdobePdf(Dependency):
         v = self.version.split(".")[0]
         self.a.execute(
             f'"c:\\Program Files (x86)\\Adobe\\Reader {v}.0\\Reader'
-            f'\\AcroRd32.exe"', async=True
+            f'\\AcroRd32.exe"', cucksync=True
         )
         # Wait until process exists and then leave it to run for a few seconds.
         # The 'preparing for first use' dialog can take some time.

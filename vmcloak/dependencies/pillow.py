@@ -25,7 +25,7 @@ class Pillow(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\pillow.exe")
-        self.a.execute("C:\\pillow.exe", async=True)
+        self.a.execute("C:\\pillow.exe", cucksync=True)
         self.a.click("Setup", "&Next >")
         self.a.click("Setup", "&Next >")
         self.a.click("Setup", "&Next >")

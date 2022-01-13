@@ -48,11 +48,11 @@ class Agent(object):
         environ = self.get("/environ").json()["environ"]
         return environ if value is None else environ.get(value, default)
 
-    def execute(self, command, async=False):
+    def execute(self, command, cucksync=False):
         """Execute a command."""
         log.debug("Executing command in VM: %s", command)
-        if async:
-            return self.post("/execute", command=command, async="true")
+        if cucksync:
+            return self.post("/execute", command=command, cucksync="true")
         else:
             resp = self.post("/execute", command=command).json()
             return {
@@ -60,10 +60,10 @@ class Agent(object):
                 "stdout": resp.get("stdout"), "stderr": resp.get("stderr")
             }
 
-    def execpy(self, filepath, async=False):
+    def execpy(self, filepath, cucksync=False):
         """Execute a Python file."""
-        if async:
-            return self.post("/execpy", filepath=filepath, async="true")
+        if cucksync:
+            return self.post("/execpy", filepath=filepath, cucksync="true")
         else:
             return self.post("/execpy", filepath=filepath)
 
@@ -78,15 +78,15 @@ class Agent(object):
 
     def shutdown(self):
         """Power off the machine."""
-        # Use 1 second timer with async to prevent the machine from shutting
+        # Use 1 second timer with cucksync to prevent the machine from shutting
         # down while a response is being sent or before it is sent.
-        self.execute("shutdown -s -t 1", async=True)
+        self.execute("shutdown -s -t 1", cucksync=True)
 
     def reboot(self):
         """Reboot the machine."""
-        # Use 1 second timer with async to prevent the machine from shutting
+        # Use 1 second timer with cucksync to prevent the machine from shutting
         # down while a response is being sent or before it is sent.
-        self.execute("shutdown -r -t 1", async=True)
+        self.execute("shutdown -r -t 1", cucksync=True)
 
     def kill(self):
         """Kill the Agent."""
@@ -169,7 +169,7 @@ class Agent(object):
         )
         self.execute(
             "C:\\vmcloak\\click.exe \"%s\" \"%s\"" %
-            (window_title, button_name), async=True
+            (window_title, button_name), cucksync=True
         )
 
     def resolution(self, width, height):
