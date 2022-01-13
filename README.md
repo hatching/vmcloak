@@ -52,7 +52,7 @@ the Python Package yet. A full example of installing VMCloak manually can be
 as follows:
 
 ```bash
-$ (venv) git clone git@github.com:hatching/vmcloak.git
+$ (venv) git clone https://github.com/hatching/vmcloak.git
 $ (venv) cd vmcloak
 $ (venv) pip install .
 ```
