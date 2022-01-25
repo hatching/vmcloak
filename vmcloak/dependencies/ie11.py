@@ -134,7 +134,7 @@ class IE11(Dependency):
         # Run ie once so that settings/files/etc created on the first run
         # are created.
         self.a.execute(
-            '"c:\\Program Files\\Internet explorer\\iexplore.exe"', async=True
+            '"c:\\Program Files\\Internet explorer\\iexplore.exe"', cucksync=True
         )
         # Wait until process exists and then leave it to run for a few seconds.
         self.wait_process_appear("iexplore.exe")

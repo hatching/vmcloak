@@ -574,7 +574,7 @@ def _snapshot(image, vmname, attr, interactive):
         log.info("You've started the snapshot creation in interactive mode!")
         log.info("Please make your last changes to the VM.")
         log.info("When you're done close the spawned notepad process in the VM to take the final snapshot.")
-        a.execute("notepad.exe C:\\vmcloak\\interactive.txt", async=False)
+        a.execute("notepad.exe C:\\vmcloak\\interactive.txt", cucksync=False)
 
     a.remove("C:\\vmcloak")
     h = get_os(image.osversion)

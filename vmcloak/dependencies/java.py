@@ -943,10 +943,10 @@ class Java(Dependency):
         if version.startswith("7"):
             self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.config", java7deploymentconfig)
             self.a.upload("C:\\Windows\\Sun\\Java\\Deployment\\deployment.properties", java7deploymentproperties)
-            self.a.execute("C:\\java.exe /s", async=True)
+            self.a.execute("C:\\java.exe /s", cucksync=True)
         else:
             self.a.upload("C:\\config.cfg", config)
-            self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", async=True)
+            self.a.execute("C:\\java.exe INSTALLCFG=C:\\config.cfg", cucksync=True)
 
         # Wait until java.exe & javaw.exe are no longer running.
         self.wait_process_exit("java.exe")

@@ -17,7 +17,7 @@ class Cuteftp(Dependency):
 
     def run(self):
         self.upload_dependency("C:\\%s" % self.filename)
-        self.a.execute("C:\\%s /S" % self.filename, async=True)
+        self.a.execute("C:\\%s /S" % self.filename, cucksync=True)
 
         time.sleep(1)
         self.a.click("InstallShield Wizard", "&Next >")
