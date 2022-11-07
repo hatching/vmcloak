@@ -52,7 +52,7 @@ Download an ISO. The download can take a while.
 
 .. code-block:: bash
 
-  vmcloak isodownload --win10x64 /home/cuckoo/win10x64.iso
+  vmcloak isodownload --win10x64 --download-to /home/cuckoo/win10x64.iso
 
 
 1.2 Mounting the ISO
