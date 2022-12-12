@@ -58,7 +58,8 @@ def _make_pre_v41_args(attr):
         "-device", "ide-cd,bus=ahci.1,unit=0,drive=cdrom,bootindex=1",
         "-device", "usb-ehci,id=ehci",
         "-device", "usb-tablet,bus=ehci.0",
-        "-soundhw", "hda",
+        "-device", "intel-hda",
+        "-device", "hda-duplex",
         "--enable-kvm"
     ]
 
@@ -82,7 +83,8 @@ def _make_post_v41_args(attr):
         "-device", "ide-cd,bus=ahci.1,unit=0,drive=cdrom,bootindex=1",
         "-device", "usb-ehci,id=ehci",
         "-device", "usb-tablet,bus=ehci.0",
-        "-soundhw", "hda",
+        "-device", "intel-hda",
+        "-device", "hda-duplex",
         "-enable-kvm"
     ]
 
