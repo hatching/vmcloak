@@ -204,7 +204,7 @@ class WindowsAutounattended(OperatingSystem):
     dummy_serial_key = None
     genisoargs = [
         "-no-emul-boot", "-iso-level", "2", "-udf", "-J", "-l", "-D", "-N",
-        "-joliet-long", "-relaxed-filenames", "-allow-limited-size",
+        "-joliet-long", "-relaxed-filenames",
     ]
 
     def _autounattend_xml(self, product, ipaddress, gateway):
