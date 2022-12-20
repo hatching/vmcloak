@@ -29,6 +29,13 @@ class Agent(object):
         session = requests.Session()
         session.trust_env = False
         session.proxies = None
+
+        # agent on the vm will only accept async as an argument
+        # for async execution
+        if "cucksync" in kwargs:
+            del kwargs["cucksync"]
+            kwargs["async"] = "true"
+
         return session.post(url, data=kwargs)
 
     def postfile(self, method, files, **kwargs):
