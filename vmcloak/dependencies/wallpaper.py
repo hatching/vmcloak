@@ -9,6 +9,7 @@ import random
 import requests
 
 from vmcloak.abstract import Dependency
+from requests.exceptions import SSLError
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +31,13 @@ class Wallpaper(Dependency):
         )
 
         if not self.filepath:
-            f = io.BytesIO(requests.get(random.choice(self.doges)).content)
+            try:
+                f = io.BytesIO(requests.get(random.choice(self.doges)).content)
+            except SSLError as e:
+                # cuckoo.sh often has an outdated cert
+                log.warning("Failed to download wallpapper Form cuckoo.sh")
+                log.debug(e)
+                return
         else:
             f = open(self.filepath, "rb")
 
