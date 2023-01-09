@@ -36,9 +36,9 @@ def _create_image_disk(path, size):
 
 def _create_snapshot_disk(image_path, path):
     log.info("Creating snapshot %s with master %s", path, image_path)
-    subprocess.check_call(["qemu-img", "create", "-f", "qcow2", "-o",
+    subprocess.check_call(["qemu-img", "create", "-F", "qcow2", "-o",
                            "lazy_refcounts=on,cluster_size=2M", "-b",
-                           image_path, path])
+                           image_path, "-f", "qcow2", path])
 
 
 def _make_pre_v41_args(attr):
