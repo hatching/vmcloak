@@ -44,7 +44,7 @@ setup(
     install_requires=[
         "click",
         "jinja2",
-        "pefile>=2019.4.18, <2019.5.0"
+        "pefile>=2019.4.18, <2019.5.0",
         "pyyaml>=5.1",
         "sqlalchemy>=1.4, <1.5",
         "alembic>=1.7.4, <1.8",
