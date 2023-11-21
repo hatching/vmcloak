@@ -27,8 +27,7 @@ Installation
 It is recommended that VMCloak is installed in a Virtualenv and on the user
 that should own the created virtual machines.
 
-VMCloak is available as a [Python Package](<https://pypi.python.org/pypi/vmcloak>)
-It can be installed with ``pip`` using ``pip install -U vmcloak``.
+Do not use the PyPI-version of VMCloak. It is outdated and heavily bugged.
 
 Install the requirements. See the docs/ for a full list of requirements.
 
@@ -37,22 +36,15 @@ $ sudo apt update
 $ sudo apt install python3 genisoimage qemu-system-x86 qemu-utils qemu-system-common
 ```
 
-
 It is recommended to install VMCloak in a virtualenv.
 
-```bash
-$ virtualenv venv
-$ source venv/bin/activate
-$ (venv) pip install -U vmcloak
-```
-
-Fetching the [Git repository](<https://github.com/hatching/vmcloak>)  through allows one access to the latest
-development version of VMCloak with features that may not have been pushed to
-the Python Package yet. A full example of installing VMCloak manually can be
+Fetching the `Git repository <https://github.com/Cryss76/vmcloak>`_ is the way to go.
+There you get the latest working version with the least bugs.
+A full example of installing VMCloak manually can be
 as follows:
 
 ```bash
-$ (venv) git clone https://github.com/hatching/vmcloak.git
+$ (venv) git clone https://github.com/Cryss76/vmcloak.git
 $ (venv) cd vmcloak
 $ (venv) pip install .
 ```
