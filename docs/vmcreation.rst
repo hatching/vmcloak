@@ -182,6 +182,11 @@ update (Let's encrypt) root certs, Adobe PDF, a wallpaper, OS optimization (stop
 removing unneeded components), and disable unneeded services such as Cortana. This can all be
 viewed afterwards with the list image command.
 
+.. Note::
+   The disable Services dependency will produce erros,
+   as it brute force diabling Windows Services like Defender.
+   It uses all know methods, which are versions specific and therefore some are bound to fail.
+
 .. code-block:: bash
 
   vmcloak --debug install win10base --recommended
