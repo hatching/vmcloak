@@ -53,6 +53,7 @@ Docs
 ----
 
 ```bash
+# For zsh use \[ and \]
 $ (venv) pip install -e .[docs]
 $ (venv) cd docs
 $ (venv) make html
