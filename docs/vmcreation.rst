@@ -321,28 +321,5 @@ First, verify your VMs were all created.
     - win10vm_4 192.168.30.13
     - win10vm_5 192.168.30.14
 
-The importing to Cuckoo will do done using Cuckoo's ``cuckoo machine import`` command.
-See its help page below
-
-.. code-block:: bash
-
-    cuckoo machine import --help
-    Usage: cuckoo machine import [OPTIONS] MACHINERY_NAME VMS_PATH [MACHINE_NAMES]...
-
-    Import all or 'machine names' from the specified VMCloak vms path to the
-    specified machinery module.
-
-
-We need to run the following command to tell Cuckoo to import the VMs. In this example our user is called 'cuckoo'.
-
-.. code-block:: bash
-
-  cuckoo machine import qemu /home/cuckoo/.vmcloak/vms/qemu
-
-After this command, you might also want to remove the example VM, so that Cuckoo can be started.
-
-.. code-block::
-
-  cuckoo machine delete qemu example1
-
-The VMs are now usable by Cuckoo 3. Cuckoo does need to be restarted to discover them.
+The importing to Cuckoo will be done using Cuckoo's ``cuckoo machine import`` command.
+See the `Machine importing command <https://github.com/cert-ee/cuckoo3/blob/main/docs/src/installation/vmcreation.md#machine-importing-command>`_ subcahpter of the Cuckoo3 docs for more info.
