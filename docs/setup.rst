@@ -4,18 +4,17 @@ Setup VMCloak
 It is recommended that VMCloak is installed in a Virtualenv and on the user
 that should own the created virtual machines.
 
-VMCloak is available as a `Python Package <https://pypi.python.org/pypi/vmcloak>`_
-It can be installed with ``pip`` using ``pip install -U vmcloak``.
+.. Attention::
+   Do not use the PyPI-version of VMCloak. It is outdated and heavily bugged.
 
-
-Fetching the `Git repository <https://github.com/hatching/vmcloak>`_  through allows one access to the latest
-development version of VMCloak with features that may not have been pushed to
-the Python Package yet. A full example of installing VMCloak manually can be
+Fetching the `Git repository <https://github.com/Cryss76/vmcloak>`_ is the way to go.
+There you get the latest working version with the least bugs.
+A full example of installing VMCloak manually can be
 as follows:
 
 .. code-block:: bash
 
-    $ git clone git@github.com:hatching/vmcloak.git
+    $ git clone https://github.com/Cryss76/vmcloak.git
     $ cd vmcloak
     $ pip install .
 
@@ -24,6 +23,6 @@ preferably inside of a ``virtualenv``:
 
 .. code-block:: bash
 
-    (venv)$ git clone git@github.com:hatching/vmcloak.git
+    (venv)$ git clone https://github.com/Cryss76/vmcloak.git
     (venv)$ cd vmcloak
     (venv)$ pip install -e .
