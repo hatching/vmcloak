@@ -8,7 +8,7 @@ Currently all VMs are created with the ``-enable-kvm`` flag.
 
 Dependencies:
 
-* qemu 2.11 or higher. (tested with 4.2.1).
+* qemu 2.11 or higher. (tested with 8.1.3).
 * qemu-system-x86
 * qemu-utils
 * qemu-system-common
